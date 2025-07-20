@@ -125,7 +125,7 @@ const SignUp = () => {
             <button
               disabled={isLoading}
               onClick={(e) => handleSubmit(e, "buyer")}
-              className="bg-primary-500 w-full mt-2 p-3 text-lg font-semibold hover:opacity-95"
+              className="bg-primary-500 shadow-lg shadow-gray-400 w-full mt-2 p-3 text-lg font-semibold hover:opacity-95"
             >
               {isLoading ? "Signing Up..." : "Sign Up as User"}
             </button>
@@ -134,7 +134,7 @@ const SignUp = () => {
               onSuccess={async (credentialResponse) => {
                 const token = credentialResponse.credential;
                 const res = await axios.post(
-                  "http://localhost:3000/api/auth/google",
+                  "https://sello-backend.onrender.com/api/auth/google",
                   { token }
                 );
                 localStorage.setItem("token", res.data.token);
@@ -158,7 +158,7 @@ const SignUp = () => {
               type="button"
               disabled={isLoading}
               onClick={(e) => handleSubmit(e, "seller")}
-              className="bg-primary-500 w-full shadow-lg p-3 text-lg font-semibold hover:opacity-95"
+              className="bg-primary-500  shadow-gray-400 w-full shadow-lg p-3 text-lg font-semibold hover:opacity-95"
             >
               {isLoading ? "Signing Up..." : "Sign Up as Dealer"}
             </button>

@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 const RightSide = ({ path }) => {
   const navigate = useNavigate();
   return (
-    <div className="h-full w-full bg-red-400 relative">
+    <div className="h-full w-full  relative">
       <img src={images.car1} className="h-full w-full object-cover" alt="" />
       <div
         className="absolute bottom-0 border-[1px] border-white w-full bg-white/30 backdrop-blur-lg p-3
