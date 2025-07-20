@@ -48,7 +48,7 @@ const SignUp = () => {
       <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-0">
         <div className="w-full md:w-[70%] max-w-md">
           <div className="flex justify-center">
-            <img src={images.usericon} className="h-10 w-10" alt="" />
+            <img src={images.userIcon} className="h-10 w-10" alt="" />
           </div>
           <h1 className="text-center font-medium text-2xl md:text-3xl mb-1">
             Create an Account

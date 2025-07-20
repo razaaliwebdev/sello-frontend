@@ -37,7 +37,7 @@ const Login = () => {
       <div className="md:w-1/2 w-full h-full flex  items-center justify-center">
         <div className="h-[90%] md:w-[70%] w-full">
           <div className="flex justify-center">
-            <img src={images.usericon} alt="" />
+            <img src={images.userIcon} alt="" />
           </div>
           <h1 className="text-center font-medium my-[4px] text-3xl">
             Welcome Back
