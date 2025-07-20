@@ -101,7 +101,7 @@ const Login = () => {
 
                 // POST token to your backend
                 const res = await axios.post(
-                  "http://localhost:3000/api/auth/google",
+                  "https://sello-backend.onrender.com/api/auth/google",
                   {
                     token,
                   }
