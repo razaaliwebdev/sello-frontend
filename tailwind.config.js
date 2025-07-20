@@ -3,6 +3,9 @@ export default {
   content: ['./src/**/*.{html,js,ts,jsx,tsx}'], // Adjust based on your project structure
   theme: {
     extend: {
+      animation: {
+        spin: "spin 1.2s ease-in-out infinite",
+      },
       colors: {
         primary: {
           DEFAULT: '#FFA602', // Base color

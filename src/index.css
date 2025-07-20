@@ -1,5 +1,17 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
+
+
+/* spinner.css */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1.5s linear infinite;
+}
