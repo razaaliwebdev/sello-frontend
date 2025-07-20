@@ -30,12 +30,12 @@ export const api = createApi({
         }),
 
         // Get Currect Logged-In User
-        getCurrentUser: builder.query({
-            query: () => ({
-                url: "/auth/me",  // your backend should expose this
-                method: "GET",
-            }),
-        }),
+        // getCurrentUser: builder.query({
+        //     query: () => ({
+        //         url: "/auth/me",  // your backend should expose this
+        //         method: "GET",
+        //     }),
+        // }),
 
         // Forgot Password
         forgotPassword: builder.mutation({
