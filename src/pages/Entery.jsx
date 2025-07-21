@@ -5,17 +5,24 @@ import HeaderLogo from "../components/utils/HeaderLogo";
 
 const Entery = () => {
   return (
-    <div className="flex h-screen overflow-hidden">
-      <div className="w-[50%] hidden md:block">
-        <div className="logo">
-          <img className="w-40 p-5" src={images.headerLogo} alt="" />
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      {/* Left Side */}
+      <div className="md:w-1/2 w-full hidden md:flex flex-col justify-between bg-gray-100">
+        <div className="">
+          <img className="w-32 md:w-40" src={images.headerLogo} alt="Logo" />
         </div>
         <HeaderLogo />
-        <div className="">
-          <img src={images.illustration} alt="" />
+        <div className="flex justify-center items-center">
+          <img
+            className="max-w-full h-auto object-cover"
+            src={images.illustration}
+            alt="Illustration"
+          />
         </div>
       </div>
-      <div className="h-screen md:w-[50%] w-full ">
+
+      {/* Right Side */}
+      <div className="w-full md:w-1/2 h-full flex justify-center items-center">
         <RightSide rightPath="/login" leftPath="/" />
       </div>
     </div>
