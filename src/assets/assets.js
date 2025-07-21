@@ -5,6 +5,7 @@ import userIcon from './images/userIcon.png';
 import google from './images/google.webp';
 import verified from './images/verified.png';
 import logo from './images/logo.svg';
+import headerLogo from './images/headerLogo.svg';
 
 export const images = {
     car1,
@@ -13,5 +14,6 @@ export const images = {
     userIcon,
     google,
     verified,
+    headerLogo,
     logo
 };

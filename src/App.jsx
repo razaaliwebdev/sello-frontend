@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 
+import Spinner from "./components/Spinner.jsx";
+
 // Pages
 import Entery from "./pages/Entery.jsx";
 import Home from "./pages/Home.jsx";
@@ -10,7 +12,6 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import VerifyOtp from "./pages/auth/VerifyOtp.jsx";
 import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
-import Spinner from "./components/Spinner.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
