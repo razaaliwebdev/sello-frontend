@@ -35,6 +35,7 @@ const App = () => {
 
   return (
     <div>
+      {/* <Spinner /> */}
       <Routes>
         <Route path="/" element={<Entery />} />
         <Route path="/home" element={<Home />} />
