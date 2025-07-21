@@ -1,23 +1,23 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const BASE_URL = "https://sello-backend.onrender.com/api";
+// const BASE_URL = "http://localhost:3000/api";
 
 export const api = createApi({
     reducerPath: "api",
-    baseQuery: fetchBaseQuery(
-        {
-            baseUrl: BASE_URL,
-            credentials: "include", // ✅ Send cookies with each request
-        }
-    ),
+    baseQuery: fetchBaseQuery({
+        baseUrl: BASE_URL,
+        credentials: "include", // ✅ Send cookies with each request
+    }),
     endpoints: (builder) => ({
         // Register User 
         registerUser: builder.mutation({
             query: (userData) => ({
                 url: "/auth/register",
                 method: "POST",
-                body: userData
-            })
+                body: userData,
+                extra: { isFormData: true }, // 👈 Flag for multipart/form-data
+            }),
         }),
 
         // Login User
@@ -25,25 +25,26 @@ export const api = createApi({
             query: (userData) => ({
                 url: "/auth/login",
                 method: "POST",
-                body: userData
-            })
+                body: userData,
+            }),
         }),
 
-        // Get Currect Logged-In User
-        // getCurrentUser: builder.query({
-        //     query: () => ({
-        //         url: "/auth/me",  // your backend should expose this
-        //         method: "GET",
-        //     }),
-        // }),
+        // Google Login ✅ ADDED HERE
+        googleLogin: builder.mutation({
+            query: (token) => ({
+                url: "/auth/google",
+                method: "POST",
+                body: { token },
+            }),
+        }),
 
         // Forgot Password
         forgotPassword: builder.mutation({
             query: (emailData) => ({
                 url: "/auth/forgot-password",
                 method: "POST",
-                body: emailData
-            })
+                body: emailData,
+            }),
         }),
 
         // Verify OTP
@@ -55,13 +56,13 @@ export const api = createApi({
                     method: "POST",
                     body: { otp },
                     headers: {
-                        email
+                        email,
                     },
                 };
             },
         }),
 
-        // Update the password
+        // Reset Password
         resetPassword: builder.mutation({
             query: ({ password }) => {
                 const email = localStorage.getItem("email");
@@ -69,7 +70,7 @@ export const api = createApi({
                 return {
                     url: "/auth/reset-password",
                     method: "POST",
-                    body: { newPassword: password }, // ✅ MATCH BACKEND KEY
+                    body: { newPassword: password },
                     headers: {
                         email,
                         "Content-Type": "application/json",
@@ -77,9 +78,15 @@ export const api = createApi({
                 };
             },
         }),
-
-
-    })
+    }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation, useGetCurrentUserQuery, useForgotPasswordMutation, useVerifyOtpMutation, useResetPasswordMutation } = api;
+export const {
+    useRegisterUserMutation,
+    useLoginUserMutation,
+    useGoogleLoginMutation, // ✅ Exported
+    useForgotPasswordMutation,
+    useVerifyOtpMutation,
+    useResetPasswordMutation,
+    // useGetCurrentUserQuery, // uncomment when needed
+} = api;
