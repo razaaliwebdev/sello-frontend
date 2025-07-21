@@ -164,11 +164,17 @@ const SignUp = () => {
                   />
                   <span className="text-sm">
                     I accept the{" "}
-                    <Link to="/" className="text-primary-500 font-medium">
+                    <Link
+                      to="/privacy-policy"
+                      className="text-primary-500 font-medium"
+                    >
                       Privacy Services
                     </Link>{" "}
                     and{" "}
-                    <Link to="/" className="text-primary-500 font-medium">
+                    <Link
+                      to="/terms-conditon"
+                      className="text-primary-500 font-medium"
+                    >
                       Terms
                     </Link>
                   </span>

@@ -13,6 +13,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import VerifyOtp from "./pages/auth/VerifyOtp.jsx";
 import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
+import OurPrivacyPolicy from "./pages/legal/OurPrivacyPolicy.jsx";
+import TermsCondition from "./pages/legal/TermsCondition.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -61,6 +63,8 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/reset-success" element={<ResetSuccess />} />
+        <Route path="/privacy-policy" element={<OurPrivacyPolicy />} />
+        <Route path="/terms-conditon" element={<TermsCondition />} />
       </Routes>
     </>
   );
