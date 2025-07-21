@@ -12,7 +12,7 @@ const RightSide = ({ rightPath, leftPath }) => {
         className="bg-cover bg-center h-full relative"
       >
         <div className="bottom-box bg-white/15 backdrop-blur-lg w-full  md:h-1/3 border-t-[1px] border-white px-4 py-1 md:px-6 md:py-4 absolute md:bottom-0 bottom-0">
-          <p className="text-lg text-gray-200">
+          <p className="md:text-lg text-sm  text-gray-200">
             "Sello is a smart and reliable platform that makes it easy to buy
             and sell cars online. Designed for convenience and trust, it
             connects users with verified listings, intuitive search filters, and
