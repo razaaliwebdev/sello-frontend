@@ -1,6 +1,5 @@
 // components/Spinner.jsx
 import React from "react";
-// import "./spinner.css"; // optional for custom styles
 
 const Spinner = () => {
   return (

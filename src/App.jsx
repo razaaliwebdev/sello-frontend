@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
+// Components
 import Spinner from "./components/Spinner.jsx";
 
 // Pages
@@ -15,7 +16,10 @@ import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
+  const location = useLocation();
 
+  // Initial app load
   useEffect(() => {
     const handleLoad = () => setInitialLoading(false);
 
@@ -28,26 +32,34 @@ const App = () => {
     return () => window.removeEventListener("load", handleLoad);
   }, []);
 
-  if (initialLoading) {
+  // Page transition loading (fake delay to simulate)
+  useEffect(() => {
+    setPageLoading(true);
+    const timeout = setTimeout(() => {
+      setPageLoading(false);
+    }, 300); // Adjust this to simulate API or data loading time
+    return () => clearTimeout(timeout);
+  }, [location.pathname]);
+
+  if (initialLoading || pageLoading) {
     return (
-      <Spinner size={80} color="text-purple-500" thickness={5} speed="fast" />
+      <div className="flex justify-center items-center h-screen">
+        <Spinner size={80} color="text-purple-500" thickness={5} speed="fast" />
+      </div>
     );
   }
 
   return (
-    <div>
-      {/* <Spinner /> */}
-      <Routes>
-        <Route path="/" element={<Entery />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/sign-up" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/reset-sucess" element={<ResetSuccess />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<Entery />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/sign-up" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/reset-sucess" element={<ResetSuccess />} />
+    </Routes>
   );
 };
 

@@ -4,6 +4,9 @@ import { images } from "../assets/assets";
 import HeaderLogo from "../components/utils/HeaderLogo";
 
 const Entery = () => {
+
+  
+
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
       {/* Left Side */}
