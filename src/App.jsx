@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 // Components
 import Spinner from "./components/Spinner.jsx";
+import Navbar from "./components/Navbar.jsx";
 
 // Pages
 import Entery from "./pages/Entery.jsx";
@@ -13,8 +14,13 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import VerifyOtp from "./pages/auth/VerifyOtp.jsx";
 import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
-import OurPrivacyPolicy from "./pages/legal/OurPrivacyPolicy.jsx";
-import TermsCondition from "./pages/legal/TermsCondition.jsx";
+import OurPrivacyPolicy from "./pages/ourPages/OurPrivacyPolicy.jsx";
+import TermsCondition from "./pages/ourPages/TermsCondition.jsx";
+import CarListings from "./pages/listings/CarListings.jsx";
+import CarDetails from "./pages/listings/CarDetails.jsx";
+import About from "./pages/about/About.jsx";
+import Contact from "./pages/contact/Contact.jsx";
+import CreatePost from "./pages/posts/CreatePost.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -54,6 +60,15 @@ const App = () => {
   return (
     <>
       <Toaster />
+      {location.pathname === "/" ||
+      location.pathname === "/login" ||
+      location.pathname === "/sign-up" ||
+      location.pathname === "/forgot-password" ||
+      location.pathname === "/reset-password" ||
+      location.pathname === "/verify-otp" ||
+      location.pathname === "/reset-success"   ? null : (
+        <Navbar />
+      )}
       <Routes>
         <Route path="/" element={<Entery />} />
         <Route path="/home" element={<Home />} />
@@ -65,6 +80,11 @@ const App = () => {
         <Route path="/reset-success" element={<ResetSuccess />} />
         <Route path="/privacy-policy" element={<OurPrivacyPolicy />} />
         <Route path="/terms-conditon" element={<TermsCondition />} />
+        <Route path="/cars" element={<CarListings />} />
+        <Route path="/cars/:id" element={<CarDetails />} />
+        <Route path="/about" element={<About />} />
+        <Route path={"/contact"} element={<Contact />} />
+        <Route path="/create-post" element={<CreatePost />} />
       </Routes>
     </>
   );

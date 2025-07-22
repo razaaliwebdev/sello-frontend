@@ -23,3 +23,23 @@
 .animate-spin {
     animation: spin 1.5s linear infinite;
 }
+
+
+/* Drawer slide-in animation */
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.mobile-drawer {
+    animation: slideInFromLeft 0.3s ease-out forwards;
+    background-color: #e0edff;
+    /* Light primary */
+}

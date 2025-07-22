@@ -17,3 +17,34 @@ export const images = {
     headerLogo,
     logo
 };
+
+
+
+// DATA
+
+export const menuLinks = [
+    {
+        path: "/home",
+        name: "Home"
+    },
+    {
+        path: "/cars",
+        name: "Lisgings"
+    },
+    {
+        path: "/blog",
+        name: "Blog"
+    },
+    {
+        path: "/pages",
+        name: "Pages"
+    },
+    {
+        path: "/about",
+        name: "About"
+    },
+    {
+        path: "/contact",
+        name: "Contact"
+    },
+]
