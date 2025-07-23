@@ -30,7 +30,7 @@ const Hero = () => {
   }, [currentImageIndex]);
 
   return (
-    <div className="min-h-[88vh] md:h-screen w-full relative overflow-hidden">
+    <div className="min-h-[90vh] md:h-screen w-full relative overflow-hidden">
       {/* Background slides */}
       {heroSlides.map((slide, index) => (
         <div
@@ -47,9 +47,9 @@ const Hero = () => {
 
       {/* Overlay content */}
       <div className="absolute z-10 inset-0 flex items-center justify-center  text-center p-4">
-        <form className="bg-[#EEEEEE]/60 backdrop-blur-md rounded-tl-3xl rounded-br-3xl hidden flex-col md:flex-row gap-6 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-[80%] max-w-6xl mx-auto p-4 md:pl-12">
+        <form className="bg-[#EEEEEE]/60 backdrop-blur-md rounded-tl-3xl rounded-br-3xl flex flex-col md:flex-row gap-6 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-[98%] max-w-6xl mx-auto p-4 md:pl-12">
           {/* Right Side */}
-          <div className="rightSide grid gap-4 sm:grid-cols-2 md:grid-cols-3 w-full md:py-6">
+          <div className="rightSide grid grid-cols-2 md:grid-cols-3 gap-4 w-full md:py-6">
             {[
               { label: "Year of manufacture", options: ["2021"] },
               { label: "Select Make", options: ["Audi"] },
@@ -75,7 +75,7 @@ const Hero = () => {
 
           {/* Left Side (Pricing) */}
           <div className="leftSide bg-white/50 rounded-tl-3xl px-4 py-5 md:py-6 md:px-7 w-full md:w-auto">
-            <h4 className="mb-3  text-gray-800 text-lg">Pricing (AED)</h4>
+            <h4 className="mb-3 text-gray-800 text-lg">Pricing (AED)</h4>
             <div className="flex flex-col sm:flex-row gap-4">
               <div>
                 <label
