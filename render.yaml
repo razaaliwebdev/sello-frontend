@@ -1,7 +1,7 @@
 static_sites:
-  - name: your-site-name
+  - name: sello-ae
     build_command: npm run build
-    public_path: /build  # or /dist if using a different build folder
+    public_path: /build
     routes:
       - type: rewrite
         source: "/*"
