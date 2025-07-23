@@ -7,6 +7,14 @@ import verified from './images/verified.png';
 import logo from './images/logo.svg';
 import headerLogo from './images/headerLogo.svg';
 import bell from "./images/bell.svg";
+import car from './images/car.jpg';
+import car2 from './images/car2.jpg';
+import car3 from './images/car3.jpg';
+import car4 from './images/car4.jpg';
+import car5 from './images/car5.jpg';
+import car6 from './images/car6.jpg';
+import car7 from './images/car7.jpg';
+
 
 export const images = {
     car1,
@@ -17,7 +25,10 @@ export const images = {
     verified,
     headerLogo,
     logo,
-    bell
+    bell,
+    car5,
+    car6,
+    car7
 };
 
 
@@ -50,3 +61,13 @@ export const menuLinks = [
         name: "Contact"
     },
 ]
+
+
+
+// Hero Slides
+export const heroSlides = [
+    { image: car },
+    { image: car2 },
+    { image: car3 },
+    { image: car4 },
+];
