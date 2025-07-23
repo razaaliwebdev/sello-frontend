@@ -6,6 +6,7 @@ import google from './images/google.webp';
 import verified from './images/verified.png';
 import logo from './images/logo.svg';
 import headerLogo from './images/headerLogo.svg';
+import bell from "./images/bell.svg";
 
 export const images = {
     car1,
@@ -15,7 +16,8 @@ export const images = {
     google,
     verified,
     headerLogo,
-    logo
+    logo,
+    bell
 };
 
 
