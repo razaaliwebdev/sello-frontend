@@ -1,20 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { images, menuLinks } from "../assets/assets";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import SearchBar from "./utils/SearchBar";
 import { FaCirclePlus, FaBars, FaXmark } from "react-icons/fa6";
+import gsap from "gsap";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const drawerRef = useRef(null);
+  const linkRefs = useRef([]);
 
   const isActive = (path) => location.pathname === path;
 
-  const handleDrawerToggle = () => {
-    if (window.innerWidth <= 768) {
-      setOpen(true);
-    }
+  const openDrawer = () => {
+    setOpen(true);
+    setTimeout(() => {
+      gsap.fromTo(
+        drawerRef.current,
+        { xPercent: 100 },
+        { xPercent: 0, duration: 0.8, ease: "bounce.out" }
+      );
+      gsap.fromTo(
+        linkRefs.current,
+        { x: 100, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+          stagger: 0.1,
+          delay: 0.2,
+        }
+      );
+    }, 10);
+  };
+
+  const closeDrawer = () => {
+    gsap.to(linkRefs.current, {
+      x: 100,
+      opacity: 0,
+      duration: 0.4,
+      ease: "back.in(1.3)",
+      stagger: {
+        each: 0.1,
+        from: "end",
+      },
+    });
+    gsap.to(drawerRef.current, {
+      xPercent: 100,
+      duration: 0.8,
+      ease: "bounce.in",
+      delay: 0.4,
+      onComplete: () => setOpen(false),
+    });
   };
 
   return (
@@ -45,8 +85,6 @@ const Navbar = () => {
 
         {/* Icons */}
         <div className="flex items-center gap-4 text-white text-3xl">
-          {/* Always visible hamburger */}
-
           {/* Desktop Create Post */}
           <button
             onClick={() => navigate("/create-post")}
@@ -55,7 +93,7 @@ const Navbar = () => {
           >
             <FaCirclePlus />
           </button>
-          <button onClick={handleDrawerToggle} title="Menu">
+          <button onClick={openDrawer} title="Menu">
             <FaBars />
           </button>
         </div>
@@ -63,10 +101,13 @@ const Navbar = () => {
 
       {/* Mobile Drawer */}
       {open && (
-        <div className="fixed top-0 left-0 w-full h-full z-50 text-primary-900 px-6 py-6 mobile-drawer bg-primary-200">
+        <div
+          ref={drawerRef}
+          className="fixed top-0 right-0 w-full sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 mobile-drawer bg-primary-300 shadow-xl"
+        >
           {/* Close Button */}
           <div className="flex justify-end text-3xl mb-6">
-            <button onClick={() => setOpen(false)}>
+            <button onClick={closeDrawer}>
               <FaXmark />
             </button>
           </div>
@@ -82,7 +123,8 @@ const Navbar = () => {
               <Link
                 key={index}
                 to={link.path}
-                onClick={() => setOpen(false)}
+                ref={(el) => (linkRefs.current[index] = el)}
+                onClick={closeDrawer}
                 className={`border-b border-primary-300 pb-2 ${
                   isActive(link.path) ? "font-bold text-black" : ""
                 }`}
@@ -94,7 +136,7 @@ const Navbar = () => {
             {/* Create Post Button */}
             <button
               onClick={() => {
-                setOpen(false);
+                closeDrawer();
                 navigate("/create-post");
               }}
               className="mt-4 flex items-center gap-2 text-primary-700"
