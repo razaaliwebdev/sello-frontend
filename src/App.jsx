@@ -21,6 +21,7 @@ import CarDetails from "./pages/listings/CarDetails.jsx";
 import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
 import CreatePost from "./pages/posts/CreatePost.jsx";
+import BottomHeader from "./components/BottomHeader.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -60,15 +61,21 @@ const App = () => {
   return (
     <>
       <Toaster />
-      {location.pathname === "/" ||
-      location.pathname === "/login" ||
-      location.pathname === "/sign-up" ||
-      location.pathname === "/forgot-password" ||
-      location.pathname === "/reset-password" ||
-      location.pathname === "/verify-otp" ||
-      location.pathname === "/reset-success"   ? null : (
-        <Navbar />
+      {![
+        "/",
+        "/login",
+        "/sign-up",
+        "/forgot-password",
+        "/reset-password",
+        "/verify-otp",
+        "/reset-success",
+      ].includes(location.pathname) && (
+        <>
+          <Navbar />
+          <BottomHeader />
+        </>
       )}
+
       <Routes>
         <Route path="/" element={<Entery />} />
         <Route path="/home" element={<Home />} />
