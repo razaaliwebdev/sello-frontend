@@ -14,6 +14,13 @@ import car4 from './images/car4.jpg';
 import car5 from './images/car5.jpg';
 import car6 from './images/car6.jpg';
 import car7 from './images/car7.jpg';
+import br1 from './images/br1.svg';
+import br2 from "./images/br2.svg";
+import br3 from "./images/br3.svg";
+import br4 from "./images/br4.svg";
+import br5 from "./images/br5.svg";
+import br6 from "./images/br6.svg";
+import br7 from "./images/br7.svg";
 
 
 export const images = {
@@ -70,4 +77,29 @@ export const heroSlides = [
     { image: car2 },
     { image: car3 },
     { image: car4 },
+];
+
+// Main Brands Icons
+export const brandsCategory = [
+    {
+        image: br1,
+    },
+    {
+        image: br2,
+    },
+    {
+        image: br3,
+    },
+    {
+        image: br4,
+    },
+    {
+        image: br5,
+    },
+    {
+        image: br6,
+    },
+    {
+        image: br7,
+    }
 ];

@@ -22,6 +22,7 @@ import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
 import CreatePost from "./pages/posts/CreatePost.jsx";
 import BottomHeader from "./components/BottomHeader.jsx";
+import AllBrands from "./pages/AllBrands.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -92,6 +93,7 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path={"/contact"} element={<Contact />} />
         <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/view-all-brands" element={<AllBrands />} />
       </Routes>
     </>
   );
