@@ -20,7 +20,7 @@ const BlogSection = () => {
         {blogPosts.map((post, index) => (
           <div
             key={index}
-            className="md:w-[390px] min-w-[85vw] md:min-w-[390px] bg-[#d9d9d9] rounded px-6 py-6 flex-shrink-0 overflow-hidden"
+            className="md:w-[390px] w-full min-w-[85vw] md:min-w-[390px] bg-[#d9d9d9] rounded px-6 py-6 flex-shrink-0 overflow-hidden"
           >
             <img
               src={post.image}
