@@ -3,6 +3,7 @@ import Hero from "../components/sections/Hero";
 import BrandsSection from "../components/sections/BrandsSection";
 import WhyChooseUs from "../components/sections/WhyChooseUs";
 import PopularMakes from "../components/sections/PopularMakes";
+import ShopBoxCar from "../components/sections/ShopBoxCarSection";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
         <BrandsSection />
         <WhyChooseUs />
         <PopularMakes />
+        <ShopBoxCar />
       </div>
     </div>
   );

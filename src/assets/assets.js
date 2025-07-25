@@ -223,3 +223,59 @@ export const popularMakes = [
 
 
 ]
+
+// ShopBoxCar Dummy Data
+export const carBrandCategories = [
+    {
+        title: "New Cars For Sale",
+        value: "new",
+    },
+    {
+        title: "Used Cars For Sale",
+        value: "used",
+    },
+    {
+        title: "Browse By Type",
+        value: "type",
+    },
+    {
+        title: "Browse By Brand",
+        value: "brand",
+    },
+];
+
+export const carBrandsByCategory = {
+    new: [
+        "Ford Cars", "Honda Cars", "Hyundai Cars", "Infiniti Cars",
+        "Jaguar Cars", "Jeep Cars", "Kia Cars", "Land Rover Cars",
+        "Lexus Cars", "Mazda Cars", "Mercedes-Benz Cars", "Mini Cars",
+        "Mitsubishi Cars", "Nissan Cars", "Peugeot Cars", "Porsche Cars",
+        "Renault Cars", "Subaru Cars", "Suzuki Cars", "Skoda Cars"
+    ],
+    used: [
+        "Chrysler Cars", "Citroen Cars", "Cupra Cars",
+        "Dacia Cars", "DS Cars", "Fiat Cars", "Geely Cars",
+        "Genesis Cars", "Great Wall Cars", "Haval Cars",
+        "Hongqi Cars", "Hummer Cars", "Isuzu Cars",
+        "Lada Cars", "Lancia Cars", "Mahindra Cars",
+        "Maruti Suzuki Cars", "Rivian Cars", "Proton Cars", "SEAT Cars"
+    ],
+    type: [
+        "SUV Cars", "Sedan Cars", "Hatchback Cars",
+        "Coupe Cars", "Convertible Cars", "Pickup Trucks",
+        "Electric Vehicles", "Hybrid Cars", "Luxury Vehicles",
+        "Sports Cars", "Family Cars", "Compact Cars",
+        "Mid-size Cars", "Full-size Cars", "Crossover SUVs",
+        "Minivans", "Commercial Vehicles", "Diesel Cars", "Gasoline Cars", "Wagon Cars"
+    ],
+    brand: [
+        "Abarth Cars", "Alfa Romeo Cars", "Aston Martin Cars",
+        "Audi Cars", "Bentley Cars", "BMW Cars", "Bugatti Cars",
+        "Buick Cars", "Cadillac Cars", "Chevrolet Cars",
+        "Dodge Cars", "Ferrari Cars", "Fisker Cars",
+        "GMC Cars", "Lamborghini Cars", "Lotus Cars",
+        "Lucid Cars", "Maserati Cars", "McLaren Cars", "Rolls-Royce Cars"
+    ],
+};
+
+
