@@ -46,14 +46,14 @@ const BlogSection = () => {
       </div>
 
       {/* Bottom Section - Buy/Sell Cards */}
-      <div className="flex flex-col md:flex-row md:gap-16 gap-12 pt-16">
+      <div className="flex flex-col md:flex-row md:gap-16 gap-3 md:pt-16">
         {goThemBuyOrSell.map((post, index) => (
           <div className="w-full md:w-1/2  p-8 " key={index}>
             <h3 className="md:text-2xl text-xl font-bold text-gray-900 mb-4">
               {post.title}
             </h3>
             <p className="text-base text-gray-600 mb-6">{post.description}</p>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 justify-between">
+            <div className="flex  sm:flex-row items-center sm:items-center gap-6 justify-between">
               <button className="bg-primary-500 hover:opacity-90  transition-colors flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
                 Get Started
                 <MdArrowRightAlt className="text-xl -rotate-[42deg]" />
@@ -61,7 +61,7 @@ const BlogSection = () => {
               <img
                 src={post.image}
                 alt="go image buy or sell"
-                className="w-full max-w-[120px] object-contain"
+                className="w-full max-w-[90px] object-contain"
               />
             </div>
           </div>
