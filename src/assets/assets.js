@@ -26,6 +26,13 @@ import why1 from './images/why1.svg';
 import why2 from './images/why2.svg';
 import why3 from './images/why3.svg';
 import why4 from './images/why4.svg';
+import transmissionIcon from './images/transmissionIcon.svg';
+import fuelTypeIcon from './images/fuelTypeIcon.svg';
+import milesIcon from './images/milesIcon.svg';
+import audiA4 from './images/audiA4.png';
+import audiA5 from './images/audiA5.png';
+import mercedesBenz from './images/mercedesBenz.jpg';
+import ford from './images/ford.jpg';
 
 
 export const images = {
@@ -40,7 +47,10 @@ export const images = {
     bell,
     car5,
     car6,
-    car7
+    car7,
+    transmissionIcon,
+    fuelTypeIcon,
+    milesIcon
 };
 
 
@@ -163,3 +173,53 @@ export const whyUs = {
     ]
 
 }
+
+// Dummy Data for Popular Makes
+export const popularMakes = [
+    {
+        image: audiA4,
+        brand: "Audi",
+        model: "A4",
+        year: 2022,
+        description: "2.0 D5 PowerPlus Momemtum 5dr AWD...",
+        moved: 150,
+        fuelType: "Diesel",
+        transmission: "CVT",
+        price: 120000
+    },
+    {
+        image: audiA5,
+        brand: "Audi",
+        model: "A5",
+        year: 2023,
+        description: "2.0 D5 PowerPlus Momemtum 5dr sedan...",
+        moved: 550,
+        fuelType: "Petrol",
+        transmission: "Automatic",
+        price: 450000
+    },
+    {
+        image: mercedesBenz,
+        brand: "Mercedes-Benz",
+        model: "C-Class",
+        year: 2023,
+        description: "C 300 AMG Line with cutting-edge tech and refined interior.",
+        moved: 95,
+        fuelType: "Petrol",
+        transmission: "Automatic",
+        price: 145000,
+    },
+    {
+        image: ford,
+        brand: "Ford",
+        model: "Mustang",
+        year: 2021,
+        description: "5.0L V8 GT Fastback — classic muscle with modern performance.",
+        moved: 200,
+        fuelType: "Petrol",
+        transmission: "Manual",
+        price: 110000,
+    },
+
+
+]

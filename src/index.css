@@ -12,7 +12,27 @@
 }
 
 
+#popularMakesSlider {
+    scroll-behavior: smooth;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
 
+#popularMakesSlider::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+/* Animations */
 /* spinner.css */
 @keyframes spin {
     to {
@@ -61,4 +81,12 @@
 
 .animate-marquee:hover {
     animation-play-state: paused;
+}
+
+
+
+::selection {
+    background-color: #FFA602;
+    /* Indigo-600 or your custom color */
+    color: black;
 }
