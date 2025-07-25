@@ -5,7 +5,7 @@ import { brandsCategory } from "../../assets/assets";
 
 const BrandsSection = () => {
   return (
-    <section className="h-screen bg-[#F5F5F5] w-full px-4 md:px-16 py-8 md:rounded-tl-[80px]">
+    <section className="md:h-screen bg-[#F5F5F5] w-full px-4 md:px-16 py-8 md:rounded-tl-[80px]">
       <div className="flex items-center justify-between ">
         <h1 className="text-2xl md:text-3xl font-semibold">
           Explore Our Premium Brands

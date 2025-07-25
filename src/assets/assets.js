@@ -21,6 +21,11 @@ import br4 from "./images/br4.svg";
 import br5 from "./images/br5.svg";
 import br6 from "./images/br6.svg";
 import br7 from "./images/br7.svg";
+import satisficationSectionImage from './images/satisficationSectionImage.png';
+import why1 from './images/why1.svg';
+import why2 from './images/why2.svg';
+import why3 from './images/why3.svg';
+import why4 from './images/why4.svg';
 
 
 export const images = {
@@ -103,3 +108,58 @@ export const brandsCategory = [
         image: br7,
     }
 ];
+
+
+
+// Clients or Satisfication
+export const whyUs = {
+    image: satisficationSectionImage,
+    title: "Get A Fair Price For Your Car Sell To Us Today",
+    description: "We are committed to providing our customers with exceptional service, competitive pricing, and wide range of.",
+    whatWeOffer: [
+        "We are the UK's largest provider, with more patrols in more places",
+        "You get 24/7 roadside assistance",
+        "We fix 4 out 5 cars at the roadside"
+    ],
+    ourAchievementsData: [
+        {
+            value: 836,
+            caption: "Cars for sale"
+        },
+        {
+            value: 738,
+            caption: "Dealer Reviewss"
+        },
+        {
+            value: 100,
+            caption: "Victory per day"
+        },
+        {
+            value: 238,
+            caption: "Verified Dealer"
+        }
+    ],
+    whyChooseUs: [
+        {
+            image: why1,
+            title: "Exclusive Offers You Can’t Miss",
+            description: "Discover unbeatable deals tailored to your budget. Our finance experts work tirelessly to bring you the best value, every time."
+        },
+        {
+            image: why2,
+            title: "Your Trusted Dealership Partner",
+            description: "Built on honesty and reliability, we’ve earned the trust of thousands by delivering quality vehicles and exceptional customer care."
+        },
+        {
+            image: why3,
+            title: "Clear, Honest Pricing",
+            description: "What you see is what you pay — no hidden costs, no surprises. We believe in full transparency to help you shop with confidence."
+        },
+        {
+            image: why4,
+            title: "Certified Service Expertise",
+            description: "Our skilled technicians are committed to keeping your vehicle in top shape — from routine maintenance to advanced diagnostics."
+        }
+    ]
+
+}
