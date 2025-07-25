@@ -24,7 +24,17 @@
     display: none;
 }
 
+#blog {
+    scroll-behavior: smooth;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
 
+#blogr::-webkit-scrollbar {
+    display: none;
+}
 
 
 

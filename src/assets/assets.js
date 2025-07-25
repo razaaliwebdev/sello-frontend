@@ -34,6 +34,14 @@ import audiA5 from './images/audiA5.png';
 import mercedesBenz from './images/mercedesBenz.jpg';
 import ford from './images/ford.jpg';
 import aliTufan from './images/aliTufan.png';
+import blogImg from './images/blogImg.jpg';
+import blogImg2 from './images/blogImg2.jpg';
+import blogImg3 from './images/blogImg3.jpg';
+import blogImg4 from './images/blogImg4.jpg';
+import blogImg5 from './images/blogImg5.jpg';
+import blogImg6 from './images/blogImg6.jpg';
+import electricSvg from './images/electricSvg.svg';
+import electricSvg2 from './images/electricSvg2.svg';
 
 
 export const images = {
@@ -281,3 +289,64 @@ export const carBrandsByCategory = {
 };
 
 
+
+// Blogs Posts Dummy Data
+export const blogPosts = [
+    {
+        flag: "Sound",
+        image: blogImg,
+        author: "Admin",
+        title: "2024 BMW alpina xb7 with exclusive details extraordinary",
+        createdAt: "June 20, 2022",
+    },
+    {
+        flag: "Sound",
+        image: blogImg2,
+        author: "Admin",
+        title: "2022 Honda civic si review, pricing, and specs",
+        createdAt: "June 18, 2022",
+    },
+    {
+        flag: "Sound",
+        image: blogImg3,
+        author: "Admin",
+        title: "2024 Kia telluride suv with exclusive details extraordinary",
+        createdAt: "June 15, 2022",
+    },
+    {
+        flag: "Sound",
+        image: blogImg4,
+        author: "Admin",
+        title: "2023 Toyota tundra with exclusive details extraordinary",
+        createdAt: "June 12, 2022",
+    },
+    {
+        flag: "Sound",
+        image: blogImg5,
+        author: "Admin",
+        title: "2022 Ford f-150 review, pricing, and specs",
+        createdAt: "June 10, 2022",
+    },
+    {
+        flag: "Sound",
+        image: blogImg6,
+        author: "Admin",
+        title: "2024 Chevrolet silverado with exclusive details extraordinary",
+        createdAt: "June 8, 2022",
+    },
+]
+
+
+// Go them buy or sell
+export const goThemBuyOrSell = [
+    {
+        title: "Are You Looking For a Car?",
+        image: electricSvg,
+        description: "Discover your perfect car with our advanced search filters and expert customer support."
+    },
+    {
+        title: "Do You Want to Sell a Car?",
+        image: electricSvg2,
+        description: "We commited to providing our customers with exceptional service."
+    },
+]
