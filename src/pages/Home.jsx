@@ -4,6 +4,7 @@ import BrandsSection from "../components/sections/BrandsSection";
 import WhyChooseUs from "../components/sections/WhyChooseUs";
 import PopularMakes from "../components/sections/PopularMakes";
 import ShopBoxCar from "../components/sections/ShopBoxCarSection";
+import CustomerReview from "../components/sections/CustomerReview";
 
 const Home = () => {
   return (
@@ -14,6 +15,7 @@ const Home = () => {
         <WhyChooseUs />
         <PopularMakes />
         <ShopBoxCar />
+        <CustomerReview />
       </div>
     </div>
   );

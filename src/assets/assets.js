@@ -33,6 +33,7 @@ import audiA4 from './images/audiA4.png';
 import audiA5 from './images/audiA5.png';
 import mercedesBenz from './images/mercedesBenz.jpg';
 import ford from './images/ford.jpg';
+import aliTufan from './images/aliTufan.png';
 
 
 export const images = {
@@ -50,7 +51,8 @@ export const images = {
     car7,
     transmissionIcon,
     fuelTypeIcon,
-    milesIcon
+    milesIcon,
+    aliTufan
 };
 
 
