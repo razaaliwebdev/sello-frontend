@@ -42,6 +42,12 @@ import blogImg5 from './images/blogImg5.jpg';
 import blogImg6 from './images/blogImg6.jpg';
 import electricSvg from './images/electricSvg.svg';
 import electricSvg2 from './images/electricSvg2.svg';
+import android from './images/android.svg';
+import apple from './images/apple.svg';
+import facebook from './images/facebook.svg';
+import twitter from './images/twitter.svg';
+import instagram from './images/instagram.svg';
+import linkedin from './images/linkedin.svg';
 
 
 export const images = {
@@ -174,6 +180,44 @@ export const footerData = [
         title: "Vehicles Type",
         types: [
             "Sedan", "Hatchback", "SUV", "Hybird", "Electric", "Coupe", "Truck", "Convertible"
+        ]
+    },
+    {
+        title: "Our Mobile App",
+        links: [
+            {
+                icon: apple,
+                download: "Download on",
+                name: "App Store"
+            },
+            {
+                icon: android,
+                download: "Get in on",
+                name: "Google Play"
+            }
+        ],
+        title2: "Follow Us",
+        social: [
+            {
+                image: facebook,
+                name: "Facebook",
+                link: ""
+            },
+            {
+                image: twitter,
+                name: "Twitter",
+                link: ""
+            },
+            {
+                image: instagram,
+                name: "Instagram",
+                link: ""
+            },
+            {
+                image: linkedin,
+                name: "LinkedIn",
+                link: ""
+            },
         ]
     }
 ];
