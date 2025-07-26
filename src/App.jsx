@@ -23,6 +23,7 @@ import Contact from "./pages/contact/Contact.jsx";
 import CreatePost from "./pages/posts/CreatePost.jsx";
 import BottomHeader from "./components/BottomHeader.jsx";
 import AllBrands from "./pages/AllBrands.jsx";
+import Footer from "./components/Footer.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -95,6 +96,19 @@ const App = () => {
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/view-all-brands" element={<AllBrands />} />
       </Routes>
+      {![
+        "/",
+        "/login",
+        "/sign-up",
+        "/forgot-password",
+        "/reset-password",
+        "/verify-otp",
+        "/reset-success",
+      ].includes(location.pathname) && (
+        <>
+          <Footer />
+        </>
+      )}
     </>
   );
 };

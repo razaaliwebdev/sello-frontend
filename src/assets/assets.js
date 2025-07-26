@@ -94,6 +94,89 @@ export const menuLinks = [
     },
 ]
 
+// Footer Data like links etc
+export const footerData = [
+    {
+        title: "Company",
+        links: [
+            {
+                name: "About Us",
+                path: "/about"
+            },
+            {
+                name: "Blog",
+                path: "/blog"
+            },
+            {
+                name: "Services",
+                path: "/services"
+            },
+            {
+                name: "Terms",
+                path: "/terms-conditon"
+            },
+            {
+                name: "Contact Us",
+                path: "/contact"
+            }
+        ]
+    },
+    {
+        title: "Quick Links",
+        links: [
+            {
+                name: "Get in Touch",
+                path: "/contact"
+            },
+            {
+                name: "Help Center",
+                path: "/help-center"
+            },
+            {
+                name: "Live chat",
+                path: "/live-chat"
+            },
+            {
+                name: "How it works",
+                path: "/how-it-works"
+            }
+        ]
+    },
+    {
+        title: "Our Brands",
+        links: [
+            {
+                name: "Toyota"
+            },
+            {
+                name: "Porsche"
+            },
+            {
+                name: "Audi"
+            },
+            {
+                name: "BMW"
+            }, {
+                name: "Ford"
+            },
+            {
+                name: "Nissan"
+            },
+            {
+                name: "Peugeot",
+            },
+            {
+                name: "Volkswagen"
+            }
+        ]
+    },
+    {
+        title: "Vehicles Type",
+        types: [
+            "Sedan", "Hatchback", "SUV", "Hybird", "Electric", "Coupe", "Truck", "Convertible"
+        ]
+    }
+];
 
 
 // Hero Slides

@@ -6,11 +6,12 @@ import PopularMakes from "../components/sections/PopularMakes";
 import ShopBoxCar from "../components/sections/ShopBoxCarSection";
 import CustomerReview from "../components/sections/CustomerReview";
 import BlogSection from "../components/sections/BlogSection";
+import NewsLatter from "../components/utils/NewsLatter";
 
 const Home = () => {
   return (
     <div className="">
-      <div className="bg-[#050B20]">
+      <div className="">
         <Hero />
         <BrandsSection />
         <WhyChooseUs />
@@ -18,6 +19,7 @@ const Home = () => {
         <ShopBoxCar />
         <CustomerReview />
         <BlogSection />
+        <NewsLatter />
       </div>
     </div>
   );
