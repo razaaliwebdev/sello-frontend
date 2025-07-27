@@ -89,7 +89,7 @@ const Navbar = () => {
               {/* Avatar */}
               <div
                 onClick={() => navigate("/profile")}
-                className="cursor-pointer md:w-14 w-12 md:h-14 h-9 rounded-full overflow-hidden border-2 border-white"
+                className="cursor-pointer md:w-14 w-12 md:h-14 h-12 rounded-full overflow-hidden border-2 border-white"
                 title="Profile"
               >
                 <img
