@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { images, popularMakes } from "../../assets/assets";
+import { images, popularMakes } from "../../../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundUp } from "react-icons/io";
 

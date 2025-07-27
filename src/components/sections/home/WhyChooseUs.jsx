@@ -1,5 +1,5 @@
 import React from "react";
-import { whyUs } from "../../assets/assets";
+import { whyUs } from "../../../assets/assets";
 import { IoMdCheckmark, IoIosArrowRoundUp } from "react-icons/io";
 
 const WhyChooseUs = () => {

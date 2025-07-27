@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { carBrandCategories, carBrandsByCategory } from "../../assets/assets";
+import {
+  carBrandCategories,
+  carBrandsByCategory,
+} from "../../../assets/assets";
 
 const ShopBoxCar = () => {
   const [activeTab, setActiveTab] = useState("new");

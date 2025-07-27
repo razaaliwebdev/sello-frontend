@@ -1,5 +1,5 @@
 import React from "react";
-import { blogPosts, goThemBuyOrSell } from "../../assets/assets";
+import { blogPosts, goThemBuyOrSell } from "../../../assets/assets";
 import { MdArrowRightAlt } from "react-icons/md";
 
 const BlogSection = () => {

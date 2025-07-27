@@ -1,7 +1,7 @@
 import React from "react";
-import BrandMarquee from "../BrandMarquee";
+import BrandMarquee from "../../BrandMarquee";
 import { Link } from "react-router-dom";
-import { brandsCategory } from "../../assets/assets";
+import { brandsCategory } from "../../../assets/assets";
 
 const BrandsSection = () => {
   return (
