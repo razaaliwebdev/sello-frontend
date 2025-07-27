@@ -1,44 +1,46 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const BASE_URL = "https://sello-backend.onrender.com/api";
-// const BASE_URL = "http://localhost:3000/api";
 
 export const api = createApi({
     reducerPath: "api",
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,
-        credentials: "include", // ✅ Send cookies with each request
+        credentials: "include",
+        prepareHeaders: (headers) => {
+            const token = localStorage.getItem("token");
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            }
+            return headers;
+        },
     }),
+    tagTypes: ["User"],
     endpoints: (builder) => ({
-        // Register User 
         registerUser: builder.mutation({
             query: (userData) => ({
                 url: "/auth/register",
                 method: "POST",
                 body: userData,
-                extra: { isFormData: true }, // 👈 Flag for multipart/form-data
             }),
+            invalidatesTags: ["User"],
         }),
-
-        // Login User
         loginUser: builder.mutation({
             query: (userData) => ({
                 url: "/auth/login",
                 method: "POST",
                 body: userData,
             }),
+            invalidatesTags: ["User"],
         }),
-
-        // Google Login ✅ ADDED HERE
         googleLogin: builder.mutation({
             query: (token) => ({
                 url: "/auth/google",
                 method: "POST",
                 body: { token },
             }),
+            invalidatesTags: ["User"],
         }),
-
-        // Forgot Password
         forgotPassword: builder.mutation({
             query: (emailData) => ({
                 url: "/auth/forgot-password",
@@ -46,8 +48,6 @@ export const api = createApi({
                 body: emailData,
             }),
         }),
-
-        // Verify OTP
         verifyOtp: builder.mutation({
             query: (otp) => {
                 const email = localStorage.getItem("email");
@@ -55,18 +55,13 @@ export const api = createApi({
                     url: "/auth/verify-otp",
                     method: "POST",
                     body: { otp },
-                    headers: {
-                        email,
-                    },
+                    headers: { email },
                 };
             },
         }),
-
-        // Reset Password
         resetPassword: builder.mutation({
             query: ({ password }) => {
                 const email = localStorage.getItem("email");
-
                 return {
                     url: "/auth/reset-password",
                     method: "POST",
@@ -78,15 +73,30 @@ export const api = createApi({
                 };
             },
         }),
+        getMe: builder.query({
+            query: () => ({
+                url: "/auth/me",
+                method: "GET",
+            }),
+            providesTags: ["User"],
+        }),
+        logout: builder.mutation({
+            query: () => ({
+                url: "/auth/logout",
+                method: "POST",
+            }),
+            invalidatesTags: ["User"],
+        }),
     }),
 });
 
 export const {
     useRegisterUserMutation,
     useLoginUserMutation,
-    useGoogleLoginMutation, // ✅ Exported
+    useGoogleLoginMutation,
     useForgotPasswordMutation,
     useVerifyOtpMutation,
     useResetPasswordMutation,
-    // useGetCurrentUserQuery, // uncomment when needed
+    useGetMeQuery,
+    useLogoutMutation,
 } = api;

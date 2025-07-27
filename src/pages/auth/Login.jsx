@@ -30,6 +30,11 @@ const Login = () => {
 
     try {
       const res = await loginUser(data).unwrap();
+
+      // Store token in the Local Storage
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
+
       toast.success("Login successful");
       navigate("/home");
     } catch (err) {
@@ -42,6 +47,9 @@ const Login = () => {
       setGoogleLoading(true); // ✅ Start loading spinner
       const token = credentialResponse.credential;
       const res = await googleLogin(token).unwrap();
+
+      localStorage.setItem("token", res.token); // ✅ Fixed typo
+      localStorage.setItem("user", JSON.stringify(res.user)); // ✅ Fixed typo
 
       toast.success("Google login successful");
       navigate("/home");

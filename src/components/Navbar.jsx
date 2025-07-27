@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import SearchBar from "./utils/SearchBar";
 import { FaCirclePlus, FaBars, FaXmark } from "react-icons/fa6";
 import gsap from "gsap";
+import { useGetMeQuery } from "../redux/services/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef(null);
   const linkRefs = useRef([]);
+  const { data: currentUser, isLoading } = useGetMeQuery();
 
   const isActive = (path) => location.pathname === path;
 
@@ -43,10 +45,7 @@ const Navbar = () => {
       opacity: 0,
       duration: 0.4,
       ease: "back.in(1.3)",
-      stagger: {
-        each: 0.1,
-        from: "end",
-      },
+      stagger: { each: 0.1, from: "end" },
     });
     gsap.to(drawerRef.current, {
       xPercent: 100,
@@ -65,7 +64,7 @@ const Navbar = () => {
           <img className="h-14 md:h-20" src={images.logo} alt="logo" />
         </div>
 
-        {/* Search Bar (Desktop only) */}
+        {/* Desktop Search Bar */}
         <div className="hidden lg:block w-full max-w-md">
           <SearchBar />
         </div>
@@ -76,16 +75,51 @@ const Navbar = () => {
             <Link
               key={index}
               to={link.path}
-              className={` ${isActive(link.path) ? "font-bold" : ""}`}
+              className={isActive(link.path) ? "font-bold" : ""}
             >
               {link.name}
             </Link>
           ))}
         </div>
 
-        {/* Icons */}
+        {/* User Avatar / Login + Actions */}
         <div className="flex items-center gap-4 text-white text-3xl">
-          {/* Desktop Create Post */}
+          {!isLoading && currentUser ? (
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
+              <div
+                onClick={() => navigate("/profile")}
+                className="cursor-pointer md:w-14 w-9 md:h-14 h-9 rounded-full overflow-hidden border-2 border-white"
+                title="Profile"
+              >
+                <img
+                  src={currentUser.avatar || "/default-avatar.png"}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Logout Button */}
+              {/* <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
+                  navigate("/login");
+                }}
+                className="px-4 py-1 bg-black rounded-md text-white text-sm"
+              >
+                Logout
+              </button> */}
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="md:px-6 md:py-2 py-1 px-4 bg-[#050B20] rounded-md text-lg text-white"
+            >
+              Login
+            </button>
+          )}
+
+          {/* Create Post Button (Desktop) */}
           <button
             onClick={() => navigate("/create-post")}
             className="hover:text-white/80 hidden md:block"
@@ -93,6 +127,8 @@ const Navbar = () => {
           >
             <FaCirclePlus />
           </button>
+
+          {/* Mobile Menu */}
           <button onClick={openDrawer} title="Menu">
             <FaBars />
           </button>
@@ -103,7 +139,7 @@ const Navbar = () => {
       {open && (
         <div
           ref={drawerRef}
-          className="fixed top-0 right-0 w-full sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 mobile-drawer bg-primary-300 shadow-xl"
+          className="fixed top-0 right-0 w-full sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl"
         >
           {/* Close Button */}
           <div className="flex justify-end text-3xl mb-6">
@@ -117,7 +153,7 @@ const Navbar = () => {
             <SearchBar />
           </div>
 
-          {/* Menu Links */}
+          {/* Drawer Menu Links */}
           <div className="flex flex-col gap-4 text-lg">
             {menuLinks.map((link, index) => (
               <Link
@@ -133,7 +169,7 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Create Post Button */}
+            {/* Create Post (Mobile) */}
             <button
               onClick={() => {
                 closeDrawer();

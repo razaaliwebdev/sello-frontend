@@ -58,8 +58,14 @@ const SignUp = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setGoogleLoading(true); // ✅ Start spinner
+
       const token = credentialResponse.credential;
-      const res = await googleLogin(token).unwrap();
+      const res = await googleLogin(token).unwrap(); // RTK Query mutation
+
+      // ✅ Save token and user info if returned
+      localStorage.setItem("token", res.token); // Assuming backend sends this
+      localStorage.setItem("user", JSON.stringify(res.user)); // Assuming backend sends this
+
       toast.success("Google sign-up successful!");
       navigate("/home");
     } catch (err) {
