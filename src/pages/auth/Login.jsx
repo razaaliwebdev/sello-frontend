@@ -48,8 +48,8 @@ const Login = () => {
       const token = credentialResponse.credential;
       const res = await googleLogin(token).unwrap();
 
-      localStorage.setItem("token", res.token); // ✅ Fixed typo
-      localStorage.setItem("user", JSON.stringify(res.user)); // ✅ Fixed typo
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Google login successful");
       navigate("/home");

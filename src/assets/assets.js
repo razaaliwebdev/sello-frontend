@@ -48,6 +48,7 @@ import facebook from './images/facebook.svg';
 import twitter from './images/twitter.svg';
 import instagram from './images/instagram.svg';
 import linkedin from './images/linkedin.svg';
+import avatarIcon from './images/avatarIcon.png';
 
 
 export const images = {
@@ -66,7 +67,8 @@ export const images = {
     transmissionIcon,
     fuelTypeIcon,
     milesIcon,
-    aliTufan
+    aliTufan,
+    avatarIcon
 };
 
 

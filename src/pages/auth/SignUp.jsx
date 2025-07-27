@@ -63,8 +63,8 @@ const SignUp = () => {
       const res = await googleLogin(token).unwrap(); // RTK Query mutation
 
       // ✅ Save token and user info if returned
-      localStorage.setItem("token", res.token); // Assuming backend sends this
-      localStorage.setItem("user", JSON.stringify(res.user)); // Assuming backend sends this
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Google sign-up successful!");
       navigate("/home");
