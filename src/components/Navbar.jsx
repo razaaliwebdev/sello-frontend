@@ -139,7 +139,7 @@ const Navbar = () => {
       {open && (
         <div
           ref={drawerRef}
-          className="fixed top-0 right-0 w-full sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl"
+          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl"
         >
           {/* Close Button */}
           <div className="flex justify-end text-3xl mb-6">
