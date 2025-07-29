@@ -566,3 +566,164 @@ export const carTypes = [
     }
 
 ]
+
+
+export const dummyCars = [
+    {
+        make: "Toyota",
+        model: "Corolla",
+        variant: "Altis Grande",
+        year: 2021,
+        condition: "used",
+        price: 3850000,
+        colorExterior: "White",
+        colorInterior: "Black",
+        fuelType: "Petrol",
+        engineCapacity: 1800,
+        transmission: "Automatic",
+        mileage: 25000,
+        features: "ABS,Air Conditioning,Power Steering,Navigation",
+        city: "Lahore",
+        location: "DHA Phase 5",
+        sellerType: "individual",
+        carDoors: 4,
+        contactNumber: "03001234567",
+        geoLocation: { lat: 31.5204, lng: 74.3587 },
+        horsepower: 138,
+        warranty: false,
+        images: [
+            "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fFRveW90YSUyMGNhcnN8ZW58MHx8MHx8fDA%3D"
+        ]
+    },
+    {
+        make: "Honda",
+        model: "Civic",
+        variant: "Oriel 1.8 i-VTEC CVT",
+        year: 2023,
+        condition: "new",
+        price: 6100000,
+        colorExterior: "Red",
+        colorInterior: "Beige",
+        fuelType: "Petrol",
+        engineCapacity: 1800,
+        transmission: "Automatic",
+        mileage: 0,
+        features: "Sunroof,Cruise Control,Push Start,Airbags",
+        city: "Karachi",
+        location: "Clifton Block 2",
+        sellerType: "dealer",
+        carDoors: 4,
+        contactNumber: "03211234567",
+        geoLocation: { lat: 24.8607, lng: 67.0011 },
+        horsepower: 141,
+        warranty: true,
+        images: [
+            "https://images.unsplash.com/photo-1634737581963-5a22ba471961?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fEhvbmRhJTIwY2Fyc3xlbnwwfHwwfHx8MA%3D%3D"
+        ]
+    },
+    {
+        make: "Suzuki",
+        model: "Wagon R",
+        variant: "VXL",
+        year: 2019,
+        condition: "used",
+        price: 2250000,
+        colorExterior: "Silver",
+        colorInterior: "Grey",
+        fuelType: "Petrol",
+        engineCapacity: 1000,
+        transmission: "Manual",
+        mileage: 48000,
+        features: "Power Windows,CD Player,AC",
+        city: "Islamabad",
+        location: "F-11 Markaz",
+        sellerType: "individual",
+        carDoors: 5,
+        contactNumber: "03031234567",
+        geoLocation: { lat: 33.6844, lng: 73.0479 },
+        horsepower: 67,
+        warranty: false,
+        images: [
+            "https://images.unsplash.com/photo-1694928938628-5be5454d3302?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U3V6dWtpJTIwY2Fyc3xlbnwwfHwwfHx8MA%3D%3D"
+        ]
+    },
+    {
+        make: "Hyundai",
+        model: "Tucson",
+        variant: "FWD A/T GLS Sport",
+        year: 2022,
+        condition: "new",
+        price: 8300000,
+        colorExterior: "Blue",
+        colorInterior: "Black",
+        fuelType: "Petrol",
+        engineCapacity: 2000,
+        transmission: "Automatic",
+        mileage: 50,
+        features: "Sunroof,Rear Camera,Airbags,Alloy Rims",
+        city: "Faisalabad",
+        location: "People's Colony",
+        sellerType: "dealer",
+        carDoors: 5,
+        contactNumber: "03451234567",
+        geoLocation: { lat: 31.418, lng: 73.0791 },
+        horsepower: 155,
+        warranty: true,
+        images: [
+            "https://images.unsplash.com/photo-1665564591004-b9e715afbbd9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8SHl1bmRhaSUyMGNhcnN8ZW58MHx8MHx8fDA%3D"
+        ]
+    },
+    {
+        make: "Kia",
+        model: "Sportage",
+        variant: "Alpha",
+        year: 2022,
+        condition: "used",
+        price: 7250000,
+        colorExterior: "Black",
+        colorInterior: "Brown",
+        fuelType: "Petrol",
+        engineCapacity: 2000,
+        transmission: "Automatic",
+        mileage: 17000,
+        features: "Cruise Control,Touchscreen,360 Camera",
+        city: "Peshawar",
+        location: "University Road",
+        sellerType: "individual",
+        carDoors: 4,
+        contactNumber: "03151234567",
+        geoLocation: { lat: 34.0151, lng: 71.5249 },
+        horsepower: 154,
+        warranty: false,
+        images: [
+            "https://images.unsplash.com/photo-1604773851233-7ef99c08735f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8a2lhJTIwY2Fyc3xlbnwwfHwwfHx8MA%3D%3D"
+        ]
+    },
+    {
+        make: "Mercedes",
+        model: "Benz E",
+        variant: "Beta",
+        year: 2010,
+        condition: "used",
+        price: 7250000,
+        colorExterior: "Black",
+        colorInterior: "Brown",
+        fuelType: "Petrol",
+        engineCapacity: 2000,
+        transmission: "Automatic",
+        mileage: 17000,
+        features: "Cruise Control,Touchscreen,360 Camera",
+        city: "Peshawar",
+        location: "University Road",
+        sellerType: "individual",
+        carDoors: 4,
+        contactNumber: "03151234567",
+        geoLocation: { lat: 34.0151, lng: 71.5249 },
+        horsepower: 154,
+        warranty: false,
+        images: [
+            "https://images.unsplash.com/photo-1685783682515-283bbae86f3f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVjZWRlcyUyMGNhcnN8ZW58MHx8MHx8fDA%3D"
+        ]
+    }
+];
+

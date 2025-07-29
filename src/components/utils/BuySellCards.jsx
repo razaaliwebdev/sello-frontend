@@ -1,6 +1,6 @@
 import React from "react";
 import { goThemBuyOrSell } from "../../assets/assets";
-import { MdArrowRightAlt } from "react-icons/md";
+import { IoIosArrowRoundUp } from "react-icons/io";
 
 const BuySellCards = () => {
   return (
@@ -14,7 +14,7 @@ const BuySellCards = () => {
           <div className="flex  sm:flex-row items-center sm:items-center gap-6 justify-between">
             <button className="bg-primary-500 hover:opacity-90  transition-colors flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
               Get Started
-              <MdArrowRightAlt className="text-xl -rotate-[42deg]" />
+              <IoIosArrowRoundUp className="text-xl rotate-[43deg]" />
             </button>
             <img
               src={post.image}
