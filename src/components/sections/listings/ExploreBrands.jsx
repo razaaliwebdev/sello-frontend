@@ -21,7 +21,7 @@ const ExploreBrands = () => {
             best in every drive.
           </p>
           <button
-            onClick={() => navigate("/brands")}
+            onClick={() => navigate("/view-all-brands")}
             className="mt-6 md:text-lg bg-primary-500 px-7 py-2.5 hover:opacity-90 rounded-md flex items-center gap-3 text-white"
           >
             Show All Brands
