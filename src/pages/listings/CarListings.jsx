@@ -4,6 +4,7 @@ import BrowsByTypeSection from "../../components/sections/listings/BrowsByTypeSe
 import GetAllCarsSection from "../../components/sections/listings/GetAllCarsSection";
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import NeedInspiration from "../../components/sections/listings/NeedInspiration";
+import BoxCarBanner from "../../components/sections/listings/BoxCarBanner";
 
 const CarListings = () => {
   return (
@@ -13,6 +14,7 @@ const CarListings = () => {
       <GetAllCarsSection />
       <WhyChooseUsUtility />
       <NeedInspiration />
+      <BoxCarBanner />
     </div>
   );
 };

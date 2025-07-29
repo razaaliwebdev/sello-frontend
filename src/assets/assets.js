@@ -67,6 +67,9 @@ import station from './images/carDetails/types/station.svg';
 import van from './images/carDetails/types/van.svg';
 import targa from './images/carDetails/types/targa.svg';
 import truck from './images/carDetails/types/truck.svg';
+import boxCar from './images/boxCar.png';
+import boxCar2 from './images/boxCar2.png';
+import boxCar3 from './images/boxCar3.png';
 
 export const images = {
     car1,
@@ -567,7 +570,7 @@ export const carTypes = [
 
 ]
 
-
+// Dummy Cars Data
 export const dummyCars = [
     {
         make: "Toyota",
@@ -727,3 +730,15 @@ export const dummyCars = [
     }
 ];
 
+// BoxCars , Review images
+export const boxCarsReviewImages = [
+    {
+        image: boxCar
+    },
+    {
+        image: boxCar2
+    },
+    {
+        image: boxCar3
+    }
+]
