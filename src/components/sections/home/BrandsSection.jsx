@@ -2,6 +2,7 @@ import React from "react";
 import BrandMarquee from "../../BrandMarquee";
 import { Link } from "react-router-dom";
 import { brandsCategory } from "../../../assets/assets";
+import brands from "../../../assets/carLogos/brands";
 
 const BrandsSection = () => {
   return (
@@ -17,7 +18,7 @@ const BrandsSection = () => {
           Show All Brands
         </Link>
       </div>
-      <BrandMarquee />
+      <BrandMarquee brands={brands} />
       <div className="maiBrandsLogos  py-5">
         {/* <div className="nav flex md:gap-10 gap-7 my-2">
           <button className="">In Stock</button>

@@ -51,7 +51,22 @@ import linkedin from './images/linkedin.svg';
 import avatarIcon from './images/avatarIcon.png';
 import blackLogo from './images/blackLogo.svg';
 import whiteCar from './images/whiteCar.png';
-
+import cabriolet from './images/carDetails/types/cabriolet.svg';
+import convertible from './images/carDetails/types/convertible.svg';
+import coupe from './images/carDetails/types/coupe.svg';
+import hatchback from './images/carDetails/types/hatchback.svg';
+import hybird from './images/carDetails/types/hybird.svg';
+import micro from './images/carDetails/types/micro.svg';
+import muscle from './images/carDetails/types/muscle.svg';
+import roadster from './images/carDetails/types/roadster.svg';
+import sedan from './images/carDetails/types/sedan.svg';
+import sports from './images/carDetails/types/sports.svg';
+import suv from './images/carDetails/types/suv.svg';
+import superType from './images/carDetails/types/superType.svg';
+import station from './images/carDetails/types/station.svg';
+import van from './images/carDetails/types/van.svg';
+import targa from './images/carDetails/types/targa.svg';
+import truck from './images/carDetails/types/truck.svg';
 
 export const images = {
     car1,
@@ -482,4 +497,72 @@ export const goThemBuyOrSell = [
         image: electricSvg2,
         description: "We commited to providing our customers with exceptional service."
     },
+]
+
+// Car Types
+export const carTypes = [
+    {
+        title: "Cabriolet",
+        image: cabriolet
+    },
+    {
+        title: "Convertible",
+        image: convertible
+    },
+    {
+        title: "Coupe",
+        image: coupe
+    },
+    {
+        title: "Hatchback",
+        image: hatchback
+    },
+    {
+        title: "Hybird",
+        image: hybird
+    },
+    {
+        title: "Micro",
+        image: micro
+    },
+    {
+        title: "Muscle",
+        image: muscle
+    },
+    {
+        title: "Roadster",
+        image: roadster
+    },
+    {
+        title: "Sedan",
+        image: sedan
+    },
+    {
+        title: "Sports",
+        image: sports
+    },
+    {
+        title: "Station",
+        image: station
+    },
+    {
+        title: "Super",
+        image: superType
+    },
+    {
+        title: "SUV",
+        image: suv
+    }, {
+        title: "Targa",
+        image: targa
+    },
+    {
+        title: "Truck",
+        image: truck
+    },
+    {
+        title: "Van",
+        image: van
+    }
+
 ]

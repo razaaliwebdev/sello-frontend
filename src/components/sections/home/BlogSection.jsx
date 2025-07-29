@@ -1,6 +1,7 @@
 import React from "react";
-import { blogPosts, goThemBuyOrSell } from "../../../assets/assets";
+import { blogPosts } from "../../../assets/assets";
 import { MdArrowRightAlt } from "react-icons/md";
+import BuySellCards from "../../utils/BuySellCards";
 
 const BlogSection = () => {
   return (
@@ -46,7 +47,7 @@ const BlogSection = () => {
       </div>
 
       {/* Bottom Section - Buy/Sell Cards */}
-      <div className="flex flex-col md:flex-row md:gap-16 gap-3 md:pt-16">
+      {/* <div className="flex flex-col md:flex-row md:gap-16 gap-3 md:pt-16">
         {goThemBuyOrSell.map((post, index) => (
           <div className="w-full md:w-1/2  p-8 " key={index}>
             <h3 className="md:text-2xl text-xl font-bold text-gray-900 mb-4">
@@ -66,7 +67,8 @@ const BlogSection = () => {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
+      <BuySellCards />
     </div>
   );
 };

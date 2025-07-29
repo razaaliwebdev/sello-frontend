@@ -5,6 +5,13 @@ export default {
     extend: {
       animation: {
         spin: "spin 1.2s ease-in-out infinite",
+        marquee: "marquee 30s linear infinite",
+      },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" }, // only 50% because you're duplicating the items
+        },
       },
       colors: {
         primary: {

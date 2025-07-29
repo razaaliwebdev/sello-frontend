@@ -1,9 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import brands from "../assets/carLogos/brands"; // must be [{ img: '...' }, ...]
 
-const BrandMarquee = () => {
-  const navigate = useNavigate();
+const BrandMarquee = ({brands}) => {
 
   return (
     <div className="w-full py-6 backdrop-blur-sm overflow-hidden">
