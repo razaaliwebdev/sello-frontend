@@ -56,12 +56,31 @@ const Navbar = () => {
     });
   };
 
+  const avatarFallback = () => {
+    if (!currentUser) return images.avatarIcon;
+    if (currentUser.avatar) return currentUser.avatar;
+    const name = currentUser.name || currentUser.email || "User";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name.charAt(0)
+    )}`;
+  };
+
   return (
     <>
-      <nav className="bg-primary-500 w-full px-4 md:px-8 py-2 flex items-center justify-between">
+      <nav
+        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between ${
+          location.pathname === "/cars"
+            ? "md:bg-[#f5f5f5] md:text-gray-600"
+            : "bg-primary-500 text-white"
+        }`}
+      >
         {/* Logo */}
         <div onClick={() => navigate("/home")} className="cursor-pointer">
-          <img className="h-14 md:h-20" src={images.logo} alt="logo" />
+          <img
+            className="h-14 md:h-20"
+            src={location.pathname === "/cars" ? images.blackLogo : images.logo}
+            alt="logo"
+          />
         </div>
 
         {/* Desktop Search Bar */}
@@ -70,7 +89,11 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-6 text-white text-lg">
+        <div
+          className={`hidden md:flex items-center gap-6 text-lg ${
+            location.pathname === "/cars" ? "text-gray-600" : "text-white"
+          }`}
+        >
           {menuLinks.map((link, index) => (
             <Link
               key={index}
@@ -93,22 +116,11 @@ const Navbar = () => {
                 title="Profile"
               >
                 <img
-                  src={currentUser.avatar || images.avatarIcon}
+                  src={avatarFallback()}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* Logout Button */}
-              {/* <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("user");
-                  navigate("/login");
-                }}
-                className="px-4 py-1 bg-black rounded-md text-white text-sm"
-              >
-                Logout
-              </button> */}
             </div>
           ) : (
             <button
@@ -122,14 +134,24 @@ const Navbar = () => {
           {/* Create Post Button (Desktop) */}
           <button
             onClick={() => navigate("/create-post")}
-            className="hover:text-white/80 hidden md:block"
+            className={`hover:text-white/80 hidden md:block ${
+              location.pathname === "/cars"
+                ? "text-gray-600 hover:text-black/80"
+                : "text-white"
+            }`}
             title="Create Post"
           >
             <FaCirclePlus />
           </button>
 
           {/* Mobile Menu */}
-          <button onClick={openDrawer} title="Menu">
+          <button
+            onClick={openDrawer}
+            title="Menu"
+            className={`${
+              location.pathname === "/cars" ? "text-gray-600" : "text-white"
+            }`}
+          >
             <FaBars />
           </button>
         </div>
@@ -139,7 +161,7 @@ const Navbar = () => {
       {open && (
         <div
           ref={drawerRef}
-          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl"
+          className="fixed top-0 right-0 w-[99.5%] sm:w-[80%] h-full z-50 text-primary-900 px-6 py-6 bg-primary-300 shadow-xl md:hidden"
         >
           {/* Close Button */}
           <div className="flex justify-end text-3xl mb-6">

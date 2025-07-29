@@ -1,9 +1,12 @@
-import React from 'react'
+import React from "react";
+import ListingHeroSection from "../../components/sections/listings/ListingHeroSection";
 
 const CarListings = () => {
   return (
-    <div>CarListings</div>
-  )
-}
+    <div>
+      <ListingHeroSection />
+    </div>
+  );
+};
 
-export default CarListings
+export default CarListings;
