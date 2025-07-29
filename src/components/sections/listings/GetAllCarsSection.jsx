@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { dummyCars, images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 
-// Capitalize function for tab labels
+// Capitalize function
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const GetAllCarsSection = () => {
@@ -10,10 +11,19 @@ const GetAllCarsSection = () => {
     new Set(dummyCars.map((car) => car.condition.toLowerCase()))
   );
 
-  const tabs = ["in stock", ...uniqueConditions]; // Add "In Stock" at the beginning
+  const tabs = ["in stock", ...uniqueConditions];
 
   const [activeTab, setActiveTab] = useState("in stock");
+  const [savedCars, setSavedCars] = useState([]);
 
+  // Toggle bookmark
+  const toggleSave = (id) => {
+    setSavedCars((prev) =>
+      prev.includes(id) ? prev.filter((carId) => carId !== id) : [...prev, id]
+    );
+  };
+
+  // Filter cars by tab
   const filteredCars =
     activeTab === "in stock"
       ? dummyCars
@@ -43,63 +53,80 @@ const GetAllCarsSection = () => {
           ))}
         </div>
 
-        {/* Cars List */}
+        {/* Cars Grid */}
         <div className="my-5 grid md:grid-cols-3 grid-cols-1 md:gap-10 gap-6">
           {filteredCars.length === 0 ? (
             <p className="col-span-full text-center text-gray-500">
               No cars found for {capitalize(activeTab)}.
             </p>
           ) : (
-            filteredCars.map((car, index) => (
-              <div className="md:px-6 md:py-8 bg-[#D9D9D9]" key={index}>
-                <div
-                  className="w-full h-full border-[1px] border-gray-100 rounded-bl-2xl rounded-br-2xl md:pb-8 pb-14 "
-                  key={index}
-                >
-                  <div className=" h-[60%] relative">
-                    <img
-                      className="h-full w-full object-cover bg-center"
-                      src={car.images[0]}
-                      alt={`${car.make} ${car.model}`}
-                    />
-                  </div>
-                  <div className="p-5">
-                    <h4 className="md:text-xl text-lg font-medium">
-                      {car.make} {car.model} - {car.year}
-                    </h4>
-                    <p className="border-b-[1px] border-gray-200 pb-1.5">
-                      {car.features}
-                    </p>
-                    <div className="flex items-center my-3 justify-around border-b-[1px] border-gray-200 pb-3">
-                      <div className="flex items-center flex-col gap-2">
-                        <img src={images.milesIcon} alt="Miles Icon" />
-                        {car.mileage} km
-                      </div>
-                      <div className="flex items-center flex-col gap-2">
-                        <img src={images.fuelTypeIcon} alt="Fuel Icon" />
-                        {car.fuelType}
-                      </div>
-                      <div className="flex items-center flex-col gap-2">
-                        <img
-                          src={images.transmissionIcon}
-                          alt="Transmission Icon"
-                        />
-                        {car.transmission}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-4">
-                      <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
-                        AED <h5 className="price">{car.price}</h5>
-                      </div>
-                      <button className="text-primary-500 flex items-center gap-2">
-                        View Details{" "}
-                        <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
+            filteredCars.map((car, index) => {
+              const carId = car.id || index; // Fallback if no id
+              return (
+                <div className="md:px-6 md:py-8 bg-[#D9D9D9]" key={carId}>
+                  <div className="w-full h-full border border-gray-100 rounded-bl-2xl rounded-br-2xl md:pb-8 pb-14">
+                    {/* Car Image & Bookmark */}
+                    <div className="h-[60%] relative">
+                      <img
+                        className="h-full w-full object-cover bg-center"
+                        src={car.images[0]}
+                        alt={`${car.make} ${car.model}`}
+                      />
+                      <button
+                        onClick={() => toggleSave(carId)}
+                        className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md"
+                      >
+                        {savedCars.includes(carId) ? (
+                          <BsBookmarkFill className="text-primary-500 text-xl" />
+                        ) : (
+                          <BsBookmark className="text-primary-500 text-xl" />
+                        )}
                       </button>
+                    </div>
+
+                    {/* Car Info */}
+                    <div className="p-5">
+                      <h4 className="md:text-xl text-lg font-medium">
+                        {car.make} {car.model} - {car.year}
+                      </h4>
+                      <p className="border-b border-gray-200 pb-1.5">
+                        {car.features}
+                      </p>
+
+                      {/* Icons Row */}
+                      <div className="flex items-center my-3 justify-around border-b border-gray-200 pb-3">
+                        <div className="flex items-center flex-col gap-2">
+                          <img src={images.milesIcon} alt="Miles Icon" />
+                          {car.mileage} km
+                        </div>
+                        <div className="flex items-center flex-col gap-2">
+                          <img src={images.fuelTypeIcon} alt="Fuel Icon" />
+                          {car.fuelType}
+                        </div>
+                        <div className="flex items-center flex-col gap-2">
+                          <img
+                            src={images.transmissionIcon}
+                            alt="Transmission Icon"
+                          />
+                          {car.transmission}
+                        </div>
+                      </div>
+
+                      {/* Price & CTA */}
+                      <div className="flex items-center justify-between py-4">
+                        <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
+                          AED <h5 className="price">{car.price}</h5>
+                        </div>
+                        <button className="text-primary-500 flex items-center gap-2">
+                          View Details
+                          <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
