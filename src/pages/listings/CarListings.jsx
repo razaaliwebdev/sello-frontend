@@ -6,6 +6,7 @@ import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import NeedInspiration from "../../components/sections/listings/NeedInspiration";
 import BoxCarBanner from "../../components/sections/listings/BoxCarBanner";
 import OurTeamSection from "../../components/sections/listings/OurTeamSection";
+import BlogSection from "../../components/sections/home/BlogSection";
 
 const CarListings = () => {
   return (
@@ -17,6 +18,7 @@ const CarListings = () => {
       <NeedInspiration />
       <BoxCarBanner />
       <OurTeamSection />
+      <BlogSection />
     </div>
   );
 };

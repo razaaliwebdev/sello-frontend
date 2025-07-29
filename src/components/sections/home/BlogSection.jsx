@@ -68,7 +68,7 @@ const BlogSection = () => {
           </div>
         ))}
       </div> */}
-      <BuySellCards />
+      {/* <BuySellCards /> */}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import ShopBoxCar from "../components/sections/home/ShopBoxCarSection";
 import CustomerReview from "../components/sections/home/CustomerReview";
 import BlogSection from "../components/sections/home/BlogSection";
 import NewsLatter from "../components/utils/NewsLatter";
+import BuySellCards from "../components/utils/BuySellCards";
 
 const Home = () => {
   return (
@@ -19,6 +20,7 @@ const Home = () => {
         <ShopBoxCar />
         <CustomerReview />
         <BlogSection />
+        <BuySellCards />
         <NewsLatter />
       </div>
     </div>
