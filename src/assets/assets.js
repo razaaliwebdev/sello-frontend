@@ -70,6 +70,12 @@ import truck from './images/carDetails/types/truck.svg';
 import boxCar from './images/boxCar.png';
 import boxCar2 from './images/boxCar2.png';
 import boxCar3 from './images/boxCar3.png';
+import team1 from './images/team1.png';
+import team2 from './images/team2.png';
+import team3 from './images/team3.png';
+import team4 from './images/team4.png';
+import team5 from './images/team5.png';
+
 
 export const images = {
     car1,
@@ -742,3 +748,32 @@ export const boxCarsReviewImages = [
         image: boxCar3
     }
 ]
+
+// Our Teams Data
+export const ourTeams = [
+    {
+        name: "Courtney Henry",
+        role: "Development Manager",
+        image: team1
+    },
+    {
+        name: "Jerome Bell",
+        role: "Software Developer",
+        image: team2
+    },
+    {
+        name: "John Doe",
+        role: "Team Lead",
+        image: team3
+    },
+    {
+        name: "Arlene McCoy",
+        role: "Development Manager",
+        image: team4
+    },
+    {
+        name: "Jenny Wilson",
+        role: "UI/UX Designer",
+        image: team5
+    },
+];
