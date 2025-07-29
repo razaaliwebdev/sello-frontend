@@ -75,6 +75,7 @@ import team2 from './images/team2.png';
 import team3 from './images/team3.png';
 import team4 from './images/team4.png';
 import team5 from './images/team5.png';
+import mutlipleBrandsLogo from './images/mutlipleBrandsLogo.svg';
 
 
 export const images = {
@@ -96,7 +97,8 @@ export const images = {
     aliTufan,
     avatarIcon,
     blackLogo,
-    whiteCar
+    whiteCar,
+    mutlipleBrandsLogo
 };
 
 
