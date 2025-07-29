@@ -1,6 +1,7 @@
 import React from "react";
 import { whyUs } from "../../../assets/assets";
 import { IoMdCheckmark, IoIosArrowRoundUp } from "react-icons/io";
+import WhyChooseUsUtility from "../../utils/WhyChooseUsUtility";
 
 const WhyChooseUs = () => {
   return (
@@ -55,23 +56,7 @@ const WhyChooseUs = () => {
       </div>
 
       <div className="px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold my-6 text-center md:text-left">
-          Why Choose Us
-        </h2>
-
-        <div className="flex flex-col md:flex-row md:gap-10 gap-6">
-          {whyUs.whyChooseUs.map((item, index) => (
-            <div key={index} className="flex-1 text-center md:text-left">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-12 mx-auto md:mx-0 my-2"
-              />
-              <h4 className="text-xl font-semibold py-2">{item.title}</h4>
-              <p className="text-sm text-gray-700">{item.description}</p>
-            </div>
-          ))}
-        </div>
+        <WhyChooseUsUtility />
       </div>
     </div>
   );
