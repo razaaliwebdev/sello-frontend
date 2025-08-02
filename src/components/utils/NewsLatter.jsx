@@ -8,14 +8,14 @@ const NewsLatter = () => {
         <p className="">Receive pricing updates,shopping tips & more.</p>
       </div>
       <div className="md:py-10 py-5">
-        <div className="field bg-white/20 h-16 md:w-150 mx-auto px-4 flex items-center md:justify-between justify-around gap-4 rounded-full w-[91%]">
+        <div className="field bg-white/20 h-12 sm:h-14 md:h-16 w-full max-w-md mx-auto px-3 sm:px-4 flex items-center justify-between gap-2 sm:gap-3 rounded-full">
           <input
-            className="flex-1 h-[85%] text-lg outline-none text-primary-500 bg-transparent border-none"
+            className="flex-1 h-full text-sm sm:text-base md:text-lg outline-none text-primary-500 bg-transparent border-none placeholder:text-primary-500/80"
             type="email"
-            placeholder="You Email Address..."
+            placeholder="Your Email Address..."
           />
-          <button className="bg-primary-500 md:py-3 md:px-7  py-2 px-4 mr-7 hover:opacity-90 rounded-full">
-            Subscibe
+          <button className="bg-primary-500  text-xs sm:text-sm md:text-base py-1.5 px-3 sm:py-2 sm:px-4 md:py-3 md:px-6 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
+            Subscribe
           </button>
         </div>
       </div>
