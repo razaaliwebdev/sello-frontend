@@ -9,13 +9,13 @@ const Btns = () => {
       const currentUrl = window.location.href;
       if (navigator.share) {
         navigator.share({
-          title: document.title || "Check this out!",
-          text: "Have a look at this page:",
+          title: "Sello - Car Details",
+          text: "Check out this car I found on Sello!",
           url: currentUrl,
         });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Share Failed ", error);
     }
   };
   const handleChat = () => {
