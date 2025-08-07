@@ -6,6 +6,7 @@ import { BrowserRouter, HashRouter } from "react-router-dom";
 import { store } from "./redux/store.js";
 import { Provider } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import "leaflet/dist/leaflet.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

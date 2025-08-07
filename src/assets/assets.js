@@ -85,7 +85,7 @@ import electric from './images/carDetails/specs/electric.svg';
 import manual from './images/carDetails/specs/manual.svg';
 import auto from './images/carDetails/specs/auto.svg';
 import door from './images/carDetails/specs/door.svg';
-import hp from './images/carDetails/specs/door.svg';
+import hp from './images/carDetails/specs/hp.svg';
 import cc from './images/carDetails/specs/cc.svg';
 import location from './images/carDetails/specs/location.svg';
 import wheel from './images/carDetails/specs/wheel.svg';
@@ -121,7 +121,9 @@ export const images = {
     hp,
     cc,
     location,
-    wheel
+    wheel,
+    // Car Types
+    sedan
 };
 
 
