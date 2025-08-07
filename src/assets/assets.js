@@ -79,6 +79,16 @@ import mutlipleBrandsLogo from './images/mutlipleBrandsLogo.svg';
 import callIcon from './images/carDetails/callIcon.svg';
 import chatIcon from './images/carDetails/chatIcon.svg';
 import shareIcon from './images/carDetails/shareIcon.svg';
+import fuelIcon from './images/carDetails/specs/fuelIcon.svg';
+import hybrid from './images/carDetails/specs/hybird.svg';
+import electric from './images/carDetails/specs/electric.svg';
+import manual from './images/carDetails/specs/manual.svg';
+import auto from './images/carDetails/specs/auto.svg';
+import door from './images/carDetails/specs/door.svg';
+import hp from './images/carDetails/specs/door.svg';
+import cc from './images/carDetails/specs/cc.svg';
+import location from './images/carDetails/specs/location.svg';
+import wheel from './images/carDetails/specs/wheel.svg';
 
 
 export const images = {
@@ -101,7 +111,17 @@ export const images = {
     avatarIcon,
     blackLogo,
     whiteCar,
-    mutlipleBrandsLogo
+    mutlipleBrandsLogo,
+    fuelIcon,
+    hybrid,
+    electric,
+    manual,
+    auto,
+    door,
+    hp,
+    cc,
+    location,
+    wheel
 };
 
 
@@ -584,6 +604,7 @@ export const carTypes = [
 // Dummy Cars Data
 export const dummyCars = [
     {
+        id: 1,
         make: "Toyota",
         model: "Corolla",
         variant: "Altis Grande",
@@ -601,6 +622,7 @@ export const dummyCars = [
         location: "DHA Phase 5",
         sellerType: "individual",
         carDoors: 4,
+        bodyType: "Sedan",
         contactNumber: "03001234567",
         geoLocation: { lat: 31.5204, lng: 74.3587 },
         horsepower: 138,
@@ -610,6 +632,7 @@ export const dummyCars = [
         ]
     },
     {
+        id: 2,
         make: "Honda",
         model: "Civic",
         variant: "Oriel 1.8 i-VTEC CVT",
@@ -627,6 +650,7 @@ export const dummyCars = [
         location: "Clifton Block 2",
         sellerType: "dealer",
         carDoors: 4,
+        bodyType: "Sedan",
         contactNumber: "03211234567",
         geoLocation: { lat: 24.8607, lng: 67.0011 },
         horsepower: 141,
@@ -636,6 +660,7 @@ export const dummyCars = [
         ]
     },
     {
+        id: 3,
         make: "Suzuki",
         model: "Wagon R",
         variant: "VXL",
@@ -653,6 +678,7 @@ export const dummyCars = [
         location: "F-11 Markaz",
         sellerType: "individual",
         carDoors: 5,
+        bodyType: "Hatchback",
         contactNumber: "03031234567",
         geoLocation: { lat: 33.6844, lng: 73.0479 },
         horsepower: 67,
@@ -662,6 +688,7 @@ export const dummyCars = [
         ]
     },
     {
+        id: 4,
         make: "Hyundai",
         model: "Tucson",
         variant: "FWD A/T GLS Sport",
@@ -679,6 +706,7 @@ export const dummyCars = [
         location: "People's Colony",
         sellerType: "dealer",
         carDoors: 5,
+        bodyType: "SUV",
         contactNumber: "03451234567",
         geoLocation: { lat: 31.418, lng: 73.0791 },
         horsepower: 155,
@@ -688,6 +716,7 @@ export const dummyCars = [
         ]
     },
     {
+        id: 5,
         make: "Kia",
         model: "Sportage",
         variant: "Alpha",
@@ -705,6 +734,7 @@ export const dummyCars = [
         location: "University Road",
         sellerType: "individual",
         carDoors: 4,
+        bodyType: "SUV",
         contactNumber: "03151234567",
         geoLocation: { lat: 34.0151, lng: 71.5249 },
         horsepower: 154,
@@ -714,6 +744,7 @@ export const dummyCars = [
         ]
     },
     {
+        id: 6,
         make: "Mercedes",
         model: "Benz E",
         variant: "Beta",
@@ -731,6 +762,7 @@ export const dummyCars = [
         location: "University Road",
         sellerType: "individual",
         carDoors: 4,
+        bodyType: "Sedan",
         contactNumber: "03151234567",
         geoLocation: { lat: 34.0151, lng: 71.5249 },
         horsepower: 154,

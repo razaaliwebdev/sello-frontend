@@ -1,3 +1,4 @@
+
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const BASE_URL = "https://sello-backend.onrender.com/api";
@@ -87,9 +88,22 @@ export const api = createApi({
             }),
             invalidatesTags: ["User"],
         }),
+
+        // ✅ Corrected Car GET Endpoint
+        getCars: builder.query({
+            query: () => ({
+                url: "/cars",
+                method: "GET",
+            }),
+            transformResponse: (response) => {
+                // Extract the cars array from the response
+                return response?.cars || [];
+            },
+        }),
     }),
 });
 
+// ✅ Export hooks
 export const {
     useRegisterUserMutation,
     useLoginUserMutation,
@@ -99,4 +113,6 @@ export const {
     useResetPasswordMutation,
     useGetMeQuery,
     useLogoutMutation,
+    useGetCarsQuery, // <-- ADD THIS
 } = api;
+
