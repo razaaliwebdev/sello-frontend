@@ -835,3 +835,28 @@ export const threeBtns = [
         image: shareIcon,
     }
 ]
+
+// Reviews
+export const reviews = [
+    {
+        name: "Ali Tufan",
+        role: "Designer",
+        review:
+            " I'd suggest Macklin Motors Nissan Glasgow South to a friend because I had great service from my salesman Patrick and all of the team.",
+        image: team1,
+    },
+    {
+        name: "Jhon Doe",
+        role: "Developer",
+        review:
+            'I was very happy with the service I received from the team at Macklin Motors Nissan Glasgow South. My salesman James was very helpful and made the whole process very easy.',
+        image: team3,
+    },
+    {
+        name: "Jane Doe",
+        role: "UX Designer",
+        review:
+            ' I was very impressed with the service I received from the team at Macklin Motors Nissan Glasgow South. My salesman was very helpful and made the whole process very easy.',
+        image: team4,
+    },
+];

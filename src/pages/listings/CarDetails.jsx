@@ -8,6 +8,7 @@ import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import WhyChooseUs from "../../components/sections/home/WhyChooseUs";
 import BlogSection from "../../components/sections/home/BlogSection";
+import CustomerReviews from "../../components/sections/carDetails/CustomerReviews";
 
 const CarDetails = () => {
   return (
@@ -16,7 +17,7 @@ const CarDetails = () => {
       <CarDetailsGallerySection />
       <Btns />
       <CarDetailsEtc />
-      
+      <CustomerReviews />
       <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
         <div className="flex items-center md:justify-between">
           <h1 className="md:text-4xl text-2xl font-semibold">
