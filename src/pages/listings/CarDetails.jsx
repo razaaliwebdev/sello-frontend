@@ -6,6 +6,8 @@ import CarDetailsEtc from "../../components/sections/carDetails/CarDetailsEtc";
 import BrandMarquee from "../../components/BrandMarquee";
 import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
+import WhyChooseUs from "../../components/sections/home/WhyChooseUs";
+import BlogSection from "../../components/sections/home/BlogSection";
 
 const CarDetails = () => {
   return (
@@ -14,6 +16,7 @@ const CarDetails = () => {
       <CarDetailsGallerySection />
       <Btns />
       <CarDetailsEtc />
+      
       <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
         <div className="flex items-center md:justify-between">
           <h1 className="md:text-4xl text-2xl font-semibold">
@@ -25,7 +28,8 @@ const CarDetails = () => {
         </div>
         <BrandMarquee brands={brands} />
       </div>
-      
+      <WhyChooseUs />
+      <BlogSection />
     </div>
   );
 };
