@@ -21,9 +21,11 @@ import CarDetails from "./pages/listings/CarDetails.jsx";
 import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
 import CreatePost from "./pages/posts/CreatePost.jsx";
+import Filter from "./pages/filter/FilterPage.jsx";
 import BottomHeader from "./components/BottomHeader.jsx";
 import AllBrands from "./pages/AllBrands.jsx";
 import Footer from "./components/Footer.jsx";
+import FilterPage from "./pages/filter/FilterPage.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -95,6 +97,7 @@ const App = () => {
         <Route path={"/contact"} element={<Contact />} />
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/view-all-brands" element={<AllBrands />} />
+        <Route path="/filter" element={<FilterPage />} />
       </Routes>
       {![
         "/",
