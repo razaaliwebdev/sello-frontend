@@ -7,6 +7,7 @@ import Seats from "../../utils/filter/Seats";
 import FuelSpecs from "../../utils/filter/FuelSpecs";
 import TransmissionSpecs from "../../utils/filter/TransmissionSpecs";
 import CylindersSpecs from "../../utils/filter/CylindersSpecs";
+import ExteriorColor from "../../utils/filter/ExteriorColor";
 
 const FilterForm = () => {
   return (
@@ -109,6 +110,11 @@ const FilterForm = () => {
         <div className="">
           <label className="block mb-1">Numbers of Cylinders</label>
           <CylindersSpecs />
+        </div>
+        {/* Exterior Colors */}
+        <div className="">
+          <label className="block mb-1">Exterior Colors</label>
+          <ExteriorColor />
         </div>
       </form>
     </div>

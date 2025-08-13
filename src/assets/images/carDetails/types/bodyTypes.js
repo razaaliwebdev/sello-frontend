@@ -221,3 +221,51 @@ export const numberOfCylinders = [
         isChecked: false
     }
 ]
+
+export const exteriorColors = [
+    {
+        titleValue: "black",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "blue",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "Brown",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "purple",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "silver",
+        isChecked: false,
+        category: "exteriorColor",
+    },
+    {
+        titleValue: "white",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "orange",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "yellow",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+    {
+        titleValue: "gold",
+        isChecked: false,
+        category: "exteriorColor"
+    },
+];
