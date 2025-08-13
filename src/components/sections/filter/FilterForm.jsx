@@ -1,7 +1,7 @@
-
 import React from "react";
-import RangeFilter from "../../utils/RangeFilter";
-import Input from "../../utils/Input";
+import RangeFilter from "../../utils/filter/RangeFilter";
+import Input from "../../utils/filter/Input";
+import BodyTypes from "../../utils/filter/BodyTypes";
 
 const FilterForm = () => {
   return (
@@ -70,6 +70,13 @@ const FilterForm = () => {
           <div className="range">
             <RangeFilter type="price" min={0} max={100000} onChange={null} />
           </div>
+        </div>
+        {/* Car Type */}
+        <div className="">
+          <label className="block mb-1">Body Types</label>
+          <BodyTypes
+            onBodyTypeChange={(name) => console.log("Selected:", name)}
+          />
         </div>
       </form>
     </div>

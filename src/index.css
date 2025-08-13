@@ -11,6 +11,10 @@
     font-style: normal;
 }
 
+.hideScrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 
 #popularMakesSlider {
     scroll-behavior: smooth;

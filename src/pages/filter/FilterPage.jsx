@@ -3,7 +3,7 @@ import FilterForm from "../../components/sections/filter/FilterForm";
 
 const FilterPage = () => {
   return (
-    <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <div className="px-4 md:px-16 py-12">
       <h1 className="md:text-3xl text-xl font-semibold text-center text-primary-500">
         Filter
       </h1>
