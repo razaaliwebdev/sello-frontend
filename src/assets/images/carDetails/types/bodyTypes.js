@@ -186,3 +186,38 @@ export const transmissionType = [
         isChecked: false
     }
 ];
+
+export const numberOfCylinders = [
+    {
+        titleValue: 2,
+        isChecked: false
+    },
+    {
+        titleValue: 3,
+        isChecked: false
+    },
+    {
+        titleValue: 4,
+        isChecked: false
+    },
+    {
+        titleValue: 5,
+        isChecked: false
+    },
+    {
+        titleValue: 6,
+        isChecked: false
+    },
+    {
+        titleValue: 7,
+        isChecked: false
+    },
+    {
+        titleValue: 8,
+        isChecked: false
+    },
+    {
+        titleValue: 8 + "+",
+        isChecked: false
+    }
+]
