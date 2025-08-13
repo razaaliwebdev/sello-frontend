@@ -19,6 +19,9 @@ import fuelIcon from '../specs/fuelIcon.svg';
 import hybirdCar from '../specs/hybird.svg';
 import electric from '../specs/electric.svg';
 
+import auto from '../specs/auto.svg';
+import menual from '../specs/manual.svg';
+
 
 export const bodyTypes = [
     {
@@ -120,7 +123,7 @@ export const regionalSpecs = [
         titleValue: "European",
         isChecked: false
     }
-]
+];
 
 export const numberOfSeats = [
     {
@@ -147,7 +150,7 @@ export const numberOfSeats = [
         titleValue: 7,
         isChecked: false
     }
-]
+];
 
 export const fuelType = [
     {
@@ -169,4 +172,17 @@ export const fuelType = [
         image: electric,
         isChecked: false
     }
-]
+];
+
+export const transmissionType = [
+    {
+        titleValue: "Manual",
+        image: menual,
+        isChecked: false
+    },
+    {
+        titleValue: "Automatic",
+        image: auto,
+        isChecked: false
+    }
+];

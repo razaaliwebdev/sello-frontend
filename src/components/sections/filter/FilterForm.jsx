@@ -5,6 +5,7 @@ import BodyTypes from "../../utils/filter/BodyTypes";
 import RegionalSpecs from "../../utils/filter/RegionalSpecs";
 import Seats from "../../utils/filter/Seats";
 import FuelSpecs from "../../utils/filter/FuelSpecs";
+import TransmissionSpecs from "../../utils/filter/TransmissionSpecs";
 
 const FilterForm = () => {
   return (
@@ -97,6 +98,11 @@ const FilterForm = () => {
         <div className="">
           <label className="block mb-1">Fuel Type</label>
           <FuelSpecs />
+        </div>
+        {/* Transmission Type */}
+        <div className="">
+          <label className="block mb-1">Transmission Type</label>
+          <TransmissionSpecs />
         </div>
       </form>
     </div>
