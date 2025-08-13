@@ -3,6 +3,7 @@ import RangeFilter from "../../utils/filter/RangeFilter";
 import Input from "../../utils/filter/Input";
 import BodyTypes from "../../utils/filter/BodyTypes";
 import RegionalSpecs from "../../utils/filter/RegionalSpecs";
+import Seats from "../../utils/filter/Seats";
 
 const FilterForm = () => {
   return (
@@ -85,6 +86,11 @@ const FilterForm = () => {
           <RegionalSpecs
             onBodyTypeChange={(name) => console.log("Selected:", name)}
           />
+        </div>
+        {/* Searts */}
+        <div className="">
+          <label className="block mb-1">Seats</label>
+          <Seats />
         </div>
       </form>
     </div>

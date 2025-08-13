@@ -19,7 +19,7 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
           <div
             key={index}
             onClick={() => handleSelect(item.titleValue)}
-            style={{ width: "150px", height: "100px" }}
+            style={{ width: "150px", height: "120px" }}
             className="bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center justify-between px-4 py-2 cursor-pointer"
           >
             {/* Image */}
@@ -33,11 +33,11 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
 
             {/* Name & Custom Radio */}
             <div
-              className={`flex items-center gap-2 w-full mt-1 ${
+              className={`flex items-center gap-3 w-full mt-1 ${
                 !item.image ? "justify-center items-center h-full" : ""
               }`}
             >
-              <span className="text-sm font-medium text-gray-700">
+              <span className="md:text-lg text-sm font-medium text-gray-700">
                 {item.titleValue}
               </span>
 
