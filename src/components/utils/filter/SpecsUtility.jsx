@@ -33,20 +33,17 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
 
             {/* Name & Custom Radio */}
             <div
-              className={`flex items-center gap-3 w-full mt-1 ${
+              className={`flex items-center gap-2 w-full mt-1 ${
                 !item.image ? "justify-center items-center h-full" : ""
               }`}
             >
-              {item.category === "exteriorColor" ? (
-                <span
-                  className="w-8 h-8 rounded-full"
-                  style={{ backgroundColor: `${item.titleValue}` }}
-                ></span>
-              ) : (
-                <span className="md:text-lg text-sm font-medium text-gray-700">
-                  {item.titleValue}
-                </span>
-              )}
+              <span className="md:text-md text-sm font-medium text-gray-700">
+                {item.titleValue}
+              </span>
+              <span
+                className="w-8 h-8 rounded-full"
+                style={{ backgroundColor: `${item.titleValue}` }}
+              ></span>
 
               <label className="relative flex items-center cursor-pointer">
                 <input

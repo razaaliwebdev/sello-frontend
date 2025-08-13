@@ -226,46 +226,94 @@ export const exteriorColors = [
     {
         titleValue: "black",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "blue",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "Brown",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "purple",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "silver",
         isChecked: false,
-        category: "exteriorColor",
+        category: "color",
     },
     {
         titleValue: "white",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "orange",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "yellow",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
     },
     {
         titleValue: "gold",
         isChecked: false,
-        category: "exteriorColor"
+        category: "color"
+    },
+];
+
+export const interiorColor = [
+    {
+        titleValue: "black",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "blue",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "Brown",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "purple",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "silver",
+        isChecked: false,
+        category: "color",
+    },
+    {
+        titleValue: "white",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "orange",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "yellow",
+        isChecked: false,
+        category: "color"
+    },
+    {
+        titleValue: "gold",
+        isChecked: false,
+        category: "color"
     },
 ];
