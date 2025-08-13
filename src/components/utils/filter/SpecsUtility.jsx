@@ -37,7 +37,7 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
                 !item.image ? "justify-center items-center h-full" : ""
               }`}
             >
-              <span className="md:text-md text-sm font-medium text-gray-700">
+              <span className="md:text-md text-sm font-medium text-gray-700 ">
                 {item.titleValue}
               </span>
               <span

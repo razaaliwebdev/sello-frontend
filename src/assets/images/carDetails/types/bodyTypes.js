@@ -347,3 +347,17 @@ export const doors = [
         isChecked: false
     }
 ]
+
+export const ownerType = [
+    {
+        titleValue: "Owner",
+        isChecked: false
+    },
+    {
+        titleValue: "Dealer",
+        isChecked: false
+    },
+    {
+        titleValue: "Dealership"
+    }
+]

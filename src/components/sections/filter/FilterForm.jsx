@@ -10,6 +10,7 @@ import CylindersSpecs from "../../utils/filter/CylindersSpecs";
 import ExteriorColor from "../../utils/filter/ExteriorColor";
 import InteriorColor from "../../utils/filter/InteriorColor";
 import DoorsSpecs from "../../utils/filter/DoorsSpecs";
+import OwnerTypeSpecs from "../../utils/filter/OwnerTypeSpecs";
 
 const FilterForm = () => {
   return (
@@ -127,6 +128,11 @@ const FilterForm = () => {
         <div className="">
           <label className="block mb-1">Doors</label>
           <DoorsSpecs />
+        </div>
+        {/* Owner Type */}
+        <div className="">
+          <label className="block mb-1">Owner Type</label>
+          <OwnerTypeSpecs />
         </div>
       </form>
     </div>
