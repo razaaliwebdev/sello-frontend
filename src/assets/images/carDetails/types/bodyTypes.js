@@ -15,6 +15,10 @@ import suv from '../types/suv.svg';
 import truck from '../types/suv.svg';
 import van from '../types/van.svg';
 
+import fuelIcon from '../specs/fuelIcon.svg';
+import hybirdCar from '../specs/hybird.svg';
+import electric from '../specs/electric.svg';
+
 
 export const bodyTypes = [
     {
@@ -141,6 +145,28 @@ export const numberOfSeats = [
     },
     {
         titleValue: 7,
+        isChecked: false
+    }
+]
+
+export const fuelType = [
+    {
+        titleValue: "Petrol",
+        image: fuelIcon,
+        isChecked: false
+    }, {
+        titleValue: "Diesel",
+        image: fuelIcon,
+        isChecked: false
+    },
+    {
+        titleValue: "Hybird",
+        image: hybirdCar,
+        isChecked: false
+    },
+    {
+        titleValue: "Electric",
+        image: electric,
         isChecked: false
     }
 ]
