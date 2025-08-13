@@ -3,9 +3,9 @@ import { bodyTypes } from "../../../assets/images/carDetails/types/bodyTypes";
 import SpecsUtility from "./SpecsUtility";
 
 const BodyTypes = ({ onBodyTypeChange }) => {
-  const handleSelect = (name) => {
+  const handleSelect = (titleValue) => {
     if (onBodyTypeChange) {
-      onBodyTypeChange(name); // Send to parent
+      onBodyTypeChange(titleValue); // Send to parent
     }
   };
 

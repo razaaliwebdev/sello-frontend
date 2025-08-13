@@ -18,82 +18,82 @@ import van from '../types/van.svg';
 
 export const bodyTypes = [
     {
-        name: 'Roadster',
+        titleValue: 'Roadster',
         image: roadster,
         isChecked: false
     },
     {
-        name: 'Cabriolet',
+        titleValue: 'Cabriolet',
         image: cabriolet,
         isChecked: false
     },
     {
-        name: 'Super',
+        titleValue: 'Super',
         image: superType,
         isChecked: false
     },
     {
-        name: 'Hatchback',
+        titleValue: 'Hatchback',
         image: hatchback,
         isChecked: false
     },
     {
-        name: 'Micro',
+        titleValue: 'Micro',
         image: micro,
         isChecked: false
     },
     {
-        name: 'Station',
+        titleValue: 'Station',
         image: station,
         isChecked: false
     },
     {
-        name: 'Sedan',
+        titleValue: 'Sedan',
         image: sedan,
         isChecked: false
     },
     {
-        name: 'Muscle',
+        titleValue: 'Muscle',
         image: muscle,
         isChecked: false
     },
     {
-        name: 'Sports',
+        titleValue: 'Sports',
         image: sports,
         isChecked: false
     },
     {
-        name: 'Targa',
+        titleValue: 'Targa',
         image: targa,
         isChecked: false
     },
     {
-        name: 'Convertible',
+        titleValue: 'Convertible',
         image: convertible,
         isChecked: false
     },
     {
-        name: 'Coupe',
+        titleValue: 'Coupe',
         image: coupe,
         isChecked: false
     },
     {
-        name: 'Hybird',
+        titleValue: 'Hybird',
         image: hybird,
         isChecked: false
     },
     {
-        name: 'SUV',
+        titleValue: 'SUV',
         image: suv,
         isChecked: false
     },
     {
-        name: 'Truck',
+        titleValue: 'Truck',
         image: truck,
         isChecked: false
     },
     {
-        name: 'Van',
+        titleValue: 'Van',
         image: van,
         isChecked: false
     },

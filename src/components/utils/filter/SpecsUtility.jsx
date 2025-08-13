@@ -3,22 +3,22 @@ import React, { useState } from "react";
 const SpecsUtility = ({ bodyTypes, onBodyTypeChange }) => {
   const [selectedBodyType, setSelectedBodyType] = useState(null);
 
-  const handleSelect = (name) => {
-    setSelectedBodyType(name);
+  const handleSelect = (titleValue) => {
+    setSelectedBodyType(titleValue);
     if (onBodyTypeChange) {
-      onBodyTypeChange(name); // Send to parent
+      onBodyTypeChange(titleValue); // Send to parent
     }
   };
 
   return (
     <div className="flex items-center gap-8 py-4 overflow-x-auto md:scrollbar-hide hideScrollbar">
       {bodyTypes.map((item, index) => {
-        const isChecked = selectedBodyType === item.name;
+        const isChecked = selectedBodyType === item.titleValue;
 
         return (
           <div
             key={index}
-            onClick={() => handleSelect(item.name)}
+            onClick={() => handleSelect(item.titleValue)}
             style={{ width: "150px", height: "100px" }}
             className="bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center justify-between px-4 py-2 cursor-pointer"
           >
@@ -26,13 +26,13 @@ const SpecsUtility = ({ bodyTypes, onBodyTypeChange }) => {
             <img
               className="w-16 h-16 object-contain"
               src={item.image}
-              alt={item.name}
+              alt={item.titleValue}
             />
 
             {/* Name & Custom Radio */}
             <div className="flex items-center gap-2 w-full mt-1">
               <span className="text-sm font-medium text-gray-700">
-                {item.name}
+                {item.titleValue}
               </span>
 
               <label className="relative flex items-center cursor-pointer">
