@@ -22,6 +22,8 @@ import electric from '../specs/electric.svg';
 import auto from '../specs/auto.svg';
 import menual from '../specs/manual.svg';
 
+import door from '../specs/door.svg';
+
 
 export const bodyTypes = [
     {
@@ -317,3 +319,31 @@ export const interiorColor = [
         category: "color"
     },
 ];
+
+export const doors = [
+    {
+        titleValue: 2,
+        image: door,
+        isChecked: false
+    },
+    {
+        titleValue: 3,
+        image: door,
+        isChecked: false
+    },
+    {
+        titleValue: 4,
+        image: door,
+        isChecked: false
+    },
+    {
+        titleValue: 5,
+        image: door,
+        isChecked: false
+    },
+    {
+        titleValue: 5 + "+",
+        image: door,
+        isChecked: false
+    }
+]
