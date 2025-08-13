@@ -81,7 +81,7 @@ const FilterForm = () => {
         </div>
         {/* Car Regional Specs */}
         <div className="">
-          <label className="block mb-1">Body Types</label>
+          <label className="block mb-1">Regional Specs</label>
           <RegionalSpecs
             onBodyTypeChange={(name) => console.log("Selected:", name)}
           />
