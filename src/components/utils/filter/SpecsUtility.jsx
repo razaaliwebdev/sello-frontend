@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const SpecsUtility = ({ bodyTypes, onBodyTypeChange }) => {
+const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
   const [selectedBodyType, setSelectedBodyType] = useState(null);
 
   const handleSelect = (titleValue) => {
@@ -12,7 +12,7 @@ const SpecsUtility = ({ bodyTypes, onBodyTypeChange }) => {
 
   return (
     <div className="flex items-center gap-8 py-4 overflow-x-auto md:scrollbar-hide hideScrollbar">
-      {bodyTypes.map((item, index) => {
+      {specsTypes.map((item, index) => {
         const isChecked = selectedBodyType === item.titleValue;
 
         return (
@@ -23,14 +23,20 @@ const SpecsUtility = ({ bodyTypes, onBodyTypeChange }) => {
             className="bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center justify-between px-4 py-2 cursor-pointer"
           >
             {/* Image */}
-            <img
-              className="w-16 h-16 object-contain"
-              src={item.image}
-              alt={item.titleValue}
-            />
+            {item.image && (
+              <img
+                className="w-16 h-16 object-contain"
+                src={item.image}
+                alt={item.titleValue}
+              />
+            )}
 
             {/* Name & Custom Radio */}
-            <div className="flex items-center gap-2 w-full mt-1">
+            <div
+              className={`flex items-center gap-2 w-full mt-1 ${
+                !item.image ? "justify-center items-center h-full" : ""
+              }`}
+            >
               <span className="text-sm font-medium text-gray-700">
                 {item.titleValue}
               </span>

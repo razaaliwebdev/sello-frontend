@@ -98,3 +98,22 @@ export const bodyTypes = [
         isChecked: false
     },
 ];
+
+export const regionalSpecs = [
+    {
+        titleValue: 'GCC',
+        isChecked: false
+    },
+    {
+        titleValue: "American",
+        isChecked: false
+    },
+    {
+        titleValue: "Canadian",
+        isChecked: false
+    },
+    {
+        titleValue: "European",
+        isChecked: false
+    }
+]

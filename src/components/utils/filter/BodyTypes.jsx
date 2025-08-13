@@ -11,7 +11,7 @@ const BodyTypes = ({ onBodyTypeChange }) => {
 
   return (
     <>
-      <SpecsUtility bodyTypes={bodyTypes} onBodyTypeChange={handleSelect} />
+      <SpecsUtility specsTypes={bodyTypes} onBodyTypeChange={handleSelect} />
     </>
   );
 };
