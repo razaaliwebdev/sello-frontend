@@ -24,6 +24,8 @@ import menual from '../specs/manual.svg';
 
 import door from '../specs/door.svg';
 
+import hp from '../specs/hp.svg';
+
 
 export const bodyTypes = [
     {
@@ -376,3 +378,66 @@ export const warrantyType = [
         isChecked: false
     }
 ]
+
+export const horsePower = [
+    {
+        titleValue: "0-99" + "hp",
+        image: hp,
+        isChecked: false,
+        category: "horsepower"
+    },
+    {
+        titleValue: "100-199" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "200-299" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "300-399" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "400-499" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "500-599" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "600-699" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "700-799" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "800" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    },
+    {
+        titleValue: "900+" + " hp",
+        isChecked: false,
+        category: "horsepower",
+        image: hp,
+    }
+];

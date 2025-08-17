@@ -12,6 +12,7 @@ import InteriorColor from "../../utils/filter/InteriorColor";
 import DoorsSpecs from "../../utils/filter/DoorsSpecs";
 import OwnerTypeSpecs from "../../utils/filter/OwnerTypeSpecs";
 import WarrantyType from "../../utils/filter/WarrantyType";
+import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 
 const FilterForm = () => {
   return (
@@ -140,11 +141,14 @@ const FilterForm = () => {
           <label className="block mb-1">Warranty</label>
           <WarrantyType />
         </div>
+        {/* Horse Power Specs */}
+        <div className="">
+          <label className="block mb-1">Horse Power</label>
+          <HorsePowerSpecs />
+        </div>
       </form>
     </div>
   );
 };
 
 export default FilterForm;
-
-

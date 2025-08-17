@@ -20,12 +20,18 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange, groupName }) => {
             key={index}
             onClick={() => handleSelect(item.titleValue)}
             style={{ width: "150px", height: "120px" }}
-            className="bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center justify-between px-4 py-2 cursor-pointer"
+            className={`bg-[#F5F5F5] rounded-lg transition-shadow duration-200 flex flex-col items-center justify-between px-4 py-2.5 cursor-pointer ${
+              item.category === "horsepower"
+                ? "flex-col-reverse relative w-[200px] h-[]"
+                : ""
+            }`}
           >
             {/* Image */}
             {item.image && (
               <img
-                className="w-16 h-16 object-contain"
+                className={`w-16 h-16 object-contain ${
+                  item.category === "horsepower" ? "absolute top-0" : ""
+                } }`}
                 src={item.image}
                 alt={item.titleValue}
               />
@@ -35,7 +41,7 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange, groupName }) => {
             <div
               className={`flex items-center gap-2 w-full mt-1 ${
                 !item.image ? "justify-center items-center h-full" : ""
-              }`}
+              } ${item.category === "horsepower" ? "" : ""}`}
             >
               <span className="md:text-md text-sm font-medium text-gray-700 ">
                 {item.titleValue}
