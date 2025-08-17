@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 
-const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
-  const [selectedBodyType, setSelectedBodyType] = useState(null);
+const SpecsUtility = ({ specsTypes, onBodyTypeChange, groupName }) => {
+  const [selectedValue, setSelectedValue] = useState(null);
 
   const handleSelect = (titleValue) => {
-    setSelectedBodyType(titleValue);
+    setSelectedValue(titleValue);
     if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue); // Send to parent
+      onBodyTypeChange(titleValue); // Send selected value to parent
     }
   };
 
   return (
     <div className="flex items-center gap-8 py-4 overflow-x-auto md:scrollbar-hide hideScrollbar">
       {specsTypes.map((item, index) => {
-        const isChecked = selectedBodyType === item.titleValue;
+        const isChecked = selectedValue === item.titleValue;
 
         return (
           <div
@@ -40,16 +40,20 @@ const SpecsUtility = ({ specsTypes, onBodyTypeChange }) => {
               <span className="md:text-md text-sm font-medium text-gray-700 ">
                 {item.titleValue}
               </span>
-              <span
-                className="w-8 h-8 rounded-full"
-                style={{ backgroundColor: `${item.titleValue}` }}
-              ></span>
+
+              {/** Color Preview (if color option) */}
+              {item.category === "color" && (
+                <span
+                  className="w-8 h-8 rounded-full border"
+                  style={{ backgroundColor: item.titleValue }}
+                ></span>
+              )}
 
               <label className="relative flex items-center cursor-pointer">
                 <input
                   type="radio"
                   checked={isChecked}
-                  name="custom-radio"
+                  name={groupName} // ✅ unique group for each filter
                   readOnly
                   className="peer h-5 w-5 appearance-none rounded-full bg-gray-100 shadow hover:shadow-md border border-gray-300 checked:border-primary-500 cursor-pointer transition-all"
                 />

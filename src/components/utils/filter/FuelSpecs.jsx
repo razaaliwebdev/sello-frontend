@@ -11,7 +11,11 @@ const FuelSpecs = ({ onBodyTypeChange }) => {
 
   return (
     <div>
-      <SpecsUtility specsTypes={fuelType} onBodyTypeChange={handleSelect} />
+      <SpecsUtility
+        groupName={"fuelType"}
+        specsTypes={fuelType}
+        onBodyTypeChange={handleSelect}
+      />
     </div>
   );
 };

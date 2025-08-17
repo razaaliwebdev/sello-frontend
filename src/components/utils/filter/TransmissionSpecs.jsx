@@ -11,6 +11,7 @@ const TransmissionSpecs = ({ onBodyTypeChange }) => {
   return (
     <div>
       <SpecsUtility
+        groupName={"transmissionType"}
         specsTypes={transmissionType}
         onBodyTypeChange={handleSelect}
       />

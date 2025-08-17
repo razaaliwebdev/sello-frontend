@@ -10,7 +10,11 @@ const DoorsSpecs = ({ onBodyTypeChange }) => {
   };
   return (
     <div>
-      <SpecsUtility specsTypes={doors} onBodyTypeChange={handleSelect} />
+      <SpecsUtility
+        groupName={"doors"}
+        specsTypes={doors}
+        onBodyTypeChange={handleSelect}
+      />
     </div>
   );
 };

@@ -10,7 +10,11 @@ const WarrantyType = ({ onBodyTypeChange }) => {
   };
   return (
     <div>
-      <SpecsUtility specsTypes={warrantyType} onBodyTypeChange={handleSelect} />
+      <SpecsUtility
+        groupName={"warrantyType"}
+        specsTypes={warrantyType}
+        onBodyTypeChange={handleSelect}
+      />
     </div>
   );
 };

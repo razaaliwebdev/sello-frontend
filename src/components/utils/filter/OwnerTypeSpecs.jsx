@@ -10,7 +10,11 @@ const OwnerTypeSpecs = ({ onBodyTypeChange }) => {
   };
   return (
     <div>
-      <SpecsUtility specsTypes={ownerType} onBodyTypeChange={handleSelect} />
+      <SpecsUtility
+        groupName={"ownerType"}
+        specsTypes={ownerType}
+        onBodyTypeChange={handleSelect}
+      />
     </div>
   );
 };

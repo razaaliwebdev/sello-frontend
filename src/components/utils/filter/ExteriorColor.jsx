@@ -11,6 +11,7 @@ const ExteriorColor = ({ onBodyTypeChange }) => {
   return (
     <div>
       <SpecsUtility
+        groupName={"exteriorColors"}
         specsTypes={exteriorColors}
         onBodyTypeChange={handleSelect}
       />

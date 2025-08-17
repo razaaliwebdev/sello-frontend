@@ -11,6 +11,7 @@ const Seats = ({ onBodyTypeChange }) => {
   return (
     <div>
       <SpecsUtility
+        groupName={"numberOfSeats"}
         specsTypes={numberOfSeats}
         onBodyTypeChange={handleSelect}
       />

@@ -11,6 +11,7 @@ const InteriorColor = ({ onBodyTypeChange }) => {
   return (
     <div>
       <SpecsUtility
+        groupName={"interiorColor"}
         specsTypes={interiorColor}
         onBodyTypeChange={handleSelect}
       />

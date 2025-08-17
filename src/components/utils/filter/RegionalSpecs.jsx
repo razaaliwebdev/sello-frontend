@@ -12,6 +12,7 @@ const RegionalSpecs = ({ onBodyTypeChange }) => {
   return (
     <>
       <SpecsUtility
+        groupName={"regionalSpecs"}
         specsTypes={regionalSpecs}
         onBodyTypeChange={handleSelect}
       />

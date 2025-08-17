@@ -11,6 +11,7 @@ const CylindersSpecs = ({ onBodyTypeChange }) => {
   return (
     <div>
       <SpecsUtility
+        groupName={"numberofCylinders"}
         specsTypes={numberOfCylinders}
         onBodyTypeChange={handleSelect}
       />
