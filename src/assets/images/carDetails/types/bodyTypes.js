@@ -361,3 +361,18 @@ export const ownerType = [
         titleValue: "Dealership"
     }
 ]
+
+export const warrantyType = [
+    {
+        titleValue: "Yes",
+        isChecked: false
+    },
+    {
+        titleValue: "No",
+        isChecked: false
+    },
+    {
+        titleValue: "Doesn't Apply",
+        isChecked: false
+    }
+]
