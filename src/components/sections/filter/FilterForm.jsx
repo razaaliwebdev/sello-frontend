@@ -14,6 +14,7 @@ import OwnerTypeSpecs from "../../utils/filter/OwnerTypeSpecs";
 import WarrantyType from "../../utils/filter/WarrantyType";
 import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
+import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 
 const FilterForm = () => {
   return (
@@ -151,6 +152,11 @@ const FilterForm = () => {
         <div className="">
           <label className="block mb-1">Engine Capacity</label>
           <EngineCapacitySpecs />
+        </div>
+        {/* Technical Features Specs */}
+        <div className="">
+          <label className="block mb-1">Technical Features</label>
+          <TechnicalFeaturesSpecs />
         </div>
       </form>
     </div>

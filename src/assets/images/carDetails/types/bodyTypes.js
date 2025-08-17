@@ -27,6 +27,7 @@ import door from '../specs/door.svg';
 import hp from '../specs/hp.svg';
 
 import cc from '../specs/cc.svg';
+import wheel from '../specs/wheel.svg';
 
 
 export const bodyTypes = [
@@ -492,6 +493,70 @@ export const engineCapacityCC = [
         isChecked: false,
         image: cc,
         category: "engineCapacity"
+    },
+
+];
+
+export const technicalFeatures = [
+    {
+        titleValue: "4 wheel Drive",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "All Wheel Drive",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "All Wheel Steering",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Anti lock Breakes ABS",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Crules Control",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Dual Exhaust",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Front Airbags",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Front Wheel Drive",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "N20 System",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
+    },
+    {
+        titleValue: "Rear Wheel Drive",
+        image: wheel,
+        isChecked: false,
+        category: "featues"
     },
 
 ];
