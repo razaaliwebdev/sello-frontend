@@ -26,6 +26,8 @@ import door from '../specs/door.svg';
 
 import hp from '../specs/hp.svg';
 
+import cc from '../specs/cc.svg';
+
 
 export const bodyTypes = [
     {
@@ -440,4 +442,56 @@ export const horsePower = [
         category: "horsepower",
         image: hp,
     }
+];
+
+export const engineCapacityCC = [
+    {
+        titleValue: "0-499" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "500-999" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "1000-1499" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "1500-1999" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "2000-2499" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "2500-2999" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "3000-3499" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+    {
+        titleValue: "3500-4000" + "+" + " CC",
+        isChecked: false,
+        image: cc,
+        category: "engineCapacity"
+    },
+
 ];
