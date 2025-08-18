@@ -3,6 +3,7 @@ import FilterForm from "../../components/sections/filter/FilterForm";
 import GridCars from "../../components/sections/filter/GridCars";
 import LoanCalculator from "../../components/sections/filter/LoanCalculator";
 import BannerInFilter from "../../components/sections/filter/BannerInFilter";
+import BlogSection from "../../components/sections/home/BlogSection";
 
 const FilterPage = () => {
   return (
@@ -16,6 +17,7 @@ const FilterPage = () => {
       <GridCars />
       <LoanCalculator />
       <BannerInFilter />
+      <BlogSection />
     </div>
   );
 };
