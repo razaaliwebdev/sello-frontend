@@ -1,5 +1,6 @@
 import React from "react";
 import FilterForm from "../../components/sections/filter/FilterForm";
+import GridCars from "../../components/sections/filter/GridCars";
 
 const FilterPage = () => {
   return (
@@ -9,6 +10,7 @@ const FilterPage = () => {
       </h1>
       <div className="border-[1px] border-gray-700 rounded-lg md:px-5 md:py-6 px-7 py-8 my-4">
         <FilterForm />
+        <GridCars />
       </div>
     </div>
   );

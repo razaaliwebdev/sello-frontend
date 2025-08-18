@@ -29,6 +29,11 @@ import hp from '../specs/hp.svg';
 import cc from '../specs/cc.svg';
 import wheel from '../specs/wheel.svg';
 
+import g1 from '../../../images/g1.png';
+import g2 from '../../../images/g2.png';
+import g3 from '../../../images/g3.png';
+import g4 from '../../../images/g4.png';
+
 
 export const bodyTypes = [
     {
@@ -559,4 +564,25 @@ export const technicalFeatures = [
         category: "featues"
     },
 
+];
+
+
+// Grid Cars Data
+export const filterGridCars = [
+    {
+        id: 1,
+        image: g1,
+    },
+    {
+        id: 2,
+        image: g2
+    },
+    {
+        id: 3,
+        image: g3
+    },
+    {
+        id: 4,
+        image: g4
+    }
 ];
