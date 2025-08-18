@@ -90,6 +90,7 @@ import cc from './images/carDetails/specs/cc.svg';
 import location from './images/carDetails/specs/location.svg';
 import wheel from './images/carDetails/specs/wheel.svg';
 import loan from './images/loan.png';
+import app from './images/app.png';
 
 
 export const images = {
@@ -125,7 +126,8 @@ export const images = {
     wheel,
     // Car Types
     sedan,
-    loan
+    loan,
+    app
 };
 
 

@@ -2,6 +2,7 @@ import React from "react";
 import FilterForm from "../../components/sections/filter/FilterForm";
 import GridCars from "../../components/sections/filter/GridCars";
 import LoanCalculator from "../../components/sections/filter/LoanCalculator";
+import BannerInFilter from "../../components/sections/filter/BannerInFilter";
 
 const FilterPage = () => {
   return (
@@ -14,6 +15,7 @@ const FilterPage = () => {
       </div>
       <GridCars />
       <LoanCalculator />
+      <BannerInFilter />
     </div>
   );
 };
