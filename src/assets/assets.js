@@ -89,6 +89,7 @@ import hp from './images/carDetails/specs/hp.svg';
 import cc from './images/carDetails/specs/cc.svg';
 import location from './images/carDetails/specs/location.svg';
 import wheel from './images/carDetails/specs/wheel.svg';
+import loan from './images/loan.png';
 
 
 export const images = {
@@ -123,7 +124,8 @@ export const images = {
     location,
     wheel,
     // Car Types
-    sedan
+    sedan,
+    loan
 };
 
 
