@@ -12,7 +12,7 @@ const BottomHeader = () => {
       <Link to={"/"} className="hover:underline">
         Save
       </Link>
-      <Link to={"/"} className="hover:underline">
+      <Link to={"/filter"} className="hover:underline">
         Filter
       </Link>
       <Link to={"/"} className="hover:underline">
