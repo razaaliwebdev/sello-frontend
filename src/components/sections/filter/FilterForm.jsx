@@ -15,6 +15,7 @@ import WarrantyType from "../../utils/filter/WarrantyType";
 import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
+import LocationButton from "../../utils/filter/LocationButton";
 
 const FilterForm = () => {
   return (
@@ -157,6 +158,17 @@ const FilterForm = () => {
         <div className="">
           <label className="block mb-1">Technical Features</label>
           <TechnicalFeaturesSpecs />
+        </div>
+        {/* Location */}
+        <div className="">
+          <label className="block mb-1">Location</label>
+          <LocationButton />
+        </div>
+        {/* Submit */}
+        <div className="">
+          <button className="bg-primary-500 px-4 py-2 rounded hover:opacity-90 transition w-full text-xl shadow-lg shadow-gray-400 font-semibold ">
+            Go
+          </button>
         </div>
       </form>
     </div>

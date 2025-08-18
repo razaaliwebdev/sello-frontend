@@ -65,7 +65,7 @@ const RangeFilter = () => {
         />
 
         {/* Thumb styling */}
-        <style jsx>{`
+        <style>{`
           input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
