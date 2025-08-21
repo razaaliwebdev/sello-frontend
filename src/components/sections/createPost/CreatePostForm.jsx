@@ -1,5 +1,5 @@
 import React from "react";
-import ImagesUpload from "../carDetails/ImagesUpload";
+import ImagesUpload from "../createPost/ImagesUpload";
 
 const CreatePostForm = () => {
   return (

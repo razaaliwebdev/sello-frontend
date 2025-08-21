@@ -335,112 +335,117 @@ const ImagesUpload = () => {
   const completedUploads = uploads.filter((u) => u.status === "done");
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
-      <div
-        className={`relative px-4 md:px-8 py-10 md:py-14 rounded-xl transition-all duration-300 ${
-          isDragging
-            ? "bg-primary-300 ring-4 ring-primary-300 ring-opacity-50"
-            : "bg-gray-100"
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        {/* Decorative circle */}
-        <div className="md:h-16 md:w-16 h-12 w-12 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-8 z-50 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-lg"></div>
+    <>
+      <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
+        <div
+          className={`relative px-4 md:px-8 py-10 md:py-14 rounded-xl transition-all duration-300 ${
+            isDragging
+              ? "bg-primary-300 ring-4 ring-primary-300 ring-opacity-50"
+              : "bg-gray-100"
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {/* Decorative circle */}
+          <div className="md:h-16 md:w-16 h-12 w-12 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 absolute top-8 z-50 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-lg"></div>
 
-        {/* Preview */}
-        <div className="bg-white rounded-xl border-2 border-primary-300 border-dashed h-56 md:h-72 flex items-center justify-center overflow-hidden group relative">
-          {activeIndex !== null ? (
-            <>
-              <img
-                src={uploads[activeIndex]?.preview}
-                alt="preview"
-                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-              />
-              <button
-                onClick={() => removeFile(uploads[activeIndex].id)}
-                className="absolute top-3 right-3 bg-red-500 text-white text-xs md:text-sm px-2 py-1 rounded hover:bg-red-600 shadow"
-              >
-                Remove
-              </button>
-            </>
-          ) : (
-            <div className="text-center p-6">
-              <p className="text-primary-500 text-sm md:text-base">
-                No image uploaded yet
-              </p>
+          {/* Preview */}
+          <div className="bg-white rounded-xl border-2 border-primary-300 border-dashed h-56 md:h-72 flex items-center justify-center overflow-hidden group relative">
+            {activeIndex !== null ? (
+              <>
+                <img
+                  src={uploads[activeIndex]?.preview}
+                  alt="preview"
+                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+                <button
+                  onClick={() => removeFile(uploads[activeIndex].id)}
+                  className="absolute top-3 right-3 bg-red-500 text-white text-xs md:text-sm px-2 py-1 rounded hover:bg-red-600 shadow"
+                >
+                  Remove
+                </button>
+              </>
+            ) : (
+              <div className="text-center p-6">
+                <p className="text-primary-500 text-sm md:text-base">
+                  No image uploaded yet
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Uploading Progress */}
+          <div className="mt-6 space-y-3">
+            {uploads
+              .filter((u) => u.status === "uploading")
+              .map((upload) => (
+                <div
+                  key={upload.id}
+                  className="bg-white p-3 shadow-sm border rounded"
+                >
+                  <div className="flex justify-between mb-1 text-xs md:text-sm">
+                    <span className="truncate max-w-[150px] md:max-w-xs">
+                      {upload.file.name}
+                    </span>
+                    <span className="text-primary-500 font-semibold">
+                      {Math.round(upload.progress)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-300 transition-all"
+                      style={{ width: `${upload.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Upload button */}
+          <div className="mt-6 text-center">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageUpload}
+              className="hidden"
+              id="fileInput"
+            />
+            <label
+              htmlFor="fileInput"
+              className="px-6 py-3 bg-gradient-to-r from-primary-400 to-primary-500 hover:scale-105 text-white rounded-lg cursor-pointer transition inline-block"
+            >
+              Select Images
+            </label>
+          </div>
+
+          {/* Navigation dots */}
+          {completedUploads.length > 0 && (
+            <div className="flex justify-center mt-6 gap-2 flex-wrap">
+              {uploads.map(
+                (upload, idx) =>
+                  upload.status === "done" && (
+                    <button
+                      key={upload.id}
+                      onClick={() => setActiveIndex(idx)}
+                      className={`w-3 h-3 md:w-4 md:h-4 rounded-full ${
+                        activeIndex === idx
+                          ? "bg-gradient-to-r from-primary-400 to-primary-500 shadow"
+                          : "bg-gray-400"
+                      }`}
+                    />
+                  )
+              )}
             </div>
           )}
         </div>
-
-        {/* Uploading Progress */}
-        <div className="mt-6 space-y-3">
-          {uploads
-            .filter((u) => u.status === "uploading")
-            .map((upload) => (
-              <div
-                key={upload.id}
-                className="bg-white p-3 shadow-sm border rounded"
-              >
-                <div className="flex justify-between mb-1 text-xs md:text-sm">
-                  <span className="truncate max-w-[150px] md:max-w-xs">
-                    {upload.file.name}
-                  </span>
-                  <span className="text-primary-500 font-semibold">
-                    {Math.round(upload.progress)}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-300 transition-all"
-                    style={{ width: `${upload.progress}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-        </div>
-
-        {/* Upload button */}
-        <div className="mt-6 text-center">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            className="hidden"
-            id="fileInput"
-          />
-          <label
-            htmlFor="fileInput"
-            className="px-6 py-3 bg-gradient-to-r from-primary-400 to-primary-500 hover:scale-105 text-white rounded-lg cursor-pointer transition inline-block"
-          >
-            Select Images
-          </label>
-        </div>
-
-        {/* Navigation dots */}
-        {completedUploads.length > 0 && (
-          <div className="flex justify-center mt-6 gap-2 flex-wrap">
-            {uploads.map(
-              (upload, idx) =>
-                upload.status === "done" && (
-                  <button
-                    key={upload.id}
-                    onClick={() => setActiveIndex(idx)}
-                    className={`w-3 h-3 md:w-4 md:h-4 rounded-full ${
-                      activeIndex === idx
-                        ? "bg-gradient-to-r from-primary-400 to-primary-500 shadow"
-                        : "bg-gray-400"
-                    }`}
-                  />
-                )
-            )}
-          </div>
-        )}
       </div>
-    </div>
+      <p className="text-left capitalize text-lg md:text-xl text-gray-600 font-semibold">
+        How to take a great listing photo
+      </p>
+    </>
   );
 };
 
