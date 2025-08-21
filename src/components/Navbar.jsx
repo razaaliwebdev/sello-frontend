@@ -134,10 +134,8 @@ const Navbar = () => {
           {/* Create Post Button (Desktop) */}
           <button
             onClick={() => navigate("/create-post")}
-            className={`hover:text-white/80 hidden md:block ${
-              location.pathname === "/cars"
-                ? "text-gray-600 hover:text-black/70"
-                : "text-white"
+            className={`hover:placeholder-opacity-85 hidden md:block ${
+              location.pathname === "/cars" ? "text-gray-600 " : "text-white"
             }`}
             title="Create Post"
           >
