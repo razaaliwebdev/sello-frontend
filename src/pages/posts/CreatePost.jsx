@@ -7,6 +7,7 @@ import BrandMarquee from "../../components/BrandMarquee";
 import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import { MdArrowOutward } from "react-icons/md";
+import FindOutMore from "../../components/sections/createPost/FindOutMore";
 
 const CreatePost = () => {
   return (
@@ -29,6 +30,7 @@ const CreatePost = () => {
         </div>
         <BrandMarquee brands={brands} />
       </div>
+      <FindOutMore />
     </div>
   );
 };
