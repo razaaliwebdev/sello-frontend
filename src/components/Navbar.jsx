@@ -136,7 +136,7 @@ const Navbar = () => {
             onClick={() => navigate("/create-post")}
             className={`hover:text-white/80 hidden md:block ${
               location.pathname === "/cars"
-                ? "text-gray-600 hover:text-black/80"
+                ? "text-gray-600 hover:text-black/70"
                 : "text-white"
             }`}
             title="Create Post"
