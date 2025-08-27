@@ -2,10 +2,10 @@ import React from "react";
 import SpecsUtility from "./SpecsUtility";
 import { transmissionType } from "../../../assets/images/carDetails/types/bodyTypes";
 
-const TransmissionSpecs = ({ onBodyTypeChange }) => {
+const TransmissionSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue); // Send to parent
+    if (onChange) {
+      onChange(titleValue);
     }
   };
   return (
@@ -13,7 +13,7 @@ const TransmissionSpecs = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"transmissionType"}
         specsTypes={transmissionType}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </div>
   );

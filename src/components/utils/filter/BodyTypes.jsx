@@ -8,13 +8,13 @@ const BodyTypes = ({ onBodyTypeChange }) => {
       onBodyTypeChange(titleValue); // Send to parent
     }
   };
-
+  
   return (
     <>
       <SpecsUtility
         groupName={"bodyTypes"}
         specsTypes={bodyTypes}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </>
   );

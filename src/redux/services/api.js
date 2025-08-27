@@ -89,7 +89,7 @@ export const api = createApi({
             invalidatesTags: ["User"],
         }),
 
-        // ✅ Corrected Car GET Endpoint
+        // ✅ Car GET Endpoint
         getCars: builder.query({
             query: () => ({
                 url: "/cars",
@@ -98,6 +98,36 @@ export const api = createApi({
             transformResponse: (response) => {
                 // Extract the cars array from the response
                 return response?.cars || [];
+            },
+        }),
+
+        // ✅ Create Car Endpoint
+        createCar: builder.mutation({
+            query: (formData) => {
+                console.log('Preparing car creation request...');
+                return {
+                    url: "/cars",
+                    method: "POST",
+                    body: formData,
+                    // Important: Don't set Content-Type header for FormData
+                    // The browser will set it with the correct boundary
+                    headers: {},
+                    // Ensure credentials are included for authenticated requests
+                    credentials: 'include',
+                    // Handle file upload progress if needed
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        console.log(`Upload progress: ${percentCompleted}%`);
+                    },
+                };
+            },
+            invalidatesTags: ['Cars'],
+            // Add error handling
+            transformErrorResponse: (response, meta, arg) => {
+                console.error('Car creation failed:', response);
+                return response.data;
             },
         }),
     }),
@@ -113,6 +143,6 @@ export const {
     useResetPasswordMutation,
     useGetMeQuery,
     useLogoutMutation,
-    useGetCarsQuery, // <-- ADD THIS
+    useGetCarsQuery,
+    useCreateCarMutation
 } = api;
-

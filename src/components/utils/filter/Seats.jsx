@@ -2,10 +2,10 @@ import React from "react";
 import { numberOfSeats } from "../../../assets/images/carDetails/types/bodyTypes";
 import SpecsUtility from "./SpecsUtility";
 
-const Seats = ({ onBodyTypeChange }) => {
+const Seats = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue); // Send to parent
+    if (onChange) {
+      onChange(titleValue);
     }
   };
   return (
@@ -13,7 +13,7 @@ const Seats = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"numberOfSeats"}
         specsTypes={numberOfSeats}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </div>
   );

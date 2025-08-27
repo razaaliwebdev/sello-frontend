@@ -2,10 +2,10 @@ import React from "react";
 import SpecsUtility from "./SpecsUtility";
 import { ownerType } from "../../../assets/images/carDetails/types/bodyTypes";
 
-const OwnerTypeSpecs = ({ onBodyTypeChange }) => {
+const OwnerTypeSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue);
+    if (onChange) {
+      onChange(titleValue);
     }
   };
   return (
@@ -13,7 +13,7 @@ const OwnerTypeSpecs = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"ownerType"}
         specsTypes={ownerType}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </div>
   );

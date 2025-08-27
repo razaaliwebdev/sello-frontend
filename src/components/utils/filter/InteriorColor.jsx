@@ -2,10 +2,10 @@ import React from "react";
 import SpecsUtility from "./SpecsUtility";
 import { interiorColor } from "../../../assets/images/carDetails/types/bodyTypes";
 
-const InteriorColor = ({ onBodyTypeChange }) => {
+const InteriorColor = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (titleValue) {
-      onBodyTypeChange(titleValue);
+    if (onChange && titleValue) {
+      onChange(titleValue);
     }
   };
   return (
@@ -13,7 +13,7 @@ const InteriorColor = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"interiorColor"}
         specsTypes={interiorColor}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </div>
   );
