@@ -2,10 +2,10 @@ import React from "react";
 import { regionalSpecs } from "../../../assets/images/carDetails/types/bodyTypes";
 import SpecsUtility from "./SpecsUtility";
 
-const RegionalSpecs = ({ onBodyTypeChange }) => {
+const RegionalSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue); // Send to parent
+    if (onChange) {
+      onChange(titleValue); // Send to parent
     }
   };
 
@@ -14,7 +14,7 @@ const RegionalSpecs = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"regionalSpecs"}
         specsTypes={regionalSpecs}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </>
   );

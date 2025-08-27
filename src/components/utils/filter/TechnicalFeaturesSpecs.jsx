@@ -2,10 +2,10 @@ import React from "react";
 import SpecsUtility from "./SpecsUtility";
 import { technicalFeatures } from "../../../assets/images/carDetails/types/bodyTypes";
 
-const TechnicalFeaturesSpecs = ({ onBodyTypeChange }) => {
+const TechnicalFeaturesSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue);
+    if (onChange) {
+      onChange(titleValue);
     }
   };
 
@@ -13,7 +13,7 @@ const TechnicalFeaturesSpecs = ({ onBodyTypeChange }) => {
     <div>
       <SpecsUtility
         specsTypes={technicalFeatures}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
         groupName={"technicalFeatures"}
       />
     </div>

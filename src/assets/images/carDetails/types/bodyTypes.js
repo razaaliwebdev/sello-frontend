@@ -568,13 +568,13 @@ export const technicalFeatures = [
 export const carCondtion = [
   {
     id: 1,
-    titleValue: "new",
+    titleValue: "New",
     isChecked: false,
     category: "condition",
   },
   {
     id: 2,
-    titleValue: "used",
+    titleValue: "Used",
     category: "condition",
   },
 ];

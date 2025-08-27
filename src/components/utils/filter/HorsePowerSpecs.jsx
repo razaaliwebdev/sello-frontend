@@ -2,10 +2,10 @@ import React from "react";
 import { horsePower } from "../../../assets/images/carDetails/types/bodyTypes";
 import SpecsUtility from "./SpecsUtility";
 
-const HorsePowerSpecs = ({ onBodyTypeChange }) => {
+const HorsePowerSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    if (onBodyTypeChange) {
-      onBodyTypeChange(titleValue); // Send to parent
+    if (onChange) {
+      onChange(titleValue); // Send to parent
     }
   };
 
@@ -14,7 +14,7 @@ const HorsePowerSpecs = ({ onBodyTypeChange }) => {
       <SpecsUtility
         groupName={"horsePower"}
         specsTypes={horsePower}
-        onBodyTypeChange={handleSelect}
+        onChange={handleSelect}
       />
     </div>
   );
