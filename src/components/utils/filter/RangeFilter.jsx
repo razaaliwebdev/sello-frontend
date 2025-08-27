@@ -74,18 +74,18 @@ const RangeFilter = () => {
           input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            height: 26px;
-            width: 26px;
+            height: 33px;
+            width: 33px;
             border-radius: 50%;
             background: #0a0e2c;
-            border: 3px solid white;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             cursor: pointer;
-            margin-top: -11px;
+            margin-top: -4px;
             transition: transform 0.2s ease;
           }
           input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.1);
+            border: 3px solid white;
           }
           input[type="range"]::-moz-range-thumb {
             height: 26px;
