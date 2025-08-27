@@ -125,11 +125,21 @@ export const api = createApi({
             },
             invalidatesTags: ['Cars'],
             // Add error handling
-            transformErrorResponse: (response, meta, arg) => {
+            transformErrorResponse: (response) => {
                 console.error('Car creation failed:', response);
                 return response.data;
             },
         }),
+        // Car Filter Endpoint , for searching cars
+        getFilteredCars: builder.query({
+            query: (params) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return {
+                    url: `/cars/fitler?${searchParams}`
+                }
+            },
+            transformResponse: (response) => response, // full object with pagination
+        })
     }),
 });
 
@@ -144,5 +154,6 @@ export const {
     useGetMeQuery,
     useLogoutMutation,
     useGetCarsQuery,
-    useCreateCarMutation
+    useCreateCarMutation,
+    useGetFilteredCarsQuery
 } = api;
