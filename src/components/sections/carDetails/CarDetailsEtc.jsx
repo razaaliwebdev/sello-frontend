@@ -131,13 +131,16 @@ import MapView from "./MapLocation";
 
 const CarDetailsEtc = () => {
   const { id } = useParams();
-  const { data: carsData = [], isLoading, error } = useGetCarsQuery();
-  const car = carsData.find((c) => c._id === id);
+  const { data: carsResponse, isLoading, error } = useGetCarsQuery({ page: 1, limit: 100 });
+  const car = carsResponse?.cars?.find((c) => c._id === id);
 
-  if (isLoading || !car)
+  if (isLoading) {
     return <p className="px-4 py-10">Loading details...</p>;
-  if (error)
-    return <p className="px-4 py-10 text-red-500">Failed to load details.</p>;
+  }
+  
+  if (error || !car) {
+    return <p className="px-4 py-10 text-red-500">Failed to load car details. Please try again later.</p>;
+  }
 
   // Coordinates fallback if not present
   const coordinates =

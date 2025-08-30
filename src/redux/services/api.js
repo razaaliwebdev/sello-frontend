@@ -90,16 +90,46 @@ export const api = createApi({
         }),
 
         // ✅ Car GET Endpoint
+        // getCars: builder.query({
+        //     query: () => ({
+        //         url: "/cars",
+        //         method: "GET",
+        //     }),
+        //     transformResponse: (response) => {
+        //         // Extract the cars array from the response
+        //         return response?.cars || [];
+        //     },
+        // }),
+
+        // ✅ Car GET Endpoint with Pagination
         getCars: builder.query({
-            query: () => ({
-                url: "/cars",
-                method: "GET",
-            }),
+            query: ({ page = 1, limit = 12, condition } = {}) => {
+                const params = new URLSearchParams({
+                    page,
+                    limit,
+                });
+                
+                // Only add condition if it's 'new' or 'used'
+                if (condition === 'new' || condition === 'used') {
+                    params.append('condition', condition);
+                }
+                // For 'in stock' or any other case, don't filter by condition
+                
+                return {
+                    url: `/cars?${params.toString()}`,
+                    method: "GET",
+                };
+            },
             transformResponse: (response) => {
-                // Extract the cars array from the response
-                return response?.cars || [];
+                return {
+                    cars: response?.cars || [],
+                    total: response?.total || 0,
+                    page: response?.page || 1,
+                    pages: response?.pages || 1
+                };
             },
         }),
+
 
         // ✅ Create Car Endpoint
         createCar: builder.mutation({
