@@ -131,14 +131,15 @@ export const api = createApi({
             },
         }),
         // Car Filter Endpoint , for searching cars
+        // In your api.js file, fix the typo:
         getFilteredCars: builder.query({
             query: (params) => {
                 const searchParams = new URLSearchParams(params).toString();
                 return {
-                    url: `/cars/fitler?${searchParams}`
+                    url: `/cars/filter?${searchParams}` // Changed from "fitler" to "filter"
                 }
             },
-            transformResponse: (response) => response, // full object with pagination
+            transformResponse: (response) => response,
         })
     }),
 });
