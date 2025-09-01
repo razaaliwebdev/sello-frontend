@@ -27,10 +27,12 @@ const CarCardSkeleton = () => (
 );
 
 // Safe capitalize function
-const capitalize = (str) => {
-  if (!str || typeof str !== "string") return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
+// const capitalize = (str) => {
+//   if (!str || typeof str !== "string") return "";
+//   return str.charAt(0).toUpperCase() + str.slice(1);
+// };
+
+// capitalize();
 
 const GetAllCarsSection = () => {
   const navigate = useNavigate();
@@ -40,12 +42,7 @@ const GetAllCarsSection = () => {
   const [isPageChanging, setIsPageChanging] = useState(false);
 
   // Call backend with pagination and filtering
-  const {
-    data: carsData,
-    isLoading,
-    error,
-    refetch,
-  } = useGetCarsQuery({
+  const { data: carsData, isLoading, error, refetch } = useGetCarsQuery({
     page,
     limit: 6,
     // Only apply condition filter if not 'all cars'
@@ -68,13 +65,15 @@ const GetAllCarsSection = () => {
   };
 
   // Handle page change with loading state
-  const handlePageChange = (newPage) => {
-    if (newPage !== page) {
-      setIsPageChanging(true);
-      setPage(newPage);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  // const handlePageChange = (newPage) => {
+  //   if (newPage !== page) {
+  //     setIsPageChanging(true);
+  //     setPage(newPage);
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //   }
+  // };
+
+  // handlePageChange();
 
   const toggleSave = (id) => {
     setSavedCars((prev) =>
@@ -98,7 +97,7 @@ const GetAllCarsSection = () => {
 
   // Filter cars based on active tab (client-side fallback)
   const filteredCars = cars.filter((car) => {
-    if (activeTab === 'all') return true;
+    if (activeTab === "all") return true;
     return car.condition?.toLowerCase() === activeTab.toLowerCase();
   });
 
