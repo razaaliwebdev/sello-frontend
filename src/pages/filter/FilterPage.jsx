@@ -4,6 +4,7 @@ import GridCars from "../../components/sections/filter/GridCars";
 import LoanCalculator from "../../components/sections/filter/LoanCalculator";
 import BannerInFilter from "../../components/sections/filter/BannerInFilter";
 import BlogSection from "../../components/sections/home/BlogSection";
+import FilteredCarsResults from "../../components/sections/filter/FilteredCarsResults";
 
 const FilterPage = () => {
   return (
@@ -13,6 +14,7 @@ const FilterPage = () => {
       </h1>
       <div className="border-[1px] border-gray-700 rounded-lg md:px-5 md:py-6 px-7 py-8 my-4">
         <FilterForm />
+        <FilteredCarsResults />
       </div>
       <GridCars />
       <LoanCalculator />
