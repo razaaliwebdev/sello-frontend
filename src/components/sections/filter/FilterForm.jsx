@@ -457,7 +457,7 @@ const FilterForm = ({ onFilter }) => {
 
         {/* Display loading and error states */}
         {isLoading && (
-          <div className="text-center text-blue-500">
+          <div className="text-center text-primary-500">
             Loading filtered results...
           </div>
         )}
@@ -475,8 +475,10 @@ const FilterForm = ({ onFilter }) => {
           </div>
         )} */}
 
-        <FilterResultsSection filteredCars={filteredCars} isLoading={isLoading} />
-
+        {/* <FilterResultsSection
+          filteredCars={filteredCars}
+          isLoading={isLoading}
+        /> */}
       </form>
     </div>
   );

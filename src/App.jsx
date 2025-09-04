@@ -26,6 +26,7 @@ import BottomHeader from "./components/BottomHeader.jsx";
 import AllBrands from "./pages/AllBrands.jsx";
 import Footer from "./components/Footer.jsx";
 import FilterPage from "./pages/filter/FilterPage.jsx";
+import FilteredResults from "./pages/listings/FilteredResults.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -98,6 +99,7 @@ const App = () => {
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/view-all-brands" element={<AllBrands />} />
         <Route path="/filter" element={<FilterPage />} />
+        <Route path="/search-results" element={<FilteredResults />} />
       </Routes>
       {![
         "/",
