@@ -3,7 +3,7 @@ import { images } from "../../assets/assets";
 
 const SearchBar = () => {
   return (
-    <div className="border border-gray-500 rounded-lg flex items-center gap-2 px-4 py-2 bg-white">
+    <div className="border border-gray-500 rounded-lg flex items-center gap-2 px-4 py-2 bg-white text-black">
       <input
         className="outline-none flex-1"
         type="text"
