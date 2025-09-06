@@ -108,13 +108,13 @@ export const api = createApi({
                     page,
                     limit,
                 });
-                
+
                 // Only add condition if it's 'new' or 'used'
                 if (condition === 'new' || condition === 'used') {
                     params.append('condition', condition);
                 }
                 // For 'in stock' or any other case, don't filter by condition
-                
+
                 return {
                     url: `/cars?${params.toString()}`,
                     method: "GET",
@@ -170,7 +170,21 @@ export const api = createApi({
                 }
             },
             transformResponse: (response) => response,
-        })
+        }),
+        // Get My Cars or My listings
+        getMyCars: builder.query({
+            query: () => ({
+                url: "/cars/my/listings",   // 👈 matches backend route
+                method: "GET",
+            }),
+            transformResponse: (response) => {
+                return {
+                    cars: response?.cars || [],
+                    total: response?.total || 0,
+                };
+            },
+            providesTags: ["Cars"],
+        }),
     }),
 });
 
@@ -186,5 +200,6 @@ export const {
     useLogoutMutation,
     useGetCarsQuery,
     useCreateCarMutation,
-    useGetFilteredCarsQuery
+    useGetFilteredCarsQuery,
+    useGetMyCarsQuery,
 } = api;

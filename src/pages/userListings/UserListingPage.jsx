@@ -4,6 +4,7 @@ import BrandMarquee from "../../components/BrandMarquee";
 import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
+import UserListings from "../../components/userListings/UsreListings";
 
 const UserListingPage = () => {
   return (
@@ -23,6 +24,7 @@ const UserListingPage = () => {
         </div>
         <BrandMarquee brands={brands} />
       </div>
+      <UserListings />
     </div>
   );
 };
