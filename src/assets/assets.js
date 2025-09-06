@@ -95,6 +95,7 @@ import findOutMore from './images/findOutMore.jpg';
 import userHeroSectionImg from './images/userHeroSectionImg.png';
 import searchSvg from './images/searchSvg.svg';
 import comma from './images/comma.svg';
+import loanPlanHeroImg from './images/loanPlanHeroImg.png';
 
 
 export const images = {
@@ -135,7 +136,8 @@ export const images = {
     findOutMore,
     userHeroSectionImg,
     searchSvg,
-    comma
+    comma,
+    loanPlanHeroImg
 };
 
 
