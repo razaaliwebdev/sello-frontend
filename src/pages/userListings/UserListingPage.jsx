@@ -9,6 +9,7 @@ import BannerInUesrListings from "../../components/userListings/BannerInUesrList
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import ReviewSectionInUser from "../../components/userListings/ReviewSectionInUser";
 import ContactMap from "../../components/userListings/ContactMap";
+import NewsLatter from "../../components/utils/NewsLatter";
 
 const UserListingPage = () => {
   return (
@@ -33,6 +34,7 @@ const UserListingPage = () => {
       <WhyChooseUsUtility />
       <ReviewSectionInUser />
       <ContactMap />
+      <NewsLatter />
     </div>
   );
 };
