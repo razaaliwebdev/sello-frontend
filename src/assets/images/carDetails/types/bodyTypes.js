@@ -39,6 +39,8 @@ import sedanType from '../types/sedanType.svg';
 import hatchbackType from '../types/hatchbackType.svg';
 import coupeType from '../types/coupeType.svg';
 import hybirdType from '../types/hybirdType.svg';
+import reviewBoyImg from '../types/reviewBoyImg.png';
+import reviewGirlImg from '../types/reviewGirlImg.png';
 
 
 
@@ -639,5 +641,26 @@ export const usersBrowseByCarType = [
     image: hybirdType,
     titleValue: "Hybird",
     category: "carType",
+  }
+]
+
+
+// Customers Reviews
+export const customersReviews = [
+  {
+    id: 1,
+    image: reviewBoyImg,
+    customerName: "John Doe",
+    customerRole: "Facebook",
+    review: "Great platform! Found my dream car within days, and the process was super smooth.",
+    category: "review",
+  },
+  {
+    id: 2,
+    image: reviewGirlImg,
+    customerName: "Sarah Smith",
+    customerRole: "Google",
+    review: "Excellent experience! The search filters made it easy to narrow down my options.",
+    category: "review",
   }
 ]

@@ -94,6 +94,7 @@ import app from './images/app.png';
 import findOutMore from './images/findOutMore.jpg';
 import userHeroSectionImg from './images/userHeroSectionImg.png';
 import searchSvg from './images/searchSvg.svg';
+import comma from './images/comma.svg';
 
 
 export const images = {
@@ -133,7 +134,8 @@ export const images = {
     app,
     findOutMore,
     userHeroSectionImg,
-    searchSvg
+    searchSvg,
+    comma
 };
 
 

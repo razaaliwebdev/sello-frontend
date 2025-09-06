@@ -7,6 +7,7 @@ import { GoArrowUpRight } from "react-icons/go";
 import UserListings from "../../components/userListings/UsreListings";
 import BannerInUesrListings from "../../components/userListings/BannerInUesrListings";
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
+import ReviewSectionInUser from "../../components/userListings/ReviewSectionInUser";
 
 const UserListingPage = () => {
   return (
@@ -29,6 +30,7 @@ const UserListingPage = () => {
       <UserListings />
       <BannerInUesrListings />
       <WhyChooseUsUtility />
+      <ReviewSectionInUser />
     </div>
   );
 };
