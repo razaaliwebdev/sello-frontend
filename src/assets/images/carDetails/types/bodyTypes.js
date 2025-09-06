@@ -40,6 +40,8 @@ import hatchbackType from '../types/hatchbackType.svg';
 import coupeType from '../types/coupeType.svg';
 import hybirdType from '../types/hybirdType.svg';
 
+
+
 export const bodyTypes = [
   {
     titleValue: "Roadster",

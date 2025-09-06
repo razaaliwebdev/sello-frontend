@@ -93,6 +93,7 @@ import loan from './images/loan.png';
 import app from './images/app.png';
 import findOutMore from './images/findOutMore.jpg';
 import userHeroSectionImg from './images/userHeroSectionImg.png';
+import searchSvg from './images/searchSvg.svg';
 
 
 export const images = {
@@ -131,7 +132,8 @@ export const images = {
     loan,
     app,
     findOutMore,
-    userHeroSectionImg
+    userHeroSectionImg,
+    searchSvg
 };
 
 
