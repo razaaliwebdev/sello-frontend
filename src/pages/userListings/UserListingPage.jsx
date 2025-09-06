@@ -8,6 +8,7 @@ import UserListings from "../../components/userListings/UsreListings";
 import BannerInUesrListings from "../../components/userListings/BannerInUesrListings";
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import ReviewSectionInUser from "../../components/userListings/ReviewSectionInUser";
+import ContactMap from "../../components/userListings/ContactMap";
 
 const UserListingPage = () => {
   return (
@@ -31,6 +32,7 @@ const UserListingPage = () => {
       <BannerInUesrListings />
       <WhyChooseUsUtility />
       <ReviewSectionInUser />
+      <ContactMap />
     </div>
   );
 };
