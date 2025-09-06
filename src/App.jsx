@@ -27,6 +27,7 @@ import AllBrands from "./pages/AllBrands.jsx";
 import Footer from "./components/Footer.jsx";
 import FilterPage from "./pages/filter/FilterPage.jsx";
 import FilteredResults from "./pages/listings/FilteredResults.jsx";
+import UserListingPage from "./pages/userListings/UserListingPage.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -100,6 +101,7 @@ const App = () => {
         <Route path="/view-all-brands" element={<AllBrands />} />
         <Route path="/filter" element={<FilterPage />} />
         <Route path="/search-results" element={<FilteredResults />} />
+        <Route path="/users" element={<UserListingPage />} />
       </Routes>
       {![
         "/",

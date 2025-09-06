@@ -92,6 +92,7 @@ import wheel from './images/carDetails/specs/wheel.svg';
 import loan from './images/loan.png';
 import app from './images/app.png';
 import findOutMore from './images/findOutMore.jpg';
+import userHeroSectionImg from './images/userHeroSectionImg.png';
 
 
 export const images = {
@@ -129,7 +130,8 @@ export const images = {
     sedan,
     loan,
     app,
-    findOutMore
+    findOutMore,
+    userHeroSectionImg
 };
 
 

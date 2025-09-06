@@ -69,7 +69,7 @@ const Navbar = () => {
     <>
       <nav
         className={`w-full px-4 md:px-8 py-2 flex items-center justify-between ${
-          location.pathname === "/cars"
+          location.pathname === "/cars" || location.pathname === "/users"
             ? "md:bg-[#f5f5f5] md:text-gray-600"
             : "bg-primary-500 text-white"
         }`}
@@ -78,7 +78,11 @@ const Navbar = () => {
         <div onClick={() => navigate("/home")} className="cursor-pointer">
           <img
             className="h-14 md:h-20"
-            src={location.pathname === "/cars" ? images.blackLogo : images.logo}
+            src={
+              location.pathname === "/cars" || location.pathname === "/users"
+                ? images.blackLogo
+                : images.logo
+            }
             alt="logo"
           />
         </div>
@@ -91,7 +95,9 @@ const Navbar = () => {
         {/* Desktop Links */}
         <div
           className={`hidden md:flex items-center gap-6 text-lg ${
-            location.pathname === "/cars" ? "text-gray-600" : "text-white"
+            location.pathname === "/cars" || location.pathname === "/users"
+              ? "text-gray-600"
+              : "text-white"
           }`}
         >
           {menuLinks.map((link, index) => (
@@ -135,7 +141,9 @@ const Navbar = () => {
           <button
             onClick={() => navigate("/create-post")}
             className={`hover:placeholder-opacity-85 hidden md:block ${
-              location.pathname === "/cars" ? "text-gray-600 " : "text-white"
+              location.pathname === "/cars" || location.pathname === "/users"
+                ? "text-gray-600 "
+                : "text-white"
             }`}
             title="Create Post"
           >
@@ -147,7 +155,9 @@ const Navbar = () => {
             onClick={openDrawer}
             title="Menu"
             className={`${
-              location.pathname === "/cars" ? "text-gray-600" : "text-white"
+              location.pathname === "/cars" || location.pathname === "/users"
+                ? "text-gray-600"
+                : "text-white"
             }`}
           >
             <FaBars />

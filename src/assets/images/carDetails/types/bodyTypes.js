@@ -34,6 +34,12 @@ import g2 from "../../../images/g2.png";
 import g3 from "../../../images/g3.png";
 import g4 from "../../../images/g4.png";
 
+import suvType from '../types/suvType.svg';
+import sedanType from '../types/sedanType.svg';
+import hatchbackType from '../types/hatchbackType.svg';
+import coupeType from '../types/coupeType.svg';
+import hybirdType from '../types/hybirdType.svg';
+
 export const bodyTypes = [
   {
     titleValue: "Roadster",
@@ -598,3 +604,38 @@ export const filterGridCars = [
     image: g4,
   },
 ];
+
+
+// Users , browse by car type 
+export const usersBrowseByCarType = [
+  {
+    id: 1,
+    image: suvType,
+    titleValue: "SUV",
+    category: "carType",
+  },
+  {
+    id: 2,
+    image: sedanType,
+    titleValue: "Sedan",
+    category: "carType",
+  },
+  {
+    id: 3,
+    image: hatchbackType,
+    titleValue: "Hatchback",
+    category: "carType",
+  },
+  {
+    id: 4,
+    image: coupeType,
+    titleValue: "Coupe",
+    category: "carType"
+  },
+  {
+    id: 5,
+    image: hybirdType,
+    titleValue: "Hybird",
+    category: "carType",
+  }
+]

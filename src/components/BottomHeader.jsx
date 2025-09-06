@@ -8,7 +8,11 @@ const BottomHeader = () => {
   if (location.pathname === "/cars") return null;
 
   return (
-    <div className="bg-[#F5F5F5] w-full flex flex-wrap items-center justify-end md:justify-end gap-4 md:gap-12 px-4 md:px-16 py-2 md:py-3 text-sm md:text-base">
+    <div
+      className={`${
+        location.pathname === "/users" ? "bg-primary" : ""
+      } bg-[#F5F5F5] w-full flex flex-wrap items-center justify-end md:justify-end gap-4 md:gap-12 px-4 md:px-16 py-2 md:py-3 text-sm md:text-base`}
+    >
       <Link to={"/"} className="hover:underline">
         Save
       </Link>
