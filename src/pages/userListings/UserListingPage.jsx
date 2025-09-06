@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
 import UserListings from "../../components/userListings/UsreListings";
 import BannerInUesrListings from "../../components/userListings/BannerInUesrListings";
+import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 
 const UserListingPage = () => {
   return (
@@ -27,6 +28,7 @@ const UserListingPage = () => {
       </div>
       <UserListings />
       <BannerInUesrListings />
+      <WhyChooseUsUtility />
     </div>
   );
 };
