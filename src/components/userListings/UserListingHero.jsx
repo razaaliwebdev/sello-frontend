@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { GoArrowUpRight } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
@@ -67,7 +65,7 @@ const UserListingHero = () => {
         <img
           src={images.userHeroSectionImg}
           alt="userHero section image"
-          className="h-full w-full object-cover"
+          className="h-full rounded-bl-[155px] w-full object-cover"
         />
       </div>
     </div>
