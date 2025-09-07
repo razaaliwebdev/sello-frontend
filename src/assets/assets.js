@@ -96,6 +96,7 @@ import userHeroSectionImg from './images/userHeroSectionImg.png';
 import searchSvg from './images/searchSvg.svg';
 import comma from './images/comma.svg';
 import loanPlanHeroImg from './images/loanPlanHeroImg.png';
+import mailbox from './images/mailbox.svg';
 
 
 export const images = {
@@ -137,7 +138,8 @@ export const images = {
     userHeroSectionImg,
     searchSvg,
     comma,
-    loanPlanHeroImg
+    loanPlanHeroImg,
+    mailbox
 };
 
 

@@ -6,7 +6,8 @@ import BrandsMarqueeInLoanSection from "../../components/sections/loanPlans/Bran
 import GetAllCarsSection from "../../components/sections/listings/GetAllCarsSection";
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import LoanCutomersReviews from "../../components/sections/loanPlans/LoanCutomersReviews";
-import BlogSection from '../../components/sections/home/BlogSection';
+import BlogSection from "../../components/sections/home/BlogSection";
+import BottomBanner from "../../components/sections/loanPlans/BottomBanner";
 
 const LoanPlansPage = () => {
   return (
@@ -18,6 +19,7 @@ const LoanPlansPage = () => {
       <WhyChooseUsUtility />
       <LoanCutomersReviews />
       <BlogSection />
+      <BottomBanner />
     </div>
   );
 };
