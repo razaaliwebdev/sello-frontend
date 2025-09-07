@@ -5,11 +5,11 @@ import LoanCalculator from "./LoanCalculator";
 const LoanPlansHeroSection = () => {
   return (
     <div
-      className="bg-primary-500 min-h-[81vh] w-full bg-cover bg-center relative flex flex-col md:flex-row md:items-start md:justify-between px-5 py-1"
+      className="bg-primary-500 md:h-[81vh] h-[100vh] w-full bg-cover bg-center relative flex flex-col md:flex-row md:items-start md:justify-between px-5 py-1"
       style={{ backgroundImage: `url(${images.loanPlanHeroImg})` }}
     >
       {/* Loan Calculator */}
-      <div className="w-full md:w-[50%] md:relative md:top-0 -mt-5 md:mt-0">
+      <div className="w-full md:w-[50%] md:relative md:top-0 top-5 -mt-5 md:mt-0">
         <LoanCalculator />
       </div>
 
