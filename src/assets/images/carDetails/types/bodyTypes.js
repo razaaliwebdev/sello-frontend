@@ -664,3 +664,63 @@ export const customersReviews = [
     category: "review",
   }
 ]
+
+// Loan-Plan page , reviews section
+// Customers Reviews
+export const loanPageCustomersReviews = [
+  {
+    id: 1,
+    image: reviewBoyImg,
+    customerName: "John Doe",
+    customerRole: "Facebook",
+    review:
+      "Great platform! Found my dream car within days, and the process was super smooth.",
+    category: "review",
+  },
+  {
+    id: 2,
+    image: reviewGirlImg,
+    customerName: "Sarah Smith",
+    customerRole: "Google",
+    review:
+      "Excellent experience! The search filters made it easy to narrow down my options.",
+    category: "review",
+  },
+  {
+    id: 3,
+    image: reviewBoyImg,
+    customerName: "Michael Johnson",
+    customerRole: "Instagram",
+    review:
+      "Loved the transparent pricing. No hidden fees and everything was straightforward.",
+    category: "review",
+  },
+  {
+    id: 4,
+    image: reviewGirlImg,
+    customerName: "Emily Davis",
+    customerRole: "Twitter",
+    review:
+      "Customer support was fantastic. They helped me through each step of financing my car.",
+    category: "review",
+  },
+  {
+    id: 5,
+    image: reviewBoyImg,
+    customerName: "David Lee",
+    customerRole: "LinkedIn",
+    review:
+      "I was impressed with the wide selection of vehicles. Found exactly what I needed.",
+    category: "review",
+  },
+  {
+    id: 6,
+    image: reviewGirlImg,
+    customerName: "Olivia Brown",
+    customerRole: "YouTube",
+    review:
+      "This platform saved me so much time. The loan calculator was a game-changer!",
+    category: "review",
+  },
+];
+
