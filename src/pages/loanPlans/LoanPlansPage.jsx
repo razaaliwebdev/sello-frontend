@@ -3,6 +3,7 @@ import LoanPlansHeroSection from "../../components/sections/loanPlans/LoanPlansH
 import HeroFilter from "../../components/utils/HeroFilter";
 import LoanPlanFilterSection from "../../components/sections/loanPlans/LoanPlanFilterSection";
 import BrandsMarqueeInLoanSection from "../../components/sections/loanPlans/BrandsMarqueeInLoanSection";
+import GetAllCarsSection from "../../components/sections/listings/GetAllCarsSection";
 
 const LoanPlansPage = () => {
   return (
@@ -10,6 +11,7 @@ const LoanPlansPage = () => {
       <LoanPlansHeroSection />
       <LoanPlanFilterSection />
       <BrandsMarqueeInLoanSection />
+      <GetAllCarsSection />
     </div>
   );
 };
