@@ -92,10 +92,8 @@ const SignUp = () => {
               />
             </div>
             <div>
-              <h2 className="md:text-3xl text-2xl my-1 md:my-2">
-                Create an Account as a User
-              </h2>
-              <p className="text-gray-400">Please enter your details.</p>
+              <h2 className="md:text-3xl text-2xl my-1 md:my-2">Join Sello</h2>
+              <p className="text-gray-400">Create an Account</p>
             </div>
 
             <form
@@ -105,7 +103,7 @@ const SignUp = () => {
             >
               {/* Name */}
               <div className="field my-1 md:my-2 border-b-[1px] border-black">
-                <label className="block py-1 text-lg">Name</label>
+                <label className="block py-1 text-lg">Full Name</label>
                 <input
                   value={data.name}
                   onChange={(e) => setData({ ...data, name: e.target.value })}
@@ -220,7 +218,11 @@ const SignUp = () => {
         </div>
 
         <div className="md:w-1/2 w-full md:block hidden">
-          <RightSide leftPath="/login" rightPath="/home" />
+          <RightSide
+            leftPath="/login"
+            rightPath="/home"
+            text="Sello: Your Trusted Partner for Buying and Selling Cars. Buy and sell cars with ease on Sello. Experience seamless transactions with our expert team."
+          />
         </div>
       </div>
     </>

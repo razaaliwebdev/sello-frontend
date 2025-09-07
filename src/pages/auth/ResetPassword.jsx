@@ -81,7 +81,13 @@ const ResetPassword = () => {
       </div>
 
       <div className="md:w-1/2 w-full md:block hidden">
-        <RightSide leftPath={"/verify-otp"} rightPath={"/reset-success"} />
+        <RightSide
+          leftPath={"/verify-otp"}
+          rightPath={"/reset-success"}
+          text={
+            "Sello brings you a smarter way to explore and own cars, offering everything from a 2020 Honda Civic for sale to a used Suzuki Mehran that fits your budget. With a wide selection of low mileage cars, buyers can count on reliability and value in every deal. The platform also features a range of automatic cars for sale to make your driving experience smoother and more convenient. Whether you’re searching for a diesel sedan in (city) or looking to upgrade your current vehicle, Sello connects you with trusted options. It’s the easiest way to buy and sell cars with confidence and convenience."
+          }
+        />
       </div>
     </div>
   );

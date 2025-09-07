@@ -3,7 +3,7 @@ import { images } from "../../assets/assets";
 import { FaStar } from "react-icons/fa6";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-const RightSide = ({ rightPath, leftPath }) => {
+const RightSide = ({ rightPath, leftPath, text }) => {
   const navigate = useNavigate();
   return (
     <div className="w-full h-full">
@@ -11,14 +11,8 @@ const RightSide = ({ rightPath, leftPath }) => {
         style={{ backgroundImage: `url(${images.car1})` }}
         className="bg-cover bg-center h-full relative"
       >
-        <div className="bottom-box bg-white/15 backdrop-blur-lg w-full  md:h-1/3 border-t-[1px] border-white px-4 py-1 md:px-6 md:py-4 absolute md:bottom-0 bottom-0">
-          <p className="md:text-lg text-sm  text-gray-200">
-            "Sello is a smart and reliable platform that makes it easy to buy
-            and sell cars online. Designed for convenience and trust, it
-            connects users with verified listings, intuitive search filters, and
-            direct communication between buyers and sellers — all in one
-            seamless experience."
-          </p>
+        <div className="bottom-box bg-white/15 backdrop-blur-lg w-full  md:h-[39%] border-t-[1px] border-white px-4 py-1 md:px-6 md:py-4 absolute md:bottom-0 bottom-0">
+          <p className="md:text-lg text-sm  text-gray-200">{text}</p>
 
           <div className="flex items-center justify-between py-2">
             <div className="">

@@ -58,7 +58,8 @@ const ForgotPassword = () => {
             Forgot Password?
           </h2>
           <p className="text-gray-400 md:text-lg text-center md:text-left">
-            Do not worry! We will help you recover your password.
+            Don’t worry, you can easily recover your password with our secure
+            system.
           </p>
 
           {success && (
@@ -102,7 +103,11 @@ const ForgotPassword = () => {
       </div>
 
       <div className="md:w-1/2 w-full md:block hidden">
-        <RightSide leftPath={"/login"} rightPath={"/verify-otp"} />
+        <RightSide
+          leftPath={"/login"}
+          rightPath={"/verify-otp"}
+          text="Looking for a reliable way to upgrade or let go of your vehicle? A trusted online car mar-ketplace makes it simple to buy used cars at the right price or sell your car online without hassle. This innovative car buying website connects buyers and sellers quickly, ensuring smooth transactions every time. With a wide range of choices, customers can explore afford-able cars for sale that fit different needs and budgets. The platform is designed to bring convenience, transparency, and confidence to every car deal."
+        />
       </div>
     </div>
   );

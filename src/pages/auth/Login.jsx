@@ -75,9 +75,7 @@ const Login = () => {
               />
             </div>
             <h2 className="md:text-4xl text-2xl my-2">Welcome Back</h2>
-            <p className="text-gray-400 pb-1">
-              Welcome back. Please enter your details.
-            </p>
+            <p className="text-gray-400 pb-1">Please enter your details.</p>
 
             <form onSubmit={handleSubmit} className="w-full">
               <div className="field border-b-[1px] border-black my-2">
@@ -158,7 +156,13 @@ const Login = () => {
         </div>
 
         <div className="md:w-1/2 w-full md:block hidden">
-          <RightSide leftPath={"/"} rightPath={"/sign-up"} />
+          <RightSide
+            leftPath={"/"}
+            rightPath={"/sign-up"}
+            text={
+              "Sello is your go-to destination for everything on wheels, offering a wide variety of used cars for sale along with the latest models for those looking to buy new cars. The platform ensures trust and quality by listing only certified pre-owned cars that meet high standards. Whether you’re planning to buy Toyota Corolla online, searching for a reliable SUV for sale, or exploring budget cars under (price), Sello has options to suit every lifestyle and budget. With its user-friendly process, Sello makes car buying and selling convenient, transparent, and stress-free."
+            }
+          />
         </div>
       </div>
     </>

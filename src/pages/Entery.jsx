@@ -25,7 +25,11 @@ const Entery = () => {
 
       {/* Right Side */}
       <div className="w-full md:w-1/2 h-full flex justify-center items-center">
-        <RightSide rightPath="/login" leftPath="/" />
+        <RightSide
+          rightPath="/login"
+          leftPath="/"
+          text="Sello is a modern car selling platform designed to help you sell your car fast with ease and confidence. With features like free car listing and instant car valuation, you get the true market value for your vehicle in just a few clicks. Whether you want to sell your car in city or reach buyers nationwide, Sello connects you to trusted customers quickly. The platform also makes it simple to sell used car online, offering a smooth, transparent, and reliable process. With Sello, turning your car into cash has never been easier."
+        />
       </div>
     </div>
   );

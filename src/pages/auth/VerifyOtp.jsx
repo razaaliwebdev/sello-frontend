@@ -54,8 +54,8 @@ const VerifyOtp = () => {
             <OtpFields value={otp} onChange={setOtp} />
 
             <div className="md:text-2xl my-5 text-gray-500 text-center">
-              Enter OTP we sent to your email{" "}
-              <MdEmail className="inline text-primary-400" />
+              Enter the OTP we have sent to your registered mobile number to
+              proceed.
             </div>
 
             <button
@@ -83,6 +83,9 @@ const VerifyOtp = () => {
         <RightSide
           leftPath={"/forgot-password"}
           rightPath={"/reset-password"}
+          text={
+            "Sello is a trusted online car marketplace that makes buying and selling cars simple and hassle-free. Whether you want to buy used cars at great prices or quickly sell your car online, Sello provides a seamless experience for every customer. As a leading car buying website, it connects sellers and buyers with transparency and convenience. From budget-friendly options to premium models, you’ll find a wide range of affordable cars for sale. With Sello, your car journey is smarter, faster, and more reliable."
+          }
         />
       </div>
     </div>
