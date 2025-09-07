@@ -4,6 +4,7 @@ import HeroFilter from "../../components/utils/HeroFilter";
 import LoanPlanFilterSection from "../../components/sections/loanPlans/LoanPlanFilterSection";
 import BrandsMarqueeInLoanSection from "../../components/sections/loanPlans/BrandsMarqueeInLoanSection";
 import GetAllCarsSection from "../../components/sections/listings/GetAllCarsSection";
+import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 
 const LoanPlansPage = () => {
   return (
@@ -12,6 +13,7 @@ const LoanPlansPage = () => {
       <LoanPlanFilterSection />
       <BrandsMarqueeInLoanSection />
       <GetAllCarsSection />
+      <WhyChooseUsUtility />
     </div>
   );
 };
