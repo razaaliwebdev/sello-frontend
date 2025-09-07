@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { images } from "../../../assets/assets";
 
@@ -30,7 +28,7 @@ const BottomBanner = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-l-lg focus:outline-none text-white bg-transparent border-[1px] border-gray-500 :placeholder:text-white"
+              className="flex-1 px-4 py-3 rounded-l-lg focus:outline-none text-white bg-transparent border-[1px] border-gray-100 ::placeholder:text-white"
             />
             <button
               type="submit"

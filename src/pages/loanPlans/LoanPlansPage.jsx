@@ -8,6 +8,7 @@ import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import LoanCutomersReviews from "../../components/sections/loanPlans/LoanCutomersReviews";
 import BlogSection from "../../components/sections/home/BlogSection";
 import BottomBanner from "../../components/sections/loanPlans/BottomBanner";
+import NewsLatter from "../../components/utils/NewsLatter";
 
 const LoanPlansPage = () => {
   return (
@@ -20,6 +21,7 @@ const LoanPlansPage = () => {
       <LoanCutomersReviews />
       <BlogSection />
       <BottomBanner />
+      <NewsLatter />
     </div>
   );
 };
