@@ -6,6 +6,7 @@ import BrandsMarqueeInLoanSection from "../../components/sections/loanPlans/Bran
 import GetAllCarsSection from "../../components/sections/listings/GetAllCarsSection";
 import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import LoanCutomersReviews from "../../components/sections/loanPlans/LoanCutomersReviews";
+import BlogSection from '../../components/sections/home/BlogSection';
 
 const LoanPlansPage = () => {
   return (
@@ -16,6 +17,7 @@ const LoanPlansPage = () => {
       <GetAllCarsSection />
       <WhyChooseUsUtility />
       <LoanCutomersReviews />
+      <BlogSection />
     </div>
   );
 };
