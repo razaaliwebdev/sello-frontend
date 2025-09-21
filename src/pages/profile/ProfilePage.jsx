@@ -3,6 +3,7 @@ import ProfileHero from "../../components/sections/profile/ProfileHero";
 import OnlineBanner from "../../components/sections/profile/OnlineBanner";
 import ReachUsSection from "../../components/sections/profile/ReachUsSection";
 import CustomerReviews from "../../components/sections/carDetails/CustomerReviews";
+import NewsLatter from "../../components/utils/NewsLatter";
 
 const ProfilePage = () => {
   return (
@@ -11,6 +12,7 @@ const ProfilePage = () => {
       <OnlineBanner />
       <CustomerReviews />
       <ReachUsSection />
+      <NewsLatter />
     </div>
   );
 };
