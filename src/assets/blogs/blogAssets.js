@@ -84,3 +84,57 @@ export const categoriesBlogs = [
 ];
 
 
+// Customers Reviews About Blogs    IN Blogs Page
+export const customerReviews = [
+    {
+        id: 1,
+        review:
+            "Great platform to find reliable cars easily. I was able to explore multiple options, compare prices, and finally purchase a car without any hassle. Truly impressed with the seamless process.",
+        name: "Ahmed Khan",
+        country: "Pakistan",
+        image: "https://randomuser.me/api/portraits/men/32.jpg",
+    },
+    {
+        id: 2,
+        review:
+            "The buying process was smooth and transparent from start to finish. I could clearly see all details, documents, and history of the car. Definitely one of the best online car platforms.",
+        name: "Fatima Ali",
+        country: "UAE",
+        image: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+        id: 3,
+        review:
+            "Excellent customer support, highly recommend! The team responded quickly to my queries and guided me step by step. It really gave me confidence in making such an important purchase online.",
+        name: "Usman Raza",
+        country: "USA",
+        image: "https://randomuser.me/api/portraits/men/12.jpg",
+    },
+    {
+        id: 4,
+        review:
+            "Loved the variety of cars available here. From budget-friendly models to luxury vehicles, everything was listed properly. The detailed descriptions and photos made it super easy to make my decision.",
+        name: "Hira Sheikh",
+        country: "Canada",
+        image: "https://randomuser.me/api/portraits/women/21.jpg",
+    },
+    {
+        id: 5,
+        review:
+            "Easy to navigate and very user-friendly website. I quickly filtered cars by my preferences and found exactly what I was looking for. The design and functionality of the site are excellent.",
+        name: "Bilal Ahmad",
+        country: "UK",
+        image: "https://randomuser.me/api/portraits/men/51.jpg",
+    },
+    {
+        id: 6,
+        review:
+            "I sold my car quickly, hassle-free experience. The platform connected me with genuine buyers and I received a fair price. Highly recommend this service to anyone looking to sell easily.",
+        name: "Sara Malik",
+        country: "Australia",
+        image: "https://randomuser.me/api/portraits/women/65.jpg",
+    },
+];
+
+
+

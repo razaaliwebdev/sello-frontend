@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import LatestBlogsSection from "../../components/sections/blogs/LatestBlogsSection";
 import NewTechnology from "../../components/sections/blogs/NewTechnology";
 import BlogsCates from "../../components/sections/blogs/BlogsCates";
+import ReviewSliderBanner from "../../components/sections/blogs/ReviewSliderBanner";
 
 const Blog = () => {
   return (
@@ -29,6 +30,7 @@ const Blog = () => {
       <LatestBlogsSection />
       <NewTechnology />
       <BlogsCates />
+      <ReviewSliderBanner />
     </div>
   );
 };
