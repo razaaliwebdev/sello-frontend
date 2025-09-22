@@ -4,6 +4,7 @@ import brands from "../../assets/carLogos/brands";
 import { GoArrowUpRight } from "react-icons/go";
 import BrandMarquee from "../../components/BrandMarquee";
 import { Link } from "react-router-dom";
+import LatestBlogsSection from "../../components/sections/blogs/LatestBlogsSection";
 
 const Blog = () => {
   return (
@@ -23,6 +24,7 @@ const Blog = () => {
         </div>
         <BrandMarquee brands={brands} />
       </div>
+      <LatestBlogsSection />
     </div>
   );
 };
