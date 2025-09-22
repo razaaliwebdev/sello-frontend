@@ -10,9 +10,14 @@ import cate2 from './cate2.png';
 import cate3 from './cate3.png';
 import cate4 from './cate4.png';
 
+import bottomRevCar from './bottomRevCar.png';
+import bottomRevCar2 from './bottomRevCar2.png';
 
 export const blogAssets = {
     latestSectionCarImg,
+    person,
+    bottomRevCar,
+    bottomRevCar2
 }
 
 // New technology

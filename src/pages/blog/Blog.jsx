@@ -8,6 +8,7 @@ import LatestBlogsSection from "../../components/sections/blogs/LatestBlogsSecti
 import NewTechnology from "../../components/sections/blogs/NewTechnology";
 import BlogsCates from "../../components/sections/blogs/BlogsCates";
 import ReviewSliderBanner from "../../components/sections/blogs/ReviewSliderBanner";
+import BottomReviews from "../../components/sections/blogs/BottomReviews";
 
 const Blog = () => {
   return (
@@ -31,6 +32,8 @@ const Blog = () => {
       <NewTechnology />
       <BlogsCates />
       <ReviewSliderBanner />
+      <NewTechnology />
+      <BottomReviews />
     </div>
   );
 };
