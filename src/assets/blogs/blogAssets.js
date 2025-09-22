@@ -5,6 +5,10 @@ import newTech3 from './newTech3.png';
 import newTech4 from './newTech4.png';
 import person from './person.png';
 
+import cate from './cate.png';
+import cate2 from './cate2.png';
+import cate3 from './cate3.png';
+import cate4 from './cate4.png';
 
 
 export const blogAssets = {
@@ -50,4 +54,33 @@ export const newTechnology = [
         readTime: "4 min read",
     },
 ];
+
+// All Categories
+export const categoriesBlogs = [
+    {
+        id: 1,
+        title: "Car Review",
+        description: "In-depth reviews of the latest cars",
+        img: cate,
+    },
+    {
+        id: 2,
+        title: "Maintainance Tips",
+        description: "Practical advice to keep your car healthy",
+        img: cate2,
+    },
+    {
+        id: 3,
+        title: "Car Modification",
+        description: "Creative upgrades to boost style & power",
+        img: cate3,
+    },
+    {
+        id: 4,
+        title: "Driving Tips",
+        description: "Smart techniques to drive safe and smooth",
+        img: cate4,
+    },
+];
+
 

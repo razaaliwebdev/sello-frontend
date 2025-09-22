@@ -6,6 +6,7 @@ import BrandMarquee from "../../components/BrandMarquee";
 import { Link } from "react-router-dom";
 import LatestBlogsSection from "../../components/sections/blogs/LatestBlogsSection";
 import NewTechnology from "../../components/sections/blogs/NewTechnology";
+import BlogsCates from "../../components/sections/blogs/BlogsCates";
 
 const Blog = () => {
   return (
@@ -27,6 +28,7 @@ const Blog = () => {
       </div>
       <LatestBlogsSection />
       <NewTechnology />
+      <BlogsCates />
     </div>
   );
 };
