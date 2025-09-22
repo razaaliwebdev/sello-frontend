@@ -5,6 +5,7 @@ import { GoArrowUpRight } from "react-icons/go";
 import BrandMarquee from "../../components/BrandMarquee";
 import { Link } from "react-router-dom";
 import LatestBlogsSection from "../../components/sections/blogs/LatestBlogsSection";
+import NewTechnology from "../../components/sections/blogs/NewTechnology";
 
 const Blog = () => {
   return (
@@ -25,6 +26,7 @@ const Blog = () => {
         <BrandMarquee brands={brands} />
       </div>
       <LatestBlogsSection />
+      <NewTechnology />
     </div>
   );
 };
