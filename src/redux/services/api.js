@@ -89,17 +89,6 @@ export const api = createApi({
             invalidatesTags: ["User"],
         }),
 
-        // ✅ Car GET Endpoint
-        // getCars: builder.query({
-        //     query: () => ({
-        //         url: "/cars",
-        //         method: "GET",
-        //     }),
-        //     transformResponse: (response) => {
-        //         // Extract the cars array from the response
-        //         return response?.cars || [];
-        //     },
-        // }),
 
         // ✅ Car GET Endpoint with Pagination
         getCars: builder.query({
@@ -184,6 +173,13 @@ export const api = createApi({
                 };
             },
             providesTags: ["Cars"],
+            getMe: builder.query({
+                query: () => ({
+                    url: "/me", // Change from "/auth/me" to "/me"
+                    method: "GET",
+                }),
+                providesTags: ["User"],
+            }),
         }),
     }),
 });

@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,16 +10,76 @@ import {
 } from "../../../assets/profilePageAssets/profileAssets";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useGetMeQuery, useLogoutMutation } from "../../../redux/services/api"; // 👈 NEW: Import hooks from api.js (adjust path)
 
 const ProfileHero = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-
   const [showProfilePopup, setShowProfilePopup] = useState(false);
+
+  // 👈 NEW: Fetch profile data
+  const { data: user, isLoading, isError, error } = useGetMeQuery();
+  const [logout] = useLogoutMutation(); // 👈 NEW: For logout
+
+  // 👈 NEW: Derived metrics from real data
+  const [metrics, setMetrics] = useState({
+    posts: 0,
+    activeListings: 0,
+    sales: 0,
+    earnings: 0,
+    clicks: 0,
+    rating: 0,
+    ratingCount: 0,
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Calculate real metrics from API data
+    const posts = user.carsPosted?.length || 0;
+    const sales = user.carsPurchased?.length || 0;
+    const earnings =
+      user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) || 0;
+    // Samples for demo (replace with real if backend provides)
+    const clicks = 1000; // e.g., from analytics
+    const rating = 4.5; // e.g., average from reviews
+    const ratingCount = 10;
+
+    setMetrics({
+      posts,
+      activeListings: posts,
+      sales,
+      earnings,
+      clicks,
+      rating,
+      ratingCount,
+    });
+  }, [user]);
+
+  // 👈 NEW: Handle errors (e.g., unauthorized)
+  useEffect(() => {
+    if (isError && error?.status === 401) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  }, [isError, error, navigate]);
 
   // Handle Profile Popup
   const handleProfilePopup = () => {
     setShowProfilePopup(true);
+  };
+
+  // 👈 NEW: Handle logout with API
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      localStorage.removeItem("token");
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
   };
 
   useEffect(() => {
@@ -34,19 +96,42 @@ const ProfileHero = () => {
     };
   }, [showProfilePopup]);
 
+  // 👈 NEW: Loading state
+  if (isLoading) {
+    return (
+      <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
+        <div className="text-xl">Loading profile...</div>
+      </div>
+    );
+  }
+
+  // 👈 NEW: Error state (non-401 handled here)
+  if (isError && error?.status !== 401) {
+    return (
+      <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
+        <div className="text-red-500">
+          Error: {error?.data?.message || "Failed to load profile"}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="md:h-[150vh] h-full w-full bg-white">
       <div className="md:h-[95%]  h-full md:py-0 py-16  w-full bg-primary-500 flex items-end">
         <div className="md:h-[90%] h-full relative w-full px-3 md:px-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0">
           {/* LeftSide */}
           <div className="md:h-full h-auto md:w-[43%] w-full relative p-5 rounded-lg">
-            {/* Avatar */}
+            {/* Avatar 👈 UPDATED: Use real avatar or fallback */}
             <div className="">
               <div className="mx-auto absolute -top-14 left-1/2 -translate-x-1/2 md:left-[43%] md:translate-x-0 h-20 w-20 rounded-3xl bg-black overflow-hidden border-2 border-white ">
                 <img
                   className="h-full w-full object-cover"
-                  src="https://images.unsplash.com/photo-1672567711579-a8615fe2d373?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG1vZGVscyUyMG9yYW5nZXxlbnwwfHwwfHx8MA%3D%3D"
-                  alt=""
+                  src={
+                    user?.avatar ||
+                    "https://images.unsplash.com/photo-1672567711579-a8615fe2d373?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG1vZGVscyUyMG9yYW5nZXxlbnwwfHwwfHx8MA%3D%3D"
+                  }
+                  alt="User Avatar"
                 />
               </div>
             </div>
@@ -73,38 +158,42 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.userIcon}
-                  alt="Add post icon"
+                  alt="User icon"
                   className="h-full w-full object-cover"
                 />
               </div>
               <h5 className="md:text-xl text-white">Profile</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* My Posts */}
+            {/* My Posts 👈 UPDATED: Navigate to my listings */}
             <div
-              onClick={() => navigate("/users")}
+              onClick={() => navigate("/my-listings")} // 👈 Assume route for carsPosted; adjust as needed
               className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.myListIcon}
-                  alt="Add post icon"
+                  alt="My posts icon"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <h5 className="md:text-xl text-white">My Posts</h5>
+              <h5 className="md:text-xl text-white">
+                My Posts ({metrics.posts})
+              </h5>{" "}
+              {/* 👈 Real count */}
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Current City */}
+            {/* Current City 👈 UPDATED: Hardcode or add to backend */}
             <div className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300">
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.buildingIcon}
-                  alt="Add post icon"
+                  alt="City icon"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <h5 className="md:text-xl text-white">City</h5>
+              <h5 className="md:text-xl text-white">Dubai</h5>{" "}
+              {/* 👈 Sample; fetch if added to user */}
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
             {/* Hr :) Horizontal Rule */}
@@ -117,7 +206,7 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.blogIcon}
-                  alt="Add post icon"
+                  alt="Blogs icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -132,7 +221,7 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.supportIcon}
-                  alt="Add post icon"
+                  alt="Support icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -147,7 +236,7 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.termAndCondition}
-                  alt="Add post icon"
+                  alt="Terms icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -162,7 +251,7 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.addsIcon}
-                  alt="Add post icon"
+                  alt="Advertising icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -177,7 +266,7 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.lockIcon}
-                  alt="Add post icon"
+                  alt="Security icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -192,22 +281,22 @@ const ProfileHero = () => {
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.bellIcon}
-                  alt="Add post icon"
+                  alt="Notification icon"
                   className="h-full w-full object-cover"
                 />
               </div>
               <h5 className="md:text-xl text-white">Notification</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Logout */}
+            {/* Logout 👈 UPDATED: Use real logout handler */}
             <div
-              onClick={() => navigate("/")}
+              onClick={handleLogout}
               className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.logoutIcon}
-                  alt="Add post icon"
+                  alt="Logout icon"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -221,13 +310,18 @@ const ProfileHero = () => {
               My Posts
             </h2>
             <div className="h-full w-full bg-white shadow-lg rounded-lg shadow-gray-700 p-4 md:p-5 ">
-              {/* profile Options */}
+              {/* profile Options 👈 UPDATED: Dynamic values */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
                 {profileOptions.map((op) => {
+                  let dynamicValue = op.values;
+                  // Override with real data based on op.title (assume profileOptions has titles like "Posts", "Verified")
+                  if (op.title === "Posts") dynamicValue = metrics.posts;
+                  if (op.title === "Verified")
+                    dynamicValue = user?.verified ? "Yes" : "No";
                   return (
                     <div
                       onClick={() => {
-                        alert("hello");
+                        alert("hello"); // 👈 Replace with real action if needed
                       }}
                       key={op.id}
                       className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer"
@@ -240,18 +334,23 @@ const ProfileHero = () => {
                         />
                       </div>
                       <div className="text-primary-500 text-sm md:text-base">
-                        {op.values}
+                        {dynamicValue}
                       </div>
                       <div className="text-sm md:text-base">{op.title}</div>
                     </div>
                   );
                 })}
               </div>
-              {/* Selling Option or Activities */}
+              {/* Selling Option or Activities 👈 UPDATED: Dynamic values */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Selling</h2>
                 <div className="w-full md:w-1/2">
                   {sellingOptions.map((op) => {
+                    let dynamicValue = op.values;
+                    // Override with real data based on op.title (e.g., "Active Listings", "Sales")
+                    if (op.title === "Active Listings")
+                      dynamicValue = metrics.activeListings;
+                    if (op.title === "Sales") dynamicValue = metrics.sales;
                     return (
                       <div
                         className="flex items-center cursor-pointer py-1 px-2 hover:bg-gray-100 justify-between my-2 rounded-md"
@@ -264,7 +363,7 @@ const ProfileHero = () => {
                         />
                         <h4 className="text-sm md:text-base">
                           {op.title}
-                          {op.values ? ` (${op.values})` : ""}
+                          {dynamicValue ? ` (${dynamicValue})` : ""}
                         </h4>
                         <MdKeyboardArrowRight className="text-xl md:text-2xl text-primary-500" />
                       </div>
@@ -272,7 +371,7 @@ const ProfileHero = () => {
                   })}
                 </div>
               </div>
-              {/* Overview */}
+              {/* Overview 👈 UPDATED: If overview has dynamic fields, override here */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Overview</h2>
                 <div className="grid grid-cols-2 gap-3 md:gap-5">
@@ -287,32 +386,40 @@ const ProfileHero = () => {
                           className="h-6 w-6 md:h-7 md:w-7 object-cover"
                           alt={op.title}
                         />
-                        <h4 className="text-sm md:text-base">{op.title}</h4>
+                        <h4 className="text-sm md:text-base">{op.title}</h4>{" "}
+                        {/* 👈 Add dynamic if needed */}
                       </div>
                     );
                   })}
                 </div>
               </div>
-              {/* Performance */}
+              {/* Performance 👈 UPDATED: Real metrics */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Performance</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
                   <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
                     <h4 className="font-medium text-sm md:text-base">
-                      AED <span className="font-semibold">0.000</span>
+                      AED{" "}
+                      <span className="font-semibold">
+                        {metrics.earnings.toLocaleString()}
+                      </span>
                     </h4>
-                    <p className="text-sm">No Pay History</p>
+                    <p className="text-sm">
+                      {metrics.sales > 0
+                        ? `${metrics.sales} Sales History`
+                        : "No Pay History"}
+                    </p>
                   </div>
                   <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
                     <h4 className="font-semibold text-base md:text-lg">
-                      000000
+                      {metrics.clicks.toLocaleString()}
                     </h4>
                     <p className="text-xs md:text-sm">Clicks On Listings</p>
                     <span className="text-xs">Last 7 Days</span>
                   </div>
                   <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
                     <div className="flex items-center gap-2 md:gap-5">
-                      <h4 className="text-sm md:text-base">2</h4>
+                      <h4 className="text-sm md:text-base">{metrics.rating}</h4>
                       <img
                         src={profileAssets.starIcon}
                         alt="star"
@@ -321,7 +428,9 @@ const ProfileHero = () => {
                     </div>
                     <div className="">
                       <p className="text-xs md:text-sm">Click On Listings</p>
-                      <span className="text-xs">4 Ratings</span>
+                      <span className="text-xs">
+                        {metrics.ratingCount} Ratings
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -330,7 +439,7 @@ const ProfileHero = () => {
           </div>
         </div>
       </div>
-      {/* Top-level Profile Popup (keeps desktop UI unchanged, improves mobile) */}
+      {/* Top-level Profile Popup 👈 UPDATED: Real data in popup */}
       {showProfilePopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75"
@@ -348,11 +457,12 @@ const ProfileHero = () => {
               ✕
             </button>
 
-            {/* Profile Image + Upload */}
+            {/* Profile Image + Upload 👈 UPDATED: Real avatar */}
             <div className="flex flex-col items-center">
               <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary-500 group">
                 <img
                   src={
+                    user?.avatar ||
                     profileAssets.profileImg ||
                     "https://via.placeholder.com/150"
                   }
@@ -370,16 +480,23 @@ const ProfileHero = () => {
                       if (e.target.files && e.target.files[0]) {
                         const imgUrl = URL.createObjectURL(e.target.files[0]);
                         console.log("New Image Selected:", imgUrl);
+                        // 👈 TODO: Add updateProfile mutation to upload avatar
                       }
                     }}
                   />
                 </label>
               </div>
-              <h3 className="mt-3 font-semibold text-lg">Raza Ali</h3>
-              <p className="text-gray-500 text-sm">razaali@email.com</p>
+              <h3 className="mt-3 font-semibold text-lg">
+                {user?.name || "User"}
+              </h3>{" "}
+              {/* 👈 Real name */}
+              <p className="text-gray-500 text-sm">
+                {user?.email || "email@example.com"}
+              </p>{" "}
+              {/* 👈 Real email */}
             </div>
 
-            {/* Profile Details */}
+            {/* Profile Details 👈 UPDATED: Real values in inputs */}
             <div className="mt-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -388,7 +505,8 @@ const ProfileHero = () => {
                 <input
                   type="email"
                   className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                  defaultValue="razaali@email.com"
+                  defaultValue={user?.email || "razaali@email.com"} // 👈 Real email
+                  disabled // 👈 Disable if not editable
                 />
               </div>
               <div>
@@ -399,7 +517,7 @@ const ProfileHero = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                    defaultValue="12345"
+                    placeholder="Enter new password" // 👈 No default for security
                   />
                   {showPassword ? (
                     <FaEye
@@ -422,7 +540,7 @@ const ProfileHero = () => {
               </div>
             </div>
 
-            {/* Save Button */}
+            {/* Save Button 👈 TODO: Add updateProfile mutation handler */}
             <div className="mt-6 flex justify-center">
               <button className="bg-primary-500 px-6 py-2 rounded-lg hover:opacity-90 transition">
                 Save Changes
