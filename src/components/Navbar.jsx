@@ -69,7 +69,9 @@ const Navbar = () => {
     <>
       <nav
         className={`w-full px-4 md:px-8 py-2 flex items-center justify-between ${
-          location.pathname === "/cars" || location.pathname === "/users"
+          location.pathname === "/cars" ||
+          location.pathname === "/users" ||
+          location.pathname === "/blog"
             ? "md:bg-[#f5f5f5] md:text-gray-600"
             : "bg-primary-500 text-white"
         }`}
@@ -79,7 +81,9 @@ const Navbar = () => {
           <img
             className="h-14 md:h-20"
             src={
-              location.pathname === "/cars" || location.pathname === "/users"
+              location.pathname === "/cars" ||
+              location.pathname === "/users" ||
+              location.pathname === "/blog"
                 ? images.blackLogo
                 : images.logo
             }
@@ -95,7 +99,9 @@ const Navbar = () => {
         {/* Desktop Links */}
         <div
           className={`hidden md:flex items-center gap-6 text-lg ${
-            location.pathname === "/cars" || location.pathname === "/users"
+            location.pathname === "/cars" ||
+            location.pathname === "/users" ||
+            location.pathname === "/blog"
               ? "text-gray-600"
               : "text-white"
           }`}
@@ -141,7 +147,9 @@ const Navbar = () => {
           <button
             onClick={() => navigate("/create-post")}
             className={`hover:placeholder-opacity-85 hidden md:block ${
-              location.pathname === "/cars" || location.pathname === "/users"
+              location.pathname === "/cars" ||
+              location.pathname === "/users" ||
+              location.pathname === "/blog"
                 ? "text-gray-600 "
                 : "text-white"
             }`}
@@ -155,7 +163,9 @@ const Navbar = () => {
             onClick={openDrawer}
             title="Menu"
             className={`${
-              location.pathname === "/cars" || location.pathname === "/users"
+              location.pathname === "/cars" ||
+              location.pathname === "/users" ||
+              location.pathname === "/blog"
                 ? "text-gray-600"
                 : "text-white"
             }`}

@@ -30,6 +30,7 @@ import FilteredResults from "./pages/listings/FilteredResults.jsx";
 import UserListingPage from "./pages/userListings/UserListingPage.jsx";
 import LoanPlansPage from "./pages/loanPlans/LoanPlansPage.jsx";
 import ProfilePage from "./pages/profile/ProfilePage.jsx";
+import Blog from "./pages/blog/Blog.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -107,6 +108,7 @@ const App = () => {
         Listings
         <Route path="/loan-plans" element={<LoanPlansPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/blog" element={<Blog />} />
       </Routes>
       {![
         "/",
