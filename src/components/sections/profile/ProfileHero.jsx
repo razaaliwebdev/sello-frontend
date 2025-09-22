@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,18 +8,14 @@ import {
 } from "../../../assets/profilePageAssets/profileAssets";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useGetMeQuery, useLogoutMutation } from "../../../redux/services/api"; // 👈 NEW: Import hooks from api.js (adjust path)
+import { useGetMeQuery, useLogoutMutation } from "../../../redux/services/api";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
-
-  // 👈 NEW: Fetch profile data
   const { data: user, isLoading, isError, error } = useGetMeQuery();
-  const [logout] = useLogoutMutation(); // 👈 NEW: For logout
-
-  // 👈 NEW: Derived metrics from real data
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [metrics, setMetrics] = useState({
     posts: 0,
     activeListings: 0,
@@ -34,17 +28,13 @@ const ProfileHero = () => {
 
   useEffect(() => {
     if (!user) return;
-
-    // Calculate real metrics from API data
     const posts = user.carsPosted?.length || 0;
     const sales = user.carsPurchased?.length || 0;
     const earnings =
       user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) || 0;
-    // Samples for demo (replace with real if backend provides)
-    const clicks = 1000; // e.g., from analytics
-    const rating = 4.5; // e.g., average from reviews
+    const clicks = 1000; // Sample; replace with real data
+    const rating = 4.5; // Sample; replace with real data
     const ratingCount = 10;
-
     setMetrics({
       posts,
       activeListings: posts,
@@ -56,7 +46,6 @@ const ProfileHero = () => {
     });
   }, [user]);
 
-  // 👈 NEW: Handle errors (e.g., unauthorized)
   useEffect(() => {
     if (isError && error?.status === 401) {
       localStorage.removeItem("token");
@@ -64,12 +53,10 @@ const ProfileHero = () => {
     }
   }, [isError, error, navigate]);
 
-  // Handle Profile Popup
   const handleProfilePopup = () => {
     setShowProfilePopup(true);
   };
 
-  // 👈 NEW: Handle logout with API
   const handleLogout = async () => {
     try {
       await logout().unwrap();
@@ -79,6 +66,7 @@ const ProfileHero = () => {
       console.error("Logout failed:", err);
       localStorage.removeItem("token");
       navigate("/login");
+      alert(`Logout failed: ${err?.data?.message || "Please try again"}`);
     }
   };
 
@@ -96,7 +84,6 @@ const ProfileHero = () => {
     };
   }, [showProfilePopup]);
 
-  // 👈 NEW: Loading state
   if (isLoading) {
     return (
       <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
@@ -105,7 +92,6 @@ const ProfileHero = () => {
     );
   }
 
-  // 👈 NEW: Error state (non-401 handled here)
   if (isError && error?.status !== 401) {
     return (
       <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
@@ -118,13 +104,11 @@ const ProfileHero = () => {
 
   return (
     <div className="md:h-[150vh] h-full w-full bg-white">
-      <div className="md:h-[95%]  h-full md:py-0 py-16  w-full bg-primary-500 flex items-end">
+      <div className="md:h-[95%] h-full md:py-0 py-16 w-full bg-primary-500 flex items-end">
         <div className="md:h-[90%] h-full relative w-full px-3 md:px-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0">
-          {/* LeftSide */}
           <div className="md:h-full h-auto md:w-[43%] w-full relative p-5 rounded-lg">
-            {/* Avatar 👈 UPDATED: Use real avatar or fallback */}
             <div className="">
-              <div className="mx-auto absolute -top-14 left-1/2 -translate-x-1/2 md:left-[43%] md:translate-x-0 h-20 w-20 rounded-3xl bg-black overflow-hidden border-2 border-white ">
+              <div className="mx-auto absolute -top-14 left-1/2 -translate-x-1/2 md:left-[43%] md:translate-x-0 h-20 w-20 rounded-3xl bg-black overflow-hidden border-2 border-white">
                 <img
                   className="h-full w-full object-cover"
                   src={
@@ -135,7 +119,6 @@ const ProfileHero = () => {
                 />
               </div>
             </div>
-            {/* Add POSTS Button */}
             <div
               onClick={() => navigate("/create-post")}
               className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
@@ -150,10 +133,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Add Posts</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* User profile */}
             <div
               onClick={handleProfilePopup}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer relative  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer relative hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -165,10 +147,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Profile</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* My Posts 👈 UPDATED: Navigate to my listings */}
             <div
-              onClick={() => navigate("/my-listings")} // 👈 Assume route for carsPosted; adjust as needed
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              onClick={() => navigate("/my-listings")}
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -179,12 +160,10 @@ const ProfileHero = () => {
               </div>
               <h5 className="md:text-xl text-white">
                 My Posts ({metrics.posts})
-              </h5>{" "}
-              {/* 👈 Real count */}
+              </h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Current City 👈 UPDATED: Hardcode or add to backend */}
-            <div className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300">
+            <div className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300">
               <div className="h-9 w-9">
                 <img
                   src={profileAssets.buildingIcon}
@@ -192,16 +171,13 @@ const ProfileHero = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <h5 className="md:text-xl text-white">Dubai</h5>{" "}
-              {/* 👈 Sample; fetch if added to user */}
+              <h5 className="md:text-xl text-white">Dubai</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Hr :) Horizontal Rule */}
             <div className="border-[1px] border-white/50 w-[55%] my-3 md:my-4"></div>
-            {/* Blogs */}
             <div
               onClick={() => navigate("/blogs")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -213,10 +189,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Blogs</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Support  */}
             <div
               onClick={() => navigate("/contact")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -228,10 +203,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Support</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Terms & Condition */}
             <div
               onClick={() => navigate("/terms-conditon")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -243,10 +217,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Terms & Condition</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Advertising */}
             <div
               onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -258,10 +231,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Advertising</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Security */}
             <div
               onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -273,10 +245,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Security</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Notification */}
             <div
               onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -288,10 +259,9 @@ const ProfileHero = () => {
               <h5 className="md:text-xl text-white">Notification</h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
-            {/* Logout 👈 UPDATED: Use real logout handler */}
             <div
               onClick={handleLogout}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer  hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">
                 <img
@@ -300,28 +270,27 @@ const ProfileHero = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <h5 className="md:text-xl text-white">Logout</h5>
+              <h5 className="md:text-xl text-white">
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </h5>
               <div className=""></div>
             </div>
           </div>
-          {/* RightSide */}
-          <div className="md:h-full h-auto md:w-[43%] w-full md:absolute md:right-5 relative mt-6 md:mt-0 ">
-            <h2 className="text-center pb-1 text-xl  text-white font-semibold">
+          <div className="md:h-full h-auto md:w-[43%] w-full md:absolute md:right-5 relative mt-6 md:mt-0">
+            <h2 className="text-center pb-1 text-xl text-white font-semibold">
               My Posts
             </h2>
-            <div className="h-full w-full bg-white shadow-lg rounded-lg shadow-gray-700 p-4 md:p-5 ">
-              {/* profile Options 👈 UPDATED: Dynamic values */}
+            <div className="h-full w-full bg-white shadow-lg rounded-lg shadow-gray-700 p-4 md:p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
                 {profileOptions.map((op) => {
                   let dynamicValue = op.values;
-                  // Override with real data based on op.title (assume profileOptions has titles like "Posts", "Verified")
                   if (op.title === "Posts") dynamicValue = metrics.posts;
                   if (op.title === "Verified")
                     dynamicValue = user?.verified ? "Yes" : "No";
                   return (
                     <div
                       onClick={() => {
-                        alert("hello"); // 👈 Replace with real action if needed
+                        alert("hello");
                       }}
                       key={op.id}
                       className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer"
@@ -341,13 +310,11 @@ const ProfileHero = () => {
                   );
                 })}
               </div>
-              {/* Selling Option or Activities 👈 UPDATED: Dynamic values */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Selling</h2>
                 <div className="w-full md:w-1/2">
                   {sellingOptions.map((op) => {
                     let dynamicValue = op.values;
-                    // Override with real data based on op.title (e.g., "Active Listings", "Sales")
                     if (op.title === "Active Listings")
                       dynamicValue = metrics.activeListings;
                     if (op.title === "Sales") dynamicValue = metrics.sales;
@@ -371,7 +338,6 @@ const ProfileHero = () => {
                   })}
                 </div>
               </div>
-              {/* Overview 👈 UPDATED: If overview has dynamic fields, override here */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Overview</h2>
                 <div className="grid grid-cols-2 gap-3 md:gap-5">
@@ -386,14 +352,12 @@ const ProfileHero = () => {
                           className="h-6 w-6 md:h-7 md:w-7 object-cover"
                           alt={op.title}
                         />
-                        <h4 className="text-sm md:text-base">{op.title}</h4>{" "}
-                        {/* 👈 Add dynamic if needed */}
+                        <h4 className="text-sm md:text-base">{op.title}</h4>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              {/* Performance 👈 UPDATED: Real metrics */}
               <div className="">
                 <h2 className="text-lg font-medium my-2">Performance</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
@@ -439,7 +403,6 @@ const ProfileHero = () => {
           </div>
         </div>
       </div>
-      {/* Top-level Profile Popup 👈 UPDATED: Real data in popup */}
       {showProfilePopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75"
@@ -449,15 +412,12 @@ const ProfileHero = () => {
             className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md p-6 relative animate-fadeIn max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               onClick={() => setShowProfilePopup(false)}
               className="absolute top-3 right-3 text-xl text-gray-500 hover:text-red-500 transition"
             >
               ✕
             </button>
-
-            {/* Profile Image + Upload 👈 UPDATED: Real avatar */}
             <div className="flex flex-col items-center">
               <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary-500 group">
                 <img
@@ -469,7 +429,6 @@ const ProfileHero = () => {
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
-                {/* Upload Overlay */}
                 <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm opacity-0 group-hover:opacity-100 cursor-pointer transition z-[1000]">
                   Change
                   <input
@@ -480,7 +439,6 @@ const ProfileHero = () => {
                       if (e.target.files && e.target.files[0]) {
                         const imgUrl = URL.createObjectURL(e.target.files[0]);
                         console.log("New Image Selected:", imgUrl);
-                        // 👈 TODO: Add updateProfile mutation to upload avatar
                       }
                     }}
                   />
@@ -488,15 +446,11 @@ const ProfileHero = () => {
               </div>
               <h3 className="mt-3 font-semibold text-lg">
                 {user?.name || "User"}
-              </h3>{" "}
-              {/* 👈 Real name */}
+              </h3>
               <p className="text-gray-500 text-sm">
                 {user?.email || "email@example.com"}
-              </p>{" "}
-              {/* 👈 Real email */}
+              </p>
             </div>
-
-            {/* Profile Details 👈 UPDATED: Real values in inputs */}
             <div className="mt-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -505,8 +459,8 @@ const ProfileHero = () => {
                 <input
                   type="email"
                   className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                  defaultValue={user?.email || "razaali@email.com"} // 👈 Real email
-                  disabled // 👈 Disable if not editable
+                  defaultValue={user?.email || "email@example.com"}
+                  disabled
                 />
               </div>
               <div>
@@ -517,7 +471,7 @@ const ProfileHero = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                    placeholder="Enter new password" // 👈 No default for security
+                    placeholder="Enter new password"
                   />
                   {showPassword ? (
                     <FaEye
@@ -533,14 +487,12 @@ const ProfileHero = () => {
                 </div>
                 <p
                   onClick={() => navigate("/reset-password")}
-                  className="text-right my-2 text-primary-500"
+                  className="text-right my-2 text-primary-500 cursor-pointer"
                 >
                   Reset Password
                 </p>
               </div>
             </div>
-
-            {/* Save Button 👈 TODO: Add updateProfile mutation handler */}
             <div className="mt-6 flex justify-center">
               <button className="bg-primary-500 px-6 py-2 rounded-lg hover:opacity-90 transition">
                 Save Changes
