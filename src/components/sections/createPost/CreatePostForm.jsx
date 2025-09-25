@@ -18,6 +18,7 @@ import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
+import { images } from "../../../assets/assets";
 
 const CreatePostForm = () => {
   const [formData, setFormData] = useState({
@@ -395,7 +396,7 @@ const CreatePostForm = () => {
         </div>
 
         <div className="mb-2">
-          <label className="block mb-1">Location (Address)</label>
+          <label className="block mb-1"> Address</label>
           <Input
             inputType="text"
             value={formData.location}
@@ -405,7 +406,7 @@ const CreatePostForm = () => {
         </div>
 
         <div className="my-4">
-          <label className="block mb-1">Geo Location (Coordinates)</label>
+          <label className="block mb-1">Current Location</label>
           <button
             type="button"
             onClick={() => {
@@ -422,9 +423,15 @@ const CreatePostForm = () => {
                 toast.error("Geolocation not supported.");
               }
             }}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="w-full flex items-center justify-between px-5 py-2 border border-gray-300 rounded-md my-2"
           >
-            Get Current Coordinates
+            <img
+              src={images.location}
+              className="w-7 h-7"
+              alt="location icons"
+            />
+            <div className="text-gray-800">Dubai</div>
+            <span></span>
           </button>
           <p>Current: {formData.geoLocation}</p>
         </div>
