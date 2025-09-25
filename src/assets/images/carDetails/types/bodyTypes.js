@@ -185,7 +185,7 @@ export const fuelType = [
     isChecked: false,
   },
   {
-    titleValue: "Hybird",
+    titleValue: "Hybrid",
     image: hybirdCar,
     isChecked: false,
   },

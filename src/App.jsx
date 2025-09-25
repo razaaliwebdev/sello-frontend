@@ -104,7 +104,7 @@ const App = () => {
         <Route path="/view-all-brands" element={<AllBrands />} />
         <Route path="/filter" element={<FilterPage />} />
         <Route path="/search-results" element={<FilteredResults />} />
-        <Route path="/users" element={<UserListingPage />} /> // User Cars
+        <Route path="/my-listings" element={<UserListingPage />} /> // User Cars
         Listings
         <Route path="/loan-plans" element={<LoanPlansPage />} />
         <Route path="/profile" element={<ProfilePage />} />
