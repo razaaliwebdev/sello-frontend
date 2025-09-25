@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { useCreateCarMutation } from "../../../redux/services/api";
 
 import ImagesUpload from "../createPost/ImagesUpload";
@@ -21,6 +22,7 @@ import CarCondition from "../../utils/filter/CarCondition";
 import { images } from "../../../assets/assets";
 
 const CreatePostForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -165,6 +167,7 @@ const CreatePostForm = () => {
         ownerType: "",
         images: [],
       });
+      navigate(`/my-listings`);
     } catch (err) {
       toast.error(err?.data?.message || "Failed to create car post");
     }
