@@ -42,610 +42,161 @@ import hybirdType from '../types/hybirdType.svg';
 import reviewBoyImg from '../types/reviewBoyImg.png';
 import reviewGirlImg from '../types/reviewGirlImg.png';
 
-
-
 export const bodyTypes = [
-  {
-    titleValue: "Roadster",
-    image: roadster,
-    isChecked: false,
-  },
-  {
-    titleValue: "Cabriolet",
-    image: cabriolet,
-    isChecked: false,
-  },
-  {
-    titleValue: "Super",
-    image: superType,
-    isChecked: false,
-  },
-  {
-    titleValue: "Hatchback",
-    image: hatchback,
-    isChecked: false,
-  },
-  {
-    titleValue: "Micro",
-    image: micro,
-    isChecked: false,
-  },
-  {
-    titleValue: "Station",
-    image: station,
-    isChecked: false,
-  },
-  {
-    titleValue: "Sedan",
-    image: sedan,
-    isChecked: false,
-  },
-  {
-    titleValue: "Muscle",
-    image: muscle,
-    isChecked: false,
-  },
-  {
-    titleValue: "Sports",
-    image: sports,
-    isChecked: false,
-  },
-  {
-    titleValue: "Targa",
-    image: targa,
-    isChecked: false,
-  },
-  {
-    titleValue: "Convertible",
-    image: convertible,
-    isChecked: false,
-  },
-  {
-    titleValue: "Coupe",
-    image: coupe,
-    isChecked: false,
-  },
-  {
-    titleValue: "Hybird",
-    image: hybird,
-    isChecked: false,
-  },
-  {
-    titleValue: "SUV",
-    image: suv,
-    isChecked: false,
-  },
-  {
-    titleValue: "Truck",
-    image: truck,
-    isChecked: false,
-  },
-  {
-    titleValue: "Van",
-    image: van,
-    isChecked: false,
-  },
+  { titleValue: "Roadster", image: roadster, isChecked: false },
+  { titleValue: "Cabriolet", image: cabriolet, isChecked: false },
+  { titleValue: "Super", image: superType, isChecked: false },
+  { titleValue: "Hatchback", image: hatchback, isChecked: false },
+  { titleValue: "Micro", image: micro, isChecked: false },
+  { titleValue: "Station", image: station, isChecked: false },
+  { titleValue: "Sedan", image: sedan, isChecked: false },
+  { titleValue: "Muscle", image: muscle, isChecked: false },
+  { titleValue: "Sports", image: sports, isChecked: false },
+  { titleValue: "Targa", image: targa, isChecked: false },
+  { titleValue: "Convertible", image: convertible, isChecked: false },
+  { titleValue: "Coupe", image: coupe, isChecked: false },
+  { titleValue: "Hybrid", image: hybird, isChecked: false },
+  { titleValue: "SUV", image: suv, isChecked: false },
+  { titleValue: "Pickup", image: truck, isChecked: false },
+  { titleValue: "Van", image: van, isChecked: false },
 ];
 
 export const regionalSpecs = [
-  {
-    titleValue: "GCC",
-    isChecked: false,
-  },
-  {
-    titleValue: "American",
-    isChecked: false,
-  },
-  {
-    titleValue: "Canadian",
-    isChecked: false,
-  },
-  {
-    titleValue: "European",
-    isChecked: false,
-  },
+  { titleValue: "GCC", isChecked: false },
+  { titleValue: "American", isChecked: false },
+  { titleValue: "Canadian", isChecked: false },
+  { titleValue: "European", isChecked: false },
 ];
 
 export const numberOfSeats = [
-  {
-    titleValue: 2,
-    isChecked: false,
-  },
-  {
-    titleValue: 3,
-    isChecked: false,
-  },
-  {
-    titleValue: 4,
-    isChecked: false,
-  },
-  {
-    titleValue: 5,
-    isChecked: false,
-  },
-  {
-    titleValue: 6,
-    isChecked: false,
-  },
-  {
-    titleValue: 7,
-    isChecked: false,
-  },
+  { titleValue: 2, isChecked: false },
+  { titleValue: 3, isChecked: false },
+  { titleValue: 4, isChecked: false },
+  { titleValue: 5, isChecked: false },
+  { titleValue: 6, isChecked: false },
+  { titleValue: 7, isChecked: false },
 ];
 
 export const fuelType = [
-  {
-    titleValue: "Petrol",
-    image: fuelIcon,
-    isChecked: false,
-  },
-  {
-    titleValue: "Diesel",
-    image: fuelIcon,
-    isChecked: false,
-  },
-  {
-    titleValue: "Hybrid",
-    image: hybirdCar,
-    isChecked: false,
-  },
-  {
-    titleValue: "Electric",
-    image: electric,
-    isChecked: false,
-  },
+  { titleValue: "Petrol", image: fuelIcon, isChecked: false },
+  { titleValue: "Diesel", image: fuelIcon, isChecked: false },
+  { titleValue: "Hybrid", image: hybirdCar, isChecked: false },
+  { titleValue: "Electric", image: electric, isChecked: false },
 ];
 
 export const transmissionType = [
-  {
-    titleValue: "Manual",
-    image: menual,
-    isChecked: false,
-  },
-  {
-    titleValue: "Automatic",
-    image: auto,
-    isChecked: false,
-  },
+  { titleValue: "Manual", image: menual, isChecked: false },
+  { titleValue: "Automatic", image: auto, isChecked: false },
 ];
 
 export const numberOfCylinders = [
-  {
-    titleValue: 2,
-    isChecked: false,
-  },
-  {
-    titleValue: 3,
-    isChecked: false,
-  },
-  {
-    titleValue: 4,
-    isChecked: false,
-  },
-  {
-    titleValue: 5,
-    isChecked: false,
-  },
-  {
-    titleValue: 6,
-    isChecked: false,
-  },
-  {
-    titleValue: 7,
-    isChecked: false,
-  },
-  {
-    titleValue: 8,
-    isChecked: false,
-  },
-  {
-    titleValue: 8 + "+",
-    isChecked: false,
-  },
+  { titleValue: 2, isChecked: false },
+  { titleValue: 3, isChecked: false },
+  { titleValue: 4, isChecked: false },
+  { titleValue: 5, isChecked: false },
+  { titleValue: 6, isChecked: false },
+  { titleValue: 7, isChecked: false },
+  { titleValue: 8, isChecked: false },
+  { titleValue: 12, isChecked: false },
 ];
 
 export const exteriorColors = [
-  {
-    titleValue: "black",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "blue",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "Brown",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "purple",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "silver",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "white",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "orange",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "yellow",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "gold",
-    isChecked: false,
-    category: "color",
-  },
+  { titleValue: "Black", isChecked: false, category: "color" },
+  { titleValue: "Blue", isChecked: false, category: "color" },
+  { titleValue: "Brown", isChecked: false, category: "color" },
+  { titleValue: "Purple", isChecked: false, category: "color" },
+  { titleValue: "Silver", isChecked: false, category: "color" },
+  { titleValue: "White", isChecked: false, category: "color" },
+  { titleValue: "Orange", isChecked: false, category: "color" },
+  { titleValue: "Yellow", isChecked: false, category: "color" },
+  { titleValue: "Gold", isChecked: false, category: "color" },
 ];
 
 export const interiorColor = [
-  {
-    titleValue: "black",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "blue",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "Brown",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "purple",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "silver",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "white",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "orange",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "yellow",
-    isChecked: false,
-    category: "color",
-  },
-  {
-    titleValue: "gold",
-    isChecked: false,
-    category: "color",
-  },
+  { titleValue: "Black", isChecked: false, category: "color" },
+  { titleValue: "Blue", isChecked: false, category: "color" },
+  { titleValue: "Brown", isChecked: false, category: "color" },
+  { titleValue: "Purple", isChecked: false, category: "color" },
+  { titleValue: "Silver", isChecked: false, category: "color" },
+  { titleValue: "White", isChecked: false, category: "color" },
+  { titleValue: "Orange", isChecked: false, category: "color" },
+  { titleValue: "Yellow", isChecked: false, category: "color" },
+  { titleValue: "Gold", isChecked: false, category: "color" },
 ];
 
 export const doors = [
-  {
-    titleValue: 2,
-    image: door,
-    isChecked: false,
-  },
-  {
-    titleValue: 3,
-    image: door,
-    isChecked: false,
-  },
-  {
-    titleValue: 4,
-    image: door,
-    isChecked: false,
-  },
-  {
-    titleValue: 5,
-    image: door,
-    isChecked: false,
-  },
-  {
-    titleValue: 5 + "+",
-    image: door,
-    isChecked: false,
-  },
+  { titleValue: 2, image: door, isChecked: false },
+  { titleValue: 3, image: door, isChecked: false },
+  { titleValue: 4, image: door, isChecked: false },
+  { titleValue: 5, image: door, isChecked: false },
 ];
 
 export const ownerType = [
-  {
-    titleValue: "Owner",
-    isChecked: false,
-  },
-  {
-    titleValue: "Dealer",
-    isChecked: false,
-  },
-  {
-    titleValue: "Dealership",
-  },
+  { titleValue: "Owner", isChecked: false },
+  { titleValue: "Dealer", isChecked: false },
+  { titleValue: "Dealership", isChecked: false },
 ];
 
 export const warrantyType = [
-  {
-    titleValue: "Yes",
-    isChecked: false,
-  },
-  {
-    titleValue: "No",
-    isChecked: false,
-  },
-  {
-    titleValue: "Doesn't Apply",
-    isChecked: false,
-  },
+  { titleValue: "Yes", isChecked: false },
+  { titleValue: "No", isChecked: false },
+  { titleValue: "Doesn't Apply", isChecked: false },
 ];
 
 export const horsePower = [
-  {
-    titleValue: "0-99" + "hp",
-    image: hp,
-    isChecked: false,
-    category: "horsepower",
-  },
-  {
-    titleValue: "100-199" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "200-299" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "300-399" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "400-499" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "500-599" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "600-699" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "700-799" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "800" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
-  {
-    titleValue: "900+" + " hp",
-    isChecked: false,
-    category: "horsepower",
-    image: hp,
-  },
+  { titleValue: "0-99 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "100-199 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "200-299 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "300-399 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "400-499 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "500-599 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "600-699 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "700-799 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "800 HP", image: hp, isChecked: false, category: "horsepower" },
+  { titleValue: "900+ HP", image: hp, isChecked: false, category: "horsepower" },
 ];
 
 export const engineCapacityCC = [
-  {
-    titleValue: "0-499" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "500-999" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "1000-1499" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "1500-1999" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "2000-2499" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "2500-2999" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "3000-3499" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
-  {
-    titleValue: "3500-4000" + "+" + " CC",
-    isChecked: false,
-    image: cc,
-    category: "engineCapacity",
-  },
+  { titleValue: "0-999 CC", isChecked: false, image: cc, category: "engineCapacity" },
+  { titleValue: "1000-1499 CC", isChecked: false, image: cc, category: "engineCapacity" },
+  { titleValue: "1500-1999 CC", isChecked: false, image: cc, category: "engineCapacity" },
+  { titleValue: "2000-2499 CC", isChecked: false, image: cc, category: "engineCapacity" },
+  { titleValue: "2500+ CC", isChecked: false, image: cc, category: "engineCapacity" },
 ];
 
 export const technicalFeatures = [
-  {
-    titleValue: "4 wheel Drive",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "All Wheel Drive",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "All Wheel Steering",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Anti lock Breakes ABS",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Crules Control",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Dual Exhaust",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Front Airbags",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Front Wheel Drive",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "N20 System",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
-  {
-    titleValue: "Rear Wheel Drive",
-    image: wheel,
-    isChecked: false,
-    category: "featues",
-  },
+  { titleValue: "4 Wheel Drive", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "All Wheel Drive", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "All Wheel Steering", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Anti-lock Brakes ABS", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Cruise Control", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Dual Exhaust", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Front Airbags", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Front Wheel Drive", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "NOS System", image: wheel, isChecked: false, category: "features" },
+  { titleValue: "Rear Wheel Drive", image: wheel, isChecked: false, category: "features" },
 ];
 
-// Car Condition
-export const carCondtion = [
-  {
-    id: 1,
-    titleValue: "New",
-    isChecked: false,
-    category: "condition",
-  },
-  {
-    id: 2,
-    titleValue: "Used",
-    category: "condition",
-  },
+export const carCondition = [
+  { id: 1, titleValue: "New", isChecked: false, category: "condition" },
+  { id: 2, titleValue: "Used", isChecked: false, category: "condition" },
 ];
 
-// Grid Cars Data
 export const filterGridCars = [
-  {
-    id: 1,
-    image: g1,
-  },
-  {
-    id: 2,
-    image: g2,
-  },
-  {
-    id: 3,
-    image: g3,
-  },
-  {
-    id: 4,
-    image: g4,
-  },
+  { id: 1, image: g1 },
+  { id: 2, image: g2 },
+  { id: 3, image: g3 },
+  { id: 4, image: g4 },
 ];
 
-
-// Users , browse by car type 
 export const usersBrowseByCarType = [
-  {
-    id: 1,
-    image: suvType,
-    titleValue: "SUV",
-    category: "carType",
-  },
-  {
-    id: 2,
-    image: sedanType,
-    titleValue: "Sedan",
-    category: "carType",
-  },
-  {
-    id: 3,
-    image: hatchbackType,
-    titleValue: "Hatchback",
-    category: "carType",
-  },
-  {
-    id: 4,
-    image: coupeType,
-    titleValue: "Coupe",
-    category: "carType"
-  },
-  {
-    id: 5,
-    image: hybirdType,
-    titleValue: "Hybird",
-    category: "carType",
-  }
-]
+  { id: 1, image: suvType, titleValue: "SUV", category: "carType" },
+  { id: 2, image: sedanType, titleValue: "Sedan", category: "carType" },
+  { id: 3, image: hatchbackType, titleValue: "Hatchback", category: "carType" },
+  { id: 4, image: coupeType, titleValue: "Coupe", category: "carType" },
+  { id: 5, image: hybirdType, titleValue: "Hybrid", category: "carType" },
+];
 
-
-// Customers Reviews
 export const customersReviews = [
   {
     id: 1,
@@ -662,19 +213,16 @@ export const customersReviews = [
     customerRole: "Google",
     review: "Excellent experience! The search filters made it easy to narrow down my options.",
     category: "review",
-  }
-]
+  },
+];
 
-// Loan-Plan page , reviews section
-// Customers Reviews
 export const loanPageCustomersReviews = [
   {
     id: 1,
     image: reviewBoyImg,
     customerName: "John Doe",
     customerRole: "Facebook",
-    review:
-      "Great platform! Found my dream car within days, and the process was super smooth.",
+    review: "Great platform! Found my dream car within days, and the process was super smooth.",
     category: "review",
   },
   {
@@ -682,8 +230,7 @@ export const loanPageCustomersReviews = [
     image: reviewGirlImg,
     customerName: "Sarah Smith",
     customerRole: "Google",
-    review:
-      "Excellent experience! The search filters made it easy to narrow down my options.",
+    review: "Excellent experience! The search filters made it easy to narrow down my options.",
     category: "review",
   },
   {
@@ -691,8 +238,7 @@ export const loanPageCustomersReviews = [
     image: reviewBoyImg,
     customerName: "Michael Johnson",
     customerRole: "Instagram",
-    review:
-      "Loved the transparent pricing. No hidden fees and everything was straightforward.",
+    review: "Loved the transparent pricing. No hidden fees and everything was straightforward.",
     category: "review",
   },
   {
@@ -700,8 +246,7 @@ export const loanPageCustomersReviews = [
     image: reviewGirlImg,
     customerName: "Emily Davis",
     customerRole: "Twitter",
-    review:
-      "Customer support was fantastic. They helped me through each step of financing my car.",
+    review: "Customer support was fantastic. They helped me through each step of financing my car.",
     category: "review",
   },
   {
@@ -709,8 +254,7 @@ export const loanPageCustomersReviews = [
     image: reviewBoyImg,
     customerName: "David Lee",
     customerRole: "LinkedIn",
-    review:
-      "I was impressed with the wide selection of vehicles. Found exactly what I needed.",
+    review: "I was impressed with the wide selection of vehicles. Found exactly what I needed.",
     category: "review",
   },
   {
@@ -718,9 +262,18 @@ export const loanPageCustomersReviews = [
     image: reviewGirlImg,
     customerName: "Olivia Brown",
     customerRole: "YouTube",
-    review:
-      "This platform saved me so much time. The loan calculator was a game-changer!",
+    review: "This platform saved me so much time. The loan calculator was a game-changer!",
     category: "review",
   },
 ];
+
+
+
+
+
+
+
+
+
+
 

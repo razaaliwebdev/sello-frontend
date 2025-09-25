@@ -1,20 +1,27 @@
-import React from "react";
-import SpecsUtility from "./SpecsUtility";
+import React, { useState } from "react";
 import { technicalFeatures } from "../../../assets/images/carDetails/types/bodyTypes";
+import SpecsUtility from "./SpecsUtility";
 
 const TechnicalFeaturesSpecs = ({ onChange }) => {
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+
   const handleSelect = (titleValue) => {
+    const newFeatures = selectedFeatures.includes(titleValue)
+      ? selectedFeatures.filter((f) => f !== titleValue)
+      : [...selectedFeatures, titleValue];
+    setSelectedFeatures(newFeatures);
     if (onChange) {
-      onChange(titleValue);
+      onChange(newFeatures);
     }
   };
 
   return (
     <div>
       <SpecsUtility
+        groupName="features"
         specsTypes={technicalFeatures}
         onChange={handleSelect}
-        groupName={"technicalFeatures"}
+        multiple
       />
     </div>
   );

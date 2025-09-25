@@ -1,22 +1,24 @@
+
+
 import React from "react";
-import { carCondtion } from "../../../assets/images/carDetails/types/bodyTypes";
+import { carCondition } from "../../../assets/images/carDetails/types/bodyTypes"; // Fixed: carCondtion → carCondition
 import SpecsUtility from "./SpecsUtility";
 
 const CarCondition = ({ onChange }) => {
   const handleSelect = (titleValue) => {
     if (onChange) {
-      onChange(titleValue); // Send to parent
+      onChange(titleValue);
     }
   };
-  
+
   return (
-    <>
+    <div>
       <SpecsUtility
-        groupName={"carCondtion"}
-        specsTypes={carCondtion}
+        groupName="condition"
+        specsTypes={carCondition}
         onChange={handleSelect}
       />
-    </>
+    </div>
   );
 };
 
