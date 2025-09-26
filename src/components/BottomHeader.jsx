@@ -9,6 +9,7 @@ const BottomHeader = () => {
 
   return (
     <div
+      style={{ zIndex: 1000 }}
       className={`${
         location.pathname === "/users" || location.pathname === "/blog"
           ? "bg-primary"
