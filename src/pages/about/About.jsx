@@ -4,6 +4,7 @@ import OutStorySection from "../../components/sections/about/OutStorySection";
 import JoinUsSection from "../../components/sections/about/JoinUsSection";
 import OurTeam from "../../components/sections/about/OurTeam";
 import ReviewsAnalysis from "../../components/sections/about/ReviewsAnalysis";
+import CustomerReviews from "../../components/sections/about/CustomerReviews";
 
 const About = () => {
   return (
@@ -13,6 +14,7 @@ const About = () => {
       <JoinUsSection />
       <OurTeam />
       <ReviewsAnalysis />
+      <CustomerReviews />
     </div>
   );
 };
