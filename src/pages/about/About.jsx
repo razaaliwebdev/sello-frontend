@@ -3,6 +3,7 @@ import AboutHeroSection from "../../components/sections/about/AboutHeroSection";
 import OutStorySection from "../../components/sections/about/OutStorySection";
 import JoinUsSection from "../../components/sections/about/JoinUsSection";
 import OurTeam from "../../components/sections/about/OurTeam";
+import ReviewsAnalysis from "../../components/sections/about/ReviewsAnalysis";
 
 const About = () => {
   return (
@@ -11,6 +12,7 @@ const About = () => {
       <OutStorySection />
       <JoinUsSection />
       <OurTeam />
+      <ReviewsAnalysis />
     </div>
   );
 };
