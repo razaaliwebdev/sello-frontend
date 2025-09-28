@@ -68,7 +68,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between ${
+        className={`w-full px-4 md:px-8 py-2 flex items-center justify-between sticky top-0 z-50  ${
           location.pathname === "/cars" ||
           location.pathname === "/users" ||
           location.pathname === "/blog"
