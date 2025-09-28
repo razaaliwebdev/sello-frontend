@@ -1,14 +1,8 @@
 import React from "react";
-import { images } from "../../assets/assets";
 
 const TermsCondition = () => {
   return (
     <div className="">
-      <nav className="bg-primary-500 p-2">
-        <div className="logo">
-          <img className="w-40" src={images.logo} alt="logo" />
-        </div>
-      </nav>
       <div className="container mx-auto px-4 py-10 max-w-4xl text-gray-800">
         <h1 className="text-3xl font-bold mb-6">Terms & Conditions</h1>
 

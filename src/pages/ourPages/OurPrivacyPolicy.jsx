@@ -1,15 +1,9 @@
 import React from "react";
-import { images } from "../../assets/assets";
 import { Link } from "react-router-dom";
 
 const OurPrivacyPolicy = () => {
   return (
     <div>
-      <nav className="bg-primary-500 p-2">
-        <div className="logo">
-          <img className="w-40" src={images.logo} alt="logo" />
-        </div>
-      </nav>
       <div className="p-6 md:p-10 max-w-5xl mx-auto text-gray-700">
         <h1 className="text-3xl md:text-4xl font-semibold mb-4 text-center">
           Privacy Policy
