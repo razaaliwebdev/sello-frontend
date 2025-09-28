@@ -57,7 +57,17 @@ const CreatePostForm = () => {
   const [createCar, { isLoading }] = useCreateCarMutation();
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Handle features to ensure it's a flat array
+    if (field === "features") {
+      const flatValue = Array.isArray(value)
+        ? value.flat().filter((item) => typeof item === "string" && item.trim())
+        : typeof value === "string" && value.trim()
+        ? value.split(",").map((item) => item.trim())
+        : [];
+      setFormData((prev) => ({ ...prev, [field]: flatValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -109,6 +119,7 @@ const CreatePostForm = () => {
       toast.error("Invalid geoLocation format. Use [longitude, latitude].");
       return;
     }
+
     const data = new FormData();
     const defaults = {
       variant: formData.variant || "N/A",
@@ -122,11 +133,17 @@ const CreatePostForm = () => {
       description: formData.description || "",
       features: formData.features.length ? formData.features : [],
     };
+
+    console.log("formData.features before submission:", formData.features);
+
     Object.keys(formData).forEach((key) => {
       if (key === "images") {
         formData.images.forEach((img) => data.append("images", img));
       } else if (key === "features") {
-        data.append("features", JSON.stringify(defaults.features));
+        // Append each feature individually to FormData
+        defaults.features.forEach((feature) =>
+          data.append("features[]", feature)
+        );
       } else {
         data.append(
           key,
@@ -134,6 +151,7 @@ const CreatePostForm = () => {
         );
       }
     });
+
     try {
       const res = await createCar(data).unwrap();
       toast.success("Car post created successfully!");
@@ -169,6 +187,7 @@ const CreatePostForm = () => {
       });
       navigate(`/my-listings`);
     } catch (err) {
+      console.error("Create Car Error:", err);
       toast.error(err?.data?.message || "Failed to create car post");
     }
   };
@@ -177,7 +196,7 @@ const CreatePostForm = () => {
     <form
       onSubmit={handleSubmit}
       className="px-4 md:px-20 py-12"
-      encType="multipart/form-data"
+      enctype="multipart/form-data"
     >
       <h1 className="text-center md:text-3xl font-semibold">Post</h1>
       <div className="border-[1px] border-gray-700 rounded-md px-5 py-6 my-5">
@@ -399,7 +418,7 @@ const CreatePostForm = () => {
         </div>
 
         <div className="mb-2">
-          <label className="block mb-1"> Address</label>
+          <label className="block mb-1">Address</label>
           <Input
             inputType="text"
             value={formData.location}
