@@ -12,7 +12,7 @@ const HeroFilter = () => {
             { label: "Select Model", options: ["A7 Sportback"] },
             { label: "Moved (km)", options: ["< 1000"] },
             { label: "Select Engine", options: ["5 Speed Manual"] },
-            { label: "Car Status", options: ["Old"] },
+            { label: "Car Status", options: ["Old", "New"] },
           ].map((field, i) => (
             <div key={i} className="filter-feild">
               <label className="text-gray-600 text-sm block mb-1">
