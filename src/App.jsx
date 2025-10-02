@@ -31,6 +31,7 @@ import UserListingPage from "./pages/userListings/UserListingPage.jsx";
 import LoanPlansPage from "./pages/loanPlans/LoanPlansPage.jsx";
 import ProfilePage from "./pages/profile/ProfilePage.jsx";
 import Blog from "./pages/blog/Blog.jsx";
+import AllBlog from "./pages/blog/AllBlog.jsx";
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -109,6 +110,7 @@ const App = () => {
         <Route path="/loan-plans" element={<LoanPlansPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/all" element={<AllBlog />} />
       </Routes>
       {![
         "/",
