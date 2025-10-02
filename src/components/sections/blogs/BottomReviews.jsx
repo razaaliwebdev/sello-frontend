@@ -43,6 +43,9 @@ const BottomReviews = () => {
             sed praesentium ducimus nobis aliquam. Lorem ipsum dolor sit amet
             consectetur adipisicing elit. Doloribus, magnam.
           </p>
+          <button className="w-max px-6 md:px-8 py-2 md:py-2.5 rounded-lg text-white bg-primary-500 hover:opacity-90 transition mt-8">
+            Read full article...
+          </button>
         </div>
       </div>
 
@@ -84,7 +87,7 @@ const BottomReviews = () => {
             illum. Recusandae atque quos distinctio?
           </p>
 
-          <button className="w-max px-6 md:px-8 py-2 md:py-2.5 rounded-lg text-white bg-red-400 hover:bg-red-500 transition">
+          <button className="w-max px-6 md:px-8 py-2 md:py-2.5 rounded-lg text-white bg-primary-500 hover:opacity-90 transition">
             Read full article...
           </button>
         </div>
