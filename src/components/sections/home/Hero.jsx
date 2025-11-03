@@ -14,7 +14,7 @@ const Hero = () => {
 
       gsap.to(slideRefs.current[currentImageIndex], {
         opacity: 0,
-        duration: 1.2,
+        duration: 1.2,  
         ease: "power2.out",
       });
 
