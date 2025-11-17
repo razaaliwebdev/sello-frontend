@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import { images, popularMakes } from "../../../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundUp } from "react-icons/io";
@@ -7,15 +7,16 @@ const PopularMakes = () => {
   const [selectBrand, setSelectBrand] = useState(null);
   const navigate = useNavigate();
 
-  const handleFilter = (brand) => {
+  const handleFilter = useCallback((brand) => {
     setSelectBrand((prev) => (prev === brand ? null : brand));
-  };
+  }, []);
 
-  const filteredCars = selectBrand
-    ? popularMakes.filter(
-        (car) => car.brand.toLowerCase() === selectBrand.toLowerCase()
-      )
-    : popularMakes;
+  const filteredCars = useMemo(() => {
+    if (!selectBrand) return popularMakes;
+    return popularMakes.filter(
+      (car) => car.brand.toLowerCase() === selectBrand.toLowerCase()
+    );
+  }, [selectBrand]);
 
   return (
     <div className="px-4 md:px-16 py-12   bg-[#F5F5F5]">
@@ -103,4 +104,4 @@ const PopularMakes = () => {
   );
 };
 
-export default PopularMakes;
+export default memo(PopularMakes);

@@ -68,10 +68,7 @@ const SearchBar = () => {
     }
   }, [error]);
 
-  // Log search term changes
-  useEffect(() => {
-    console.log("Current search term:", searchTerm);
-  }, [searchTerm]);
+  // Removed console.log to reduce noise
 
   return (
     <form

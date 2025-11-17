@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
@@ -41,28 +41,33 @@ const GetAllCarsSection = () => {
   const [page, setPage] = useState(1);
   const [isPageChanging, setIsPageChanging] = useState(false);
 
-  // Call backend with pagination and filtering
-  const { data: carsData, isLoading, error, refetch } = useGetCarsQuery({
+  // Memoize query params to prevent unnecessary refetches
+  const queryParams = useMemo(() => ({
     page,
     limit: 6,
     // Only apply condition filter if not 'all cars'
-    condition: activeTab === "all" ? "" : activeTab,
-  });
+    ...(activeTab !== "all" && { condition: activeTab }),
+  }), [page, activeTab]);
+
+  // Call backend with pagination and filtering
+  const { data: carsData, isLoading, error } = useGetCarsQuery(queryParams);
 
   // Reset to first page when changing tabs
   useEffect(() => {
     setPage(1);
-    refetch();
-  }, [activeTab, refetch]);
+  }, [activeTab]);
 
   // Cars data from API with fallback to empty array
-  const cars = Array.isArray(carsData?.cars) ? carsData.cars : [];
+  const cars = useMemo(() => {
+    return Array.isArray(carsData?.cars) ? carsData.cars : [];
+  }, [carsData?.cars]);
+  
   const totalPages = carsData?.pages || 1;
 
-  // Handle tab change
-  const handleTabChange = (tab) => {
+  // Handle tab change with useCallback
+  const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
-  };
+  }, []);
 
   // Handle page change with loading state
   // const handlePageChange = (newPage) => {
@@ -75,18 +80,18 @@ const GetAllCarsSection = () => {
 
   // handlePageChange();
 
-  const toggleSave = (id) => {
+  const toggleSave = useCallback((id) => {
     setSavedCars((prev) =>
       prev.includes(id) ? prev.filter((carId) => carId !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  // Define the available tabs
-  const tabs = [
+  // Define the available tabs - memoized
+  const tabs = useMemo(() => [
     { id: "all", label: "All Cars" },
     { id: "new", label: "New Cars" },
     { id: "used", label: "Used Cars" },
-  ];
+  ], []);
 
   // Reset loading state when data is loaded
   useEffect(() => {
@@ -95,11 +100,11 @@ const GetAllCarsSection = () => {
     }
   }, [cars]);
 
-  // Filter cars based on active tab (client-side fallback)
-  const filteredCars = cars.filter((car) => {
-    if (activeTab === "all") return true;
-    return car.condition?.toLowerCase() === activeTab.toLowerCase();
-  });
+  // Filter cars based on active tab (client-side fallback) - memoized
+  const filteredCars = useMemo(() => {
+    if (activeTab === "all") return cars;
+    return cars.filter((car) => car.condition?.toLowerCase() === activeTab.toLowerCase());
+  }, [cars, activeTab]);
 
   // Show skeleton loaders while loading
   if (isLoading) {
@@ -298,4 +303,5 @@ const GetAllCarsSection = () => {
   );
 };
 
-export default GetAllCarsSection;
+// Memoize the component to prevent unnecessary rerenders
+export default memo(GetAllCarsSection);

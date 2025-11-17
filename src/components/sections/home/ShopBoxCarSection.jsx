@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import {
   carBrandCategories,
   carBrandsByCategory,
@@ -7,7 +7,11 @@ import {
 const ShopBoxCar = () => {
   const [activeTab, setActiveTab] = useState("new");
 
-  const activeBrands = carBrandsByCategory[activeTab] || [];
+  const activeBrands = useMemo(() => carBrandsByCategory[activeTab] || [], [activeTab]);
+
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+  }, []);
 
   return (
     <section className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
@@ -20,7 +24,7 @@ const ShopBoxCar = () => {
         {carBrandCategories.map((tab) => (
           <button
             key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
+            onClick={() => handleTabChange(tab.value)}
             className={`pb-2 text-base md:text-lg font-medium whitespace-nowrap ${
               activeTab === tab.value
                 ? "border-b-2 border-yellow-500 text-black"
@@ -47,4 +51,4 @@ const ShopBoxCar = () => {
   );
 };
 
-export default ShopBoxCar;
+export default memo(ShopBoxCar);

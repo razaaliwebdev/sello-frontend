@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useCreateCarMutation } from "../../../redux/services/api";
@@ -20,9 +20,15 @@ import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import CarCondition from "../../utils/filter/CarCondition";
 import { images } from "../../../assets/assets";
+import { useCarCategories } from "../../../hooks/useCarCategories";
 
 const CreatePostForm = () => {
   const navigate = useNavigate();
+  const { makes, models, getModelsByMake, years, isLoading: categoriesLoading } = useCarCategories();
+  const [selectedMake, setSelectedMake] = useState("");
+  const [availableModels, setAvailableModels] = useState([]);
+  const [availableYears, setAvailableYears] = useState([]);
+  
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -67,6 +73,36 @@ const CreatePostForm = () => {
       setFormData((prev) => ({ ...prev, [field]: flatValue }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
+      
+      // When make changes, update available models
+      if (field === "make") {
+        setSelectedMake(value);
+        const selectedMakeObj = makes.find(m => m.name === value);
+        if (selectedMakeObj) {
+          const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+          setAvailableModels(makeModels);
+          // Reset model if it's not available for the new make
+          if (formData.model && !makeModels.find(m => m.name === formData.model)) {
+            setFormData((prev) => ({ ...prev, model: "" }));
+          }
+        }
+      }
+      
+      // When model changes, update available years
+      if (field === "model") {
+        const selectedModelObj = availableModels.find(m => m.name === value);
+        if (selectedModelObj) {
+          const modelYears = years.filter(y => {
+            const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
+            return parentId === selectedModelObj._id;
+          });
+          setAvailableYears(modelYears);
+          // Reset year if it's not available for the new model
+          if (formData.year && !modelYears.find(y => y.name === formData.year.toString())) {
+            setFormData((prev) => ({ ...prev, year: "" }));
+          }
+        }
+      }
     }
   };
 
@@ -196,7 +232,7 @@ const CreatePostForm = () => {
     <form
       onSubmit={handleSubmit}
       className="px-4 md:px-20 py-12"
-      enctype="multipart/form-data"
+      encType="multipart/form-data"
     >
       <h1 className="text-center md:text-3xl font-semibold">Post</h1>
       <div className="border-[1px] border-gray-700 rounded-md px-5 py-6 my-5">
@@ -262,24 +298,38 @@ const CreatePostForm = () => {
 
         <div className="flex gap-6 my-2 w-full items-center">
           <div className="w-1/2">
-            <label className="block mb-1">Car Make</label>
-            <Input
-              inputType="text"
+            <label className="block mb-1">Car Make *</label>
+            <select
               value={formData.make}
               onChange={(e) => handleChange("make", e.target.value)}
-              placeholder="e.g., Toyota"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
-            />
+              disabled={categoriesLoading}
+            >
+              <option value="">Select Make</option>
+              {makes.map((make) => (
+                <option key={make._id} value={make.name}>
+                  {make.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="w-1/2">
-            <label className="block mb-1">Car Model</label>
-            <Input
-              inputType="text"
+            <label className="block mb-1">Car Model *</label>
+            <select
               value={formData.model}
               onChange={(e) => handleChange("model", e.target.value)}
-              placeholder="e.g., Camry"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
-            />
+              disabled={categoriesLoading || !formData.make}
+            >
+              <option value="">Select Model</option>
+              {availableModels.map((model) => (
+                <option key={model._id} value={model.name}>
+                  {model.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -295,14 +345,33 @@ const CreatePostForm = () => {
 
         <div className="flex gap-6 my-2 w-full items-center">
           <div className="w-1/2">
-            <label className="block mb-1">Year</label>
-            <Input
-              inputType="number"
+            <label className="block mb-1">Year *</label>
+            <select
               value={formData.year}
               onChange={(e) => handleChange("year", e.target.value)}
-              placeholder="e.g., 2020"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
-            />
+              disabled={categoriesLoading || !formData.model}
+            >
+              <option value="">Select Year</option>
+              {availableYears.length > 0 ? (
+                availableYears.map((year) => (
+                  <option key={year._id} value={year.name}>
+                    {year.name}
+                  </option>
+                ))
+              ) : (
+                // Fallback: show years from 1990 to current year if no categories
+                Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => {
+                  const year = new Date().getFullYear() - i;
+                  return (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  );
+                })
+              )}
+            </select>
           </div>
           <div className="w-1/2">
             <label className="block mb-1">Mileage (km)</label>

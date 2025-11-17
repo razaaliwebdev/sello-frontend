@@ -18,8 +18,13 @@ import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import LocationButton from "../../utils/filter/LocationButton";
 import { useNavigate } from "react-router-dom";
+import { useCarCategories } from "../../../hooks/useCarCategories";
 
 const FilterForm = ({ onFilter }) => {
+  const { makes, models, getModelsByMake, isLoading: categoriesLoading } = useCarCategories();
+  const [selectedMake, setSelectedMake] = useState("");
+  const [availableModels, setAvailableModels] = useState([]);
+  
   const [filters, setFilters] = useState({
     search: "",
     minPrice: "",
@@ -61,7 +66,35 @@ const FilterForm = ({ onFilter }) => {
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    
+    // When make changes, update available models
+    if (field === "make") {
+      setSelectedMake(value);
+      const selectedMakeObj = makes.find(m => m.name === value);
+      if (selectedMakeObj) {
+        const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+        setAvailableModels(makeModels);
+        // Reset model if it's not available for the new make
+        if (filters.model && !makeModels.find(m => m.name === filters.model)) {
+          setFilters((prev) => ({ ...prev, model: "" }));
+        }
+      } else {
+        setAvailableModels([]);
+        setFilters((prev) => ({ ...prev, model: "" }));
+      }
+    }
   };
+  
+  // Initialize available models when make is selected on mount
+  useEffect(() => {
+    if (filters.make && makes.length > 0) {
+      const selectedMakeObj = makes.find(m => m.name === filters.make);
+      if (selectedMakeObj) {
+        const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+        setAvailableModels(makeModels);
+      }
+    }
+  }, [filters.make, makes, getModelsByMake]);
 
   const handleRangeChange = (type, values) => {
     if (type === "price") {
@@ -301,21 +334,35 @@ const FilterForm = ({ onFilter }) => {
           <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
             <div className="w-full sm:w-1/2">
               <label className="block mb-1">Car Make</label>
-              <Input
-                inputType="text"
+              <select
                 value={filters.make}
                 onChange={(e) => handleChange("make", e.target.value)}
-                placeholder="e.g., Toyota"
-              />
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                disabled={categoriesLoading}
+              >
+                <option value="">All Makes</option>
+                {makes.map((make) => (
+                  <option key={make._id} value={make.name}>
+                    {make.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="w-full sm:w-1/2">
               <label className="block mb-1">Car Model</label>
-              <Input
-                inputType="text"
+              <select
                 value={filters.model}
                 onChange={(e) => handleChange("model", e.target.value)}
-                placeholder="e.g., Camry"
-              />
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                disabled={categoriesLoading || !filters.make}
+              >
+                <option value="">All Models</option>
+                {availableModels.map((model) => (
+                  <option key={model._id} value={model.name}>
+                    {model.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetCarsQuery } from "../../../redux/services/api";
+import { useGetSingleCarQuery, useGetMeQuery } from "../../../redux/services/api";
 import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
+import CarChatWidget from "../../carChat/CarChatWidget";
+import toast from "react-hot-toast";
 
 const CarDetailsEtc = () => {
   const { id } = useParams();
-  const { data: carsResponse, isLoading, error } = useGetCarsQuery({
-    page: 1,
-    limit: 100,
+  const { data: car, isLoading, error } = useGetSingleCarQuery(id, {
+    skip: !id,
   });
-  const car = carsResponse?.cars?.find((c) => c._id === id);
-
+  const { data: currentUser } = useGetMeQuery();
   const [showMore, setShowMore] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   if (isLoading) {
     return <p className="px-4 py-10">Loading details...</p>;
@@ -138,12 +140,98 @@ const CarDetailsEtc = () => {
           </div>
         </div>
 
-        {/* Price and Proceed Button */}
+        {/* Status Badge (for seller) */}
+        {currentUser && car.postedBy && currentUser._id === car.postedBy._id && (
+          <div className="flex items-center gap-3 py-3 border-b border-gray-400">
+            <span className="text-sm font-medium text-gray-700">Status:</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              car.isSold 
+                ? "bg-red-100 text-red-800" 
+                : "bg-green-100 text-green-800"
+            }`}>
+              {car.isSold ? "Sold Out" : "Available"}
+            </span>
+            <button
+              onClick={async () => {
+                if (window.confirm(`Are you sure you want to mark this car as ${car.isSold ? 'available' : 'sold'}?`)) {
+                  try {
+                    setIsUpdatingStatus(true);
+                    const token = localStorage.getItem("token");
+                    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+                    const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
+                    const response = await fetch(`${API_URL}/cars/${car._id}/sold`, {
+                      method: "PUT",
+                      headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({ isSold: !car.isSold })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                      toast.success(`Car marked as ${!car.isSold ? 'sold' : 'available'}`);
+                      window.location.reload(); // Reload to update car data
+                    } else {
+                      toast.error(data.message || "Failed to update status");
+                    }
+                  } catch (error) {
+                    toast.error("Failed to update car status");
+                  } finally {
+                    setIsUpdatingStatus(false);
+                  }
+                }
+              }}
+              disabled={isUpdatingStatus}
+              className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+            >
+              {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
+            </button>
+          </div>
+        )}
+
+        {/* Price and Buy Now Button */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between py-4 gap-4">
-          <h2 className="md:text-2xl text-xl font-semibold">AED {car.price}</h2>
-          <button className="bg-primary-500 px-4 py-2 rounded hover:opacity-90 transition">
-            Proceed
-          </button>
+          <div>
+            <h2 className="md:text-2xl text-xl font-semibold">AED {car.price}</h2>
+            {car.isSold && (
+              <p className="text-red-600 font-medium text-sm mt-1">This car has been sold</p>
+            )}
+          </div>
+          {!car.isSold ? (
+            currentUser ? (
+              currentUser._id === car.postedBy?._id ? (
+                <button 
+                  className="bg-gray-400 px-4 py-2 rounded hover:opacity-90 transition cursor-not-allowed"
+                  disabled
+                >
+                  Your Listing
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setShowChat(true)}
+                  className="bg-primary-500 text-white px-6 py-2 rounded hover:opacity-90 transition font-medium"
+                >
+                  Buy Now / Chat with Seller
+                </button>
+              )
+            ) : (
+              <button 
+                onClick={() => {
+                  toast.error("Please login to chat with seller");
+                }}
+                className="bg-primary-500 text-white px-6 py-2 rounded hover:opacity-90 transition font-medium"
+              >
+                Buy Now / Chat with Seller
+              </button>
+            )
+          ) : (
+            <button 
+              className="bg-gray-400 px-4 py-2 rounded cursor-not-allowed"
+              disabled
+            >
+              Sold Out
+            </button>
+          )}
         </div>
 
         {/* Expand/Collapse More Details */}
@@ -202,6 +290,16 @@ const CarDetailsEtc = () => {
         <h2 className="md:text-4xl text-2xl font-semibold my-4">Description</h2>
         <p className="text-sm md:text-base">{car.description}</p>
       </div>
+
+      {/* Car Chat Widget */}
+      {showChat && car && currentUser && currentUser._id !== car.postedBy?._id && (
+        <CarChatWidget
+          carId={car._id}
+          sellerId={car.postedBy?._id || car.postedBy}
+          carTitle={`${car.make} ${car.model} - ${car.year}`}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 };

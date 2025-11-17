@@ -36,7 +36,13 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Login successful");
-      navigate("/home");
+      
+      // Redirect to admin dashboard if user is admin
+      if (res.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       toast.error(err?.data?.message || "Login failed");
     }
@@ -52,7 +58,13 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Google login successful");
-      navigate("/home");
+      
+      // Redirect to admin dashboard if user is admin
+      if (res.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       toast.error(err?.data?.message || "Google login failed");
     } finally {

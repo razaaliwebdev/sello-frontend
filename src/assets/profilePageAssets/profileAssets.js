@@ -40,7 +40,8 @@ export const profileAssets = {
     carImage,
     girlImage,
     phoneIcon,
-    mailIcon
+    mailIcon,
+    chatIcon
 }
 
 

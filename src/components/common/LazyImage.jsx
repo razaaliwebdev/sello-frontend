@@ -11,13 +11,14 @@ const LazyImage = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [imgSrc, setImgSrc] = useState('');
+  const [imgSrc, setImgSrc] = useState(null);
   const imgRef = useRef(null);
   const observerRef = useRef(null);
 
   useEffect(() => {
-    if (!src) {
+    if (!src || src === '') {
       setHasError(true);
+      setIsLoading(false);
       return;
     }
 

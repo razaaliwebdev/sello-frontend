@@ -128,7 +128,7 @@
 
 // export default CarDetailsGallerySection;
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   FaBookmark,
   FaRegBookmark,
@@ -137,17 +137,23 @@ import {
 } from "react-icons/fa";
 import { CiImageOn } from "react-icons/ci";
 import { useParams } from "react-router-dom";
-import { useGetCarsQuery } from "../../../redux/services/api";
+import { useGetSingleCarQuery } from "../../../redux/services/api";
+import { images as placeholderImages } from "../../../assets/assets";
 
 const CarDetailsGallerySection = () => {
   const { id } = useParams();
-  const { data: carsData = {}, isLoading, error } = useGetCarsQuery();
+  const { data: car, isLoading, error } = useGetSingleCarQuery(id, {
+    skip: !id,
+  });
 
-  // ✅ Extract array correctly after pagination
-  const cars = Array.isArray(carsData?.cars) ? carsData.cars : [];
-  const car = cars.find((c) => c._id === id);
-
-  const images = car?.images || [];
+  // Filter out empty image strings and provide fallback
+  const images = useMemo(() => {
+    if (!car?.images || !Array.isArray(car.images)) {
+      return [placeholderImages.carPlaceholder];
+    }
+    const validImages = car.images.filter(img => img && img.trim() !== '');
+    return validImages.length > 0 ? validImages : [placeholderImages.carPlaceholder];
+  }, [car?.images]);
   const [current, setCurrent] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
 
@@ -184,15 +190,21 @@ const CarDetailsGallerySection = () => {
       {/* Main Image Area */}
       <div className="relative  rounded overflow-hidden">
         <div className="w-full h-[200px] md:h-[490px] rounded-lg overflow-hidden bg-gray-100 relative">
-          <img
-            src={images[current]}
-            alt={`Car Image ${current + 1}`}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "/fallback-car.jpg";
-            }}
-          />
+          {images[current] ? (
+            <img
+              src={images[current]}
+              alt={`Car Image ${current + 1}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = placeholderImages.carPlaceholder;
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+              <span className="text-gray-400">No image available</span>
+            </div>
+          )}
         </div>
 
         {/* Badge */}
@@ -241,19 +253,27 @@ const CarDetailsGallerySection = () => {
       </div>
 
       {/* Thumbnails */}
-      <div className="flex gap-3 mt-5 bottom-image-gallery overflow-x-auto">
-        {images.map((img, idx) => (
-          <img
-            key={idx}
-            src={img}
-            onClick={() => setCurrent(idx)}
-            className={` h-40 w-40 object-cover rounded cursor-pointer border-2 transition-all duration-200 ${
-              current === idx ? "border-primary-500" : "border-transparent"
-            }`}
-            alt={`Thumbnail ${idx + 1}`}
-          />
-        ))}
-      </div>
+      {images.length > 1 && (
+        <div className="flex gap-3 mt-5 bottom-image-gallery overflow-x-auto">
+          {images.map((img, idx) => (
+            img ? (
+              <img
+                key={idx}
+                src={img}
+                onClick={() => setCurrent(idx)}
+                className={` h-40 w-40 object-cover rounded cursor-pointer border-2 transition-all duration-200 ${
+                  current === idx ? "border-primary-500" : "border-transparent"
+                }`}
+                alt={`Thumbnail ${idx + 1}`}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = placeholderImages.carPlaceholder;
+                }}
+              />
+            ) : null
+          ))}
+        </div>
+      )}
     </section>
   );
 };

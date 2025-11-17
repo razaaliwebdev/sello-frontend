@@ -77,7 +77,7 @@ const Navbar = () => {
         }`}
       >
         {/* Logo */}
-        <div onClick={() => navigate("/home")} className="cursor-pointer">
+        <div onClick={() => navigate("/")} className="cursor-pointer">
           <img
             className="h-14 md:h-20"
             src={
@@ -121,6 +121,21 @@ const Navbar = () => {
         <div className="flex items-center gap-4 text-white text-3xl">
           {!isLoading && currentUser ? (
             <div className="flex items-center gap-4">
+              {/* Admin Link */}
+              {currentUser.role === "admin" && (
+                <Link
+                  to="/admin/dashboard"
+                  className={`hidden md:block text-sm px-3 py-1 bg-orange-500 rounded-md hover:bg-orange-600 ${
+                    location.pathname === "/cars" ||
+                    location.pathname === "/users" ||
+                    location.pathname === "/blog"
+                      ? "text-white"
+                      : "text-white"
+                  }`}
+                >
+                  Admin
+                </Link>
+              )}
               {/* Avatar */}
               <div
                 onClick={() => navigate("/profile")}
@@ -220,6 +235,17 @@ const Navbar = () => {
               <FaCirclePlus />
               Create Post
             </button>
+
+            {/* Admin Link (Mobile) */}
+            {!isLoading && currentUser?.role === "admin" && (
+              <Link
+                to="/admin/dashboard"
+                onClick={closeDrawer}
+                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+              >
+                <span>Admin Panel</span>
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -9,9 +9,11 @@ import {
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useGetMeQuery, useLogoutMutation } from "../../../redux/services/api";
+import { useSupportChat } from "../../../contexts/SupportChatContext";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
+  const { openSupportChat } = useSupportChat();
   const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const { data: user, isLoading, isError, error } = useGetMeQuery();
@@ -163,6 +165,20 @@ const ProfileHero = () => {
               </h5>
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
+            <div
+              onClick={() => navigate("/my-chats")}
+              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
+            >
+              <div className="h-9 w-9">
+                <img
+                  src={profileAssets.chatIcon}
+                  alt="My chats icon"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <h5 className="md:text-xl text-white">My Chats</h5>
+              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
+            </div>
             <div className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300">
               <div className="h-9 w-9">
                 <img
@@ -190,7 +206,7 @@ const ProfileHero = () => {
               <MdKeyboardArrowRight className="text-white text-xl" size={25} />
             </div>
             <div
-              onClick={() => navigate("/contact")}
+              onClick={() => openSupportChat()}
               className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
             >
               <div className="h-9 w-9">

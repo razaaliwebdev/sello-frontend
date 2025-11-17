@@ -1,8 +1,7 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL = "https://sello-backend.onrender.com/api";
-// const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 export const api = createApi({
     reducerPath: "api",
@@ -17,7 +16,7 @@ export const api = createApi({
             return headers;
         },
     }),
-    tagTypes: ["User"],
+    tagTypes: ["User", "SupportChat", "CarChat"],
     endpoints: (builder) => ({
         registerUser: builder.mutation({
             query: (userData) => ({
@@ -26,6 +25,17 @@ export const api = createApi({
                 body: userData,
             }),
             invalidatesTags: ["User"],
+            transformResponse: (response) => {
+                // Backend format: { success, message, data: { user, token } }
+                if (response?.data) {
+                    return {
+                        message: response.message,
+                        user: response.data.user,
+                        token: response.data.token
+                    };
+                }
+                return response;
+            },
         }),
         loginUser: builder.mutation({
             query: (userData) => ({
@@ -34,6 +44,23 @@ export const api = createApi({
                 body: userData,
             }),
             invalidatesTags: ["User"],
+            transformResponse: (response) => {
+                // Backend format: { success, message, data: { user, token } }
+                if (response?.data?.user && response?.data?.token) {
+                    return {
+                        token: response.data.token,
+                        user: response.data.user
+                    };
+                }
+                // Fallback for old format
+                if (response?.token && response?.user) {
+                    return {
+                        token: response.token,
+                        user: response.user
+                    };
+                }
+                return response;
+            },
         }),
         googleLogin: builder.mutation({
             query: (token) => ({
@@ -42,6 +69,23 @@ export const api = createApi({
                 body: { token },
             }),
             invalidatesTags: ["User"],
+            transformResponse: (response) => {
+                // Backend format: { success, message, data: { user, token } }
+                if (response?.data?.user && response?.data?.token) {
+                    return {
+                        token: response.data.token,
+                        user: response.data.user
+                    };
+                }
+                // Fallback for old format
+                if (response?.token && response?.user) {
+                    return {
+                        token: response.token,
+                        user: response.user
+                    };
+                }
+                return response;
+            },
         }),
         forgotPassword: builder.mutation({
             query: (emailData) => ({
@@ -60,6 +104,9 @@ export const api = createApi({
                     headers: { email },
                 };
             },
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
         }),
         resetPassword: builder.mutation({
             query: ({ password }) => {
@@ -74,13 +121,19 @@ export const api = createApi({
                     },
                 };
             },
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
         }),
         getMe: builder.query({
             query: () => ({
-                url: "/auth/me",
+                url: "/users/me",
                 method: "GET",
             }),
             providesTags: ["User"],
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
         }),
         logout: builder.mutation({
             query: () => ({
@@ -95,15 +148,14 @@ export const api = createApi({
         getCars: builder.query({
             query: ({ page = 1, limit = 12, condition } = {}) => {
                 const params = new URLSearchParams({
-                    page,
-                    limit,
+                    page: String(page),
+                    limit: String(limit),
                 });
 
-                // Only add condition if it's 'new' or 'used'
-                if (condition === 'new' || condition === 'used') {
+                // Only add condition if it's explicitly 'new' or 'used' (not empty string or undefined)
+                if (condition && (condition === 'new' || condition === 'used')) {
                     params.append('condition', condition);
                 }
-                // For 'in stock' or any other case, don't filter by condition
 
                 return {
                     url: `/cars?${params.toString()}`,
@@ -111,15 +163,27 @@ export const api = createApi({
                 };
             },
             transformResponse: (response) => {
+                const data = response?.data || response;
                 return {
-                    cars: response?.cars || [],
-                    total: response?.total || 0,
-                    page: response?.page || 1,
-                    pages: response?.pages || 1
+                    cars: data?.cars || [],
+                    total: data?.total || 0,
+                    page: data?.page || 1,
+                    pages: data?.pages || 1
                 };
             },
         }),
 
+        // ✅ Get Single Car Endpoint
+        getSingleCar: builder.query({
+            query: (carId) => ({
+                url: `/cars/${carId}`,
+                method: "GET",
+            }),
+            transformResponse: (response) => {
+                const data = response?.data || response;
+                return data;
+            },
+        }),
 
         // ✅ Create Car Endpoint
         createCar: builder.mutation({
@@ -168,19 +232,127 @@ export const api = createApi({
                 method: "GET",
             }),
             transformResponse: (response) => {
+                const data = response?.data || response;
                 return {
-                    cars: response?.cars || [],
-                    total: response?.total || 0,
+                    cars: data?.cars || [],
+                    total: data?.total || 0,
                 };
             },
             providesTags: ["Cars"],
-            getMe: builder.query({
-                query: () => ({
-                    url: "/me", // Change from "/auth/me" to "/me"
-                    method: "GET",
-                }),
-                providesTags: ["User"],
+        }),
+
+        // Support Chat Endpoints
+        createSupportChat: builder.mutation({
+            query: (data) => ({
+                url: "/support-chat",
+                method: "POST",
+                body: data,
             }),
+            invalidatesTags: ["SupportChat"],
+        }),
+        getUserSupportChats: builder.query({
+            query: () => "/support-chat/my-chats",
+            providesTags: ["SupportChat"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getSupportChatMessages: builder.query({
+            query: (chatId) => `/support-chat/${chatId}/messages`,
+            providesTags: ["SupportChat"],
+            transformResponse: (response) => {
+                // Handle response format: { success, message, data: [...] }
+                if (response?.data && Array.isArray(response.data)) {
+                    return response.data;
+                }
+                // If already an array, return as is
+                if (Array.isArray(response)) {
+                    return response;
+                }
+                return [];
+            },
+        }),
+        sendSupportMessage: builder.mutation({
+            query: ({ chatId, message }) => ({
+                url: `/support-chat/${chatId}/messages`,
+                method: "POST",
+                body: { message },
+            }),
+            invalidatesTags: ["SupportChat"],
+        }),
+
+        // Car Chat Endpoints (Buyer-Seller)
+        createCarChat: builder.mutation({
+            query: (carId) => ({
+                url: `/car-chat/car/${carId}`,
+                method: "POST",
+            }),
+            invalidatesTags: ["CarChat"],
+        }),
+        getCarChatByCarId: builder.query({
+            query: (carId) => `/car-chat/car/${carId}`,
+            providesTags: ["CarChat"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getCarChats: builder.query({
+            query: () => "/car-chat/my-chats",
+            providesTags: ["CarChat"],
+            transformResponse: (response) => {
+                if (response?.data && Array.isArray(response.data)) {
+                    return response.data;
+                }
+                if (Array.isArray(response)) {
+                    return response;
+                }
+                return [];
+            },
+        }),
+        getSellerBuyerChats: builder.query({
+            query: () => "/car-chat/seller/chats",
+            providesTags: ["CarChat"],
+            transformResponse: (response) => {
+                if (response?.data && Array.isArray(response.data)) {
+                    return response.data;
+                }
+                if (Array.isArray(response)) {
+                    return response;
+                }
+                return [];
+            },
+        }),
+        getCarChatMessages: builder.query({
+            query: (chatId) => `/car-chat/${chatId}/messages`,
+            providesTags: ["CarChat"],
+            transformResponse: (response) => {
+                if (response?.data && Array.isArray(response.data)) {
+                    return response.data;
+                }
+                if (Array.isArray(response)) {
+                    return response;
+                }
+                return [];
+            },
+        }),
+        sendCarChatMessage: builder.mutation({
+            query: ({ chatId, message, messageType = 'text', attachments = [] }) => ({
+                url: `/car-chat/${chatId}/messages`,
+                method: "POST",
+                body: { message, messageType, attachments },
+            }),
+            invalidatesTags: ["CarChat"],
+        }),
+        editCarChatMessage: builder.mutation({
+            query: ({ messageId, message }) => ({
+                url: `/car-chat/messages/${messageId}`,
+                method: "PUT",
+                body: { message },
+            }),
+            invalidatesTags: ["CarChat"],
+        }),
+        deleteCarChatMessage: builder.mutation({
+            query: (messageId) => ({
+                url: `/car-chat/messages/${messageId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["CarChat"],
         }),
     }),
 });
@@ -196,7 +368,20 @@ export const {
     useGetMeQuery,
     useLogoutMutation,
     useGetCarsQuery,
+    useGetSingleCarQuery,
     useCreateCarMutation,
     useGetFilteredCarsQuery,
     useGetMyCarsQuery,
+    useCreateSupportChatMutation,
+    useGetUserSupportChatsQuery,
+    useGetSupportChatMessagesQuery,
+    useSendSupportMessageMutation,
+    useCreateCarChatMutation,
+    useGetCarChatByCarIdQuery,
+    useGetCarChatsQuery,
+    useGetSellerBuyerChatsQuery,
+    useGetCarChatMessagesQuery,
+    useSendCarChatMessageMutation,
+    useEditCarChatMessageMutation,
+    useDeleteCarChatMessageMutation,
 } = api;

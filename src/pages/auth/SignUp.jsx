@@ -67,7 +67,13 @@ const SignUp = () => {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success("Google sign-up successful!");
-      navigate("/home");
+      
+      // Redirect to admin dashboard if user is admin
+      if (res.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       toast.error(err?.data?.message || "Google login failed");
     } finally {

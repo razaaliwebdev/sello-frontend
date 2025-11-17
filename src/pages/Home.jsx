@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Hero from "../components/sections/home/Hero";
 import BrandsSection from "../components/sections/home/BrandsSection";
 import WhyChooseUs from "../components/sections/home/WhyChooseUs";
@@ -8,6 +8,7 @@ import CustomerReview from "../components/sections/home/CustomerReview";
 import BlogSection from "../components/sections/home/BlogSection";
 import NewsLatter from "../components/utils/NewsLatter";
 import BuySellCards from "../components/utils/BuySellCards";
+import GetAllCarsSection from "../components/sections/listings/GetAllCarsSection";
 
 const Home = () => {
   return (
@@ -18,6 +19,7 @@ const Home = () => {
         <WhyChooseUs />
         <PopularMakes />
         <ShopBoxCar />
+        <GetAllCarsSection />
         <CustomerReview />
         <BlogSection />
         <BuySellCards />
@@ -27,4 +29,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default memo(Home);

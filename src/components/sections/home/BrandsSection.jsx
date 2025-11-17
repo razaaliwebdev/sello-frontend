@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import BrandMarquee from "../../BrandMarquee";
 import { Link } from "react-router-dom";
 import { brandsCategory } from "../../../assets/assets";
@@ -53,4 +53,4 @@ const BrandsSection = () => {
   );
 };
 
-export default BrandsSection;
+export default memo(BrandsSection);

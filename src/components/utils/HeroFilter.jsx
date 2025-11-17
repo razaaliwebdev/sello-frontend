@@ -15,21 +15,22 @@ const HeroFilter = () => {
   const MARKETCHECK_API_KEY = "moVS1VykrNPtKGbEyZyk2KBOYADDSz70";
   const MARJKETCHECK_API_SECRET = "M0m6HyF2ePAKlGqV";
 
-  useEffect(() => {
-    async function fetchData() {
-      const url = `https://api.marketcheck.com/v1/search?api_key=${MARKETCHECK_API_KEY}&country=US&price_range=10000-50000`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.error("Error fetching car data:", error);
-      }
-    }
-
-    fetchData();
-  }, []);
+  // Removed direct API call to marketcheck.com due to CORS restrictions
+  // This should be handled by the backend if needed
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const url = `https://api.marketcheck.com/v1/search?api_key=${MARKETCHECK_API_KEY}&country=US&price_range=10000-50000`;
+  //     try {
+  //       const response = await fetch(url);
+  //       if (!response.ok) throw new Error("Network response was not ok");
+  //       const data = await response.json();
+  //       console.log(data);
+  //     } catch (error) {
+  //       console.error("Error fetching car data:", error);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
   return (
     <div className="absolute z-10 inset-0 flex items-center justify-center  text-center p-4">
