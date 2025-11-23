@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
@@ -18,7 +18,7 @@ export const adminApi = createApi({
             return headers;
         },
     }),
-    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests"],
+    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials"],
     endpoints: (builder) => ({
         // Dashboard
         getDashboardStats: builder.query({
@@ -484,6 +484,82 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ["CustomerRequests"],
         }),
+
+        // Banners
+        getAllBanners: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/banners?${searchParams}`;
+            },
+            providesTags: ["Banners"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getBannerById: builder.query({
+            query: (bannerId) => `/banners/${bannerId}`,
+            providesTags: ["Banners"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        createBanner: builder.mutation({
+            query: (formData) => ({
+                url: "/banners",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["Banners"],
+        }),
+        updateBanner: builder.mutation({
+            query: ({ bannerId, formData }) => ({
+                url: `/banners/${bannerId}`,
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["Banners"],
+        }),
+        deleteBanner: builder.mutation({
+            query: (bannerId) => ({
+                url: `/banners/${bannerId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Banners"],
+        }),
+
+        // Testimonials
+        getAllTestimonials: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/testimonials?${searchParams}`;
+            },
+            providesTags: ["Testimonials"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getTestimonialById: builder.query({
+            query: (testimonialId) => `/testimonials/${testimonialId}`,
+            providesTags: ["Testimonials"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        createTestimonial: builder.mutation({
+            query: (formData) => ({
+                url: "/testimonials",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["Testimonials"],
+        }),
+        updateTestimonial: builder.mutation({
+            query: ({ testimonialId, formData }) => ({
+                url: `/testimonials/${testimonialId}`,
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["Testimonials"],
+        }),
+        deleteTestimonial: builder.mutation({
+            query: (testimonialId) => ({
+                url: `/testimonials/${testimonialId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Testimonials"],
+        }),
     }),
 });
 
@@ -545,5 +621,15 @@ export const {
     useUpdateCustomerRequestMutation,
     useAddCustomerRequestResponseMutation,
     useDeleteCustomerRequestMutation,
+    useGetAllBannersQuery,
+    useGetBannerByIdQuery,
+    useCreateBannerMutation,
+    useUpdateBannerMutation,
+    useDeleteBannerMutation,
+    useGetAllTestimonialsQuery,
+    useGetTestimonialByIdQuery,
+    useCreateTestimonialMutation,
+    useUpdateTestimonialMutation,
+    useDeleteTestimonialMutation,
 } = adminApi;
 

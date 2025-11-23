@@ -118,14 +118,14 @@ const BlogCategories = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Blog Categories</h2>
-                    <p className="text-sm text-gray-500 mt-1">Manage blog categories</p>
+                    <p className="text-sm text-gray-500 mt-1">Organize your blog posts with categories.</p>
                 </div>
                 <button
                     onClick={handleOpenModal}
                     className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
                 >
                     <FiPlus size={18} />
-                    Add Category
+                    Categories
                 </button>
             </div>
 
@@ -135,10 +135,11 @@ const BlogCategories = () => {
                     <table className="w-full">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Slug</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Description</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Slug</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Posts</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Order</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -150,8 +151,8 @@ const BlogCategories = () => {
                                 </tr>
                             ) : categories.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                                        No categories found
+                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                                        No data available
                                     </td>
                                 </tr>
                             ) : (
@@ -163,8 +164,11 @@ const BlogCategories = () => {
                                         <td className="px-6 py-4 text-gray-500">
                                             {category.slug}
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
-                                            {category.description || "-"}
+                                        <td className="px-6 py-4 text-gray-600">
+                                            0
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600">
+                                            {category.order || 0}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">

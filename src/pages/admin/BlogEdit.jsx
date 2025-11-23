@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-    useGetAllBlogsQuery,
-    useUpdateBlogMutation,
-} from "../../redux/services/adminApi";
+import { useGetAllBlogsQuery, useUpdateBlogMutation } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
+import { FiX, FiSave } from "react-icons/fi";
+import TiptapEditor from "../../components/admin/TiptapEditor";
 
 const BlogEdit = () => {
     const { id } = useParams();
@@ -20,6 +19,11 @@ const BlogEdit = () => {
         category: "",
         tags: "",
         status: "draft",
+        metaTitle: "",
+        metaDescription: "",
+        publishDate: "",
+        publishTime: "",
+        slug: ""
     });
 
     const blogs = blogsData?.blogs || [];
@@ -35,6 +39,11 @@ const BlogEdit = () => {
                 category: blog.category?._id || "",
                 tags: Array.isArray(blog.tags) ? blog.tags.join(", ") : blog.tags || "",
                 status: blog.status || "draft",
+                metaTitle: blog.metaTitle || "",
+                metaDescription: blog.metaDescription || "",
+                slug: blog.slug || "",
+                publishDate: blog.publishDate ? new Date(blog.publishDate).toISOString().split('T')[0] : "",
+                publishTime: blog.publishDate ? new Date(blog.publishDate).toTimeString().slice(0, 5) : ""
             });
         }
     }, [blog]);
@@ -46,6 +55,10 @@ const BlogEdit = () => {
         } else {
             setFormData({ ...formData, [name]: value });
         }
+    };
+
+    const handleContentChange = (content) => {
+        setFormData(prev => ({ ...prev, content }));
     };
 
     const handleSubmit = async (e) => {
@@ -147,7 +160,7 @@ const BlogEdit = () => {
                                     <input
                                         type="text"
                                         name="slug"
-                                        value={formData.slug || blog.slug || ""}
+                                        value={formData.slug}
                                         onChange={handleChange}
                                         placeholder="auto-generated-from-title"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -184,15 +197,11 @@ const BlogEdit = () => {
                                         Post Content *
                                     </label>
                                     
-                                    {/* Editor */}
-                                    <textarea
-                                        name="content"
-                                        value={formData.content}
-                                        onChange={handleChange}
-                                        required
-                                        rows="15"
+                                    {/* Tiptap Rich Text Editor */}
+                                    <TiptapEditor
+                                        value={formData.content || ""}
+                                        onChange={handleContentChange}
                                         placeholder="Write your blog post content here..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     />
                                 </div>
                             </div>
@@ -209,7 +218,7 @@ const BlogEdit = () => {
                                     <input
                                         type="text"
                                         name="metaTitle"
-                                        value={formData.metaTitle || blog.metaTitle || ""}
+                                        value={formData.metaTitle}
                                         onChange={handleChange}
                                         placeholder="Enter meta title for SEO"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -222,7 +231,7 @@ const BlogEdit = () => {
                                     </label>
                                     <textarea
                                         name="metaDescription"
-                                        value={formData.metaDescription || blog.metaDescription || ""}
+                                        value={formData.metaDescription}
                                         onChange={handleChange}
                                         rows="3"
                                         placeholder="Enter meta description for SEO"
@@ -264,14 +273,14 @@ const BlogEdit = () => {
                                         <input
                                             type="date"
                                             name="publishDate"
-                                            value={formData.publishDate || ""}
+                                            value={formData.publishDate}
                                             onChange={handleChange}
                                             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                                         />
                                         <input
                                             type="time"
                                             name="publishTime"
-                                            value={formData.publishTime || ""}
+                                            value={formData.publishTime}
                                             onChange={handleChange}
                                             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                                         />

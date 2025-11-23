@@ -32,11 +32,11 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/users", icon: FiUsers, label: "User Management" },
         { path: "/admin/listings", icon: FiList, label: "Listings" },
         { path: "/admin/dealers", icon: FiBriefcase, label: "Dealer Management" },
-        { path: "/admin/blogs", icon: FiFileText, label: "Blogs" },
+        { path: "/admin/blogs", icon: FiFileText, label: "Blog Management" },
         { path: "/admin/analytics", icon: FiBarChart2, label: "Reports & Analytics" },
         { path: "/admin/chat", icon: FiMessageSquare, label: "Chat Monitoring" },
         { path: "/admin/chatbot", icon: FiCpu, label: "Support Chatbot" },
-        { path: "/admin/customers", icon: FiUser, label: "Customer Requests" },
+        { path: "/admin/customers", icon: FiUser, label: "Customer Request" },
         { path: "/admin/promotions", icon: FiHeart, label: "Promotions" },
         { path: "/admin/notifications", icon: FiBell, label: "Notifications" },
         { path: "/admin/settings", icon: FiSettings, label: "Settings" },
@@ -61,13 +61,13 @@ const AdminLayout = ({ children }) => {
             {/* Sidebar - Dark Grey */}
             <aside
                 className={`${sidebarOpen ? "w-64" : "w-20"
-                    } bg-gray-800 text-white transition-all duration-300 flex flex-col`}
+                    } bg-[#050B20] text-white transition-all duration-300 flex flex-col`}
             >
                 {/* Logo - Primary Orange Header */}
-                <div className="bg-primary-500 px-4 py-6 flex items-center justify-between">
+                <div className="bg-primary-500 px-4 py-2 flex items-center justify-between">
                     {sidebarOpen && (
                         <div className="flex items-center justify-center gap-1 h-full w-full">
-                            <img src={images.logo} alt="logo" className="w-24 h-24 scale-150" />
+                            <img src={images.logo} alt="logo" className="w-24 h-24 scale-150 object-contain" />
                         </div>
                     )}
                     <button
@@ -118,9 +118,9 @@ const AdminLayout = ({ children }) => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Top Primary Bar */}
-                <header className="bg-primary-500 text-white py-4 px-6 shadow-md">
+                {/* <header className="bg-primary-500 text-white py-4 px-6 shadow-md">
                     <h1 className="text-xl font-bold">Sello Admin</h1>
-                </header>
+                </header> */}
                 
                 {/* Page Content */}
                 <main className="flex-1 overflow-y-auto bg-gray-100 p-6">{children}</main>

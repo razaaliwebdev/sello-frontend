@@ -4,7 +4,8 @@ import { useCreateBlogMutation, useGetAllCategoriesQuery } from "../../redux/ser
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiBold, FiItalic, FiUnderline, FiList, FiHash, FiLink, FiImage, FiAlignLeft, FiAlignCenter, FiAlignRight, FiX, FiCalendar, FiClock, FiSave, FiSend, FiArrowLeft } from "react-icons/fi";
+import { FiSave, FiSend, FiArrowLeft } from "react-icons/fi";
+import TiptapEditor from "../../components/admin/TiptapEditor";
 
 const BlogCreateEnhanced = () => {
     const navigate = useNavigate();
@@ -36,6 +37,10 @@ const BlogCreateEnhanced = () => {
         }
     };
 
+    const handleContentChange = (content) => {
+        setFormData(prev => ({ ...prev, content }));
+    };
+
     const handleSubmit = async (e, status) => {
         e.preventDefault();
         
@@ -47,28 +52,46 @@ const BlogCreateEnhanced = () => {
         
         try {
             const formDataToSend = new FormData();
-            Object.keys(formData).forEach((key) => {
-                if (key === "featuredImage" && formData[key]) {
-                    formDataToSend.append("featuredImage", formData[key]);
-                } else if (key === "tags" && formData[key]) {
-                    // Convert tags string to array
-                    const tagsArray = formData[key]
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter((tag) => tag);
-                    formDataToSend.append("tags", JSON.stringify(tagsArray));
-                } else if (formData[key] && key !== "category") {
-                    formDataToSend.append(key, formData[key]);
-                }
-            });
             
-            // Only append category if it's provided
+            // Append basic fields
+            formDataToSend.append("title", formData.title);
+            if (formData.slug) formDataToSend.append("slug", formData.slug);
+            if (formData.excerpt) formDataToSend.append("excerpt", formData.excerpt);
+            
+            // Tiptap returns HTML content directly
+            formDataToSend.append("content", formData.content || "");
+            
+            // Handle featured image
+            if (formData.featuredImage) {
+                formDataToSend.append("featuredImage", formData.featuredImage);
+            }
+            
+            // Handle category
             if (formData.category) {
                 formDataToSend.append("category", formData.category);
             }
             
+            // Handle tags
+            if (formData.tags) {
+                const tagsArray = formData.tags
+                    .split(",")
+                    .map((tag) => tag.trim())
+                    .filter((tag) => tag);
+                formDataToSend.append("tags", JSON.stringify(tagsArray));
+            }
+            
+            // Handle SEO fields
+            if (formData.metaTitle) formDataToSend.append("metaTitle", formData.metaTitle);
+            if (formData.metaDescription) formDataToSend.append("metaDescription", formData.metaDescription);
+            
             // Set status
             formDataToSend.append("status", status);
+            
+            // Handle publish date/time if provided
+            if (formData.publishDate && formData.publishTime) {
+                const publishDateTime = new Date(`${formData.publishDate}T${formData.publishTime}`);
+                // The backend will handle this based on status
+            }
 
             await createBlog(formDataToSend).unwrap();
             toast.success(status === "published" ? "Blog published successfully" : "Blog saved as draft");
@@ -182,53 +205,15 @@ const BlogCreateEnhanced = () => {
                                         Post Content *
                                     </label>
                                     
-                                    {/* Toolbar */}
-                                    <div className="flex flex-wrap gap-1 p-2 bg-gray-50 rounded-t-lg border border-gray-300 border-b-0">
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Bold">
-                                            <FiBold size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Italic">
-                                            <FiItalic size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Underline">
-                                            <FiUnderline size={16} />
-                                        </button>
-                                        <div className="w-px bg-gray-300 mx-1"></div>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Bullet List">
-                                            <FiList size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Numbered List">
-                                            <FiHash size={16} />
-                                        </button>
-                                        <div className="w-px bg-gray-300 mx-1"></div>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Link">
-                                            <FiLink size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Image">
-                                            <FiImage size={16} />
-                                        </button>
-                                        <div className="w-px bg-gray-300 mx-1"></div>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Align Left">
-                                            <FiAlignLeft size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Align Center">
-                                            <FiAlignCenter size={16} />
-                                        </button>
-                                        <button type="button" className="p-2 rounded hover:bg-gray-200" title="Align Right">
-                                            <FiAlignRight size={16} />
-                                        </button>
-                                    </div>
-                                    
-                                    {/* Editor */}
-                                    <textarea
-                                        name="content"
-                                        value={formData.content}
-                                        onChange={handleChange}
-                                        required
-                                        rows="15"
+                                    {/* Tiptap Rich Text Editor */}
+                                    <TiptapEditor
+                                        value={formData.content || ""}
+                                        onChange={handleContentChange}
                                         placeholder="Write your blog post content here..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-b-lg rounded-t-none focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        You can use the toolbar to format your content.
+                                    </p>
                                 </div>
                             </div>
                         </div>

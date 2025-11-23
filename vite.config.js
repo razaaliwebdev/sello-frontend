@@ -22,6 +22,14 @@ export default defineConfig({
     cors: true
   },
   optimizeDeps: {
-    exclude: ['js-big-decimal']
+    exclude: ['js-big-decimal'],
+    include: [
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+      '@tiptap/extension-image',
+      '@tiptap/extension-link',
+      '@tiptap/extension-text-align',
+      '@tiptap/extension-underline'
+    ]
   }
 });

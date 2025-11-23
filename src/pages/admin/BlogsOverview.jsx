@@ -25,13 +25,15 @@ const BlogsOverview = () => {
     const pagination = blogsData?.pagination || {};
     const categories = categoriesData || [];
 
-    // Calculate metrics
+    // Calculate metrics - need to get all blogs for accurate counts
     const totalBlogs = blogsData?.pagination?.total || 0;
-    const draftBlogs = blogs.filter(blog => blog.status === "draft").length;
     const publishedBlogs = blogs.filter(blog => blog.status === "published").length;
+    const draftBlogs = blogs.filter(blog => blog.status === "draft").length;
+    const pendingBlogs = blogs.filter(blog => blog.status === "pending" || (!blog.status || blog.status === "")).length;
+    const reviewedBlogs = blogs.filter(blog => blog.status === "archived").length;
     const totalCategories = categories.length;
-    const comments = 0; // This would come from a comments API in a real implementation
-    const pendingReviews = 0; // This would come from a reviews API in a real implementation
+    const totalComments = 0; // Placeholder - would need comments API
+    const totalViews = blogs.reduce((sum, blog) => sum + (blog.views || 0), 0);
 
     const handleDeleteClick = (blogId) => {
         setBlogToDelete(blogId);
@@ -58,7 +60,8 @@ const BlogsOverview = () => {
         if (filter === "published") return blog.status === "published";
         if (filter === "draft") return blog.status === "draft";
         if (filter === "scheduled") return blog.status === "scheduled";
-        if (filter === "pending") return blog.status === "pending";
+        if (filter === "pending") return blog.status === "pending" || (!blog.status || blog.status === "");
+        if (filter === "reviewed") return blog.status === "archived";
         return true;
     }).filter(blog => {
         if (categoryFilter === "") return true;
@@ -80,13 +83,13 @@ const BlogsOverview = () => {
                 <p className="text-sm text-gray-500 mt-1">Manage blog posts, categories, and engagement</p>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-                {/* Total Blogs */}
+            {/* Stats Cards - Match reference design exactly */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6">
+                {/* Total Posts */}
                 <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Total Blogs</p>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Total Posts</p>
                             <h3 className="text-2xl font-bold text-gray-900">{totalBlogs}</h3>
                         </div>
                         <div className="relative flex-shrink-0">
@@ -98,27 +101,11 @@ const BlogsOverview = () => {
                     </div>
                 </div>
 
-                {/* Draft Blogs */}
+                {/* Published Posts */}
                 <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Draft Blogs</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{draftBlogs}</h3>
-                        </div>
-                        <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-yellow-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-yellow-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiClock size={28} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Published Blogs */}
-                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Published Blogs</p>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Published Posts</p>
                             <h3 className="text-2xl font-bold text-gray-900">{publishedBlogs}</h3>
                         </div>
                         <div className="relative flex-shrink-0">
@@ -130,49 +117,97 @@ const BlogsOverview = () => {
                     </div>
                 </div>
 
-                {/* Categories */}
+                {/* Draft Posts */}
                 <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Categories</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{totalCategories}</h3>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Draft Posts</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{draftBlogs}</h3>
                         </div>
                         <div className="relative flex-shrink-0">
                             <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
                             <div className="relative w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                                <FiClock size={28} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Pending Posts */}
+                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Pending Posts</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{pendingBlogs}</h3>
+                        </div>
+                        <div className="relative flex-shrink-0">
+                            <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                            <div className="relative w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                                <FiAlertCircle size={28} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Reviewed Posts */}
+                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Reviewed Posts</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{reviewedBlogs}</h3>
+                        </div>
+                        <div className="relative flex-shrink-0">
+                            <div className="absolute w-20 h-20 bg-green-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                            <div className="relative w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                                <FiCheckCircle size={28} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Total Categories */}
+                <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Total Categories</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{totalCategories}</h3>
+                        </div>
+                        <div className="relative flex-shrink-0">
+                            <div className="absolute w-20 h-20 bg-red-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                            <div className="relative w-14 h-14 bg-red-500 rounded-xl flex items-center justify-center text-white shadow-md">
                                 <FiBook size={28} />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Comments */}
+                {/* Total Comments */}
                 <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Comments</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{comments}</h3>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Total Comments</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{totalComments}</h3>
                         </div>
                         <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-indigo-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                            <div className="absolute w-20 h-20 bg-purple-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                            <div className="relative w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-md">
                                 <FiMessageSquare size={28} />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Pending Reviews */}
+                {/* Total Views */}
                 <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Pending Reviews</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{pendingReviews}</h3>
+                            <p className="text-xs font-medium text-gray-500 mb-1">Total Views</p>
+                            <h3 className="text-2xl font-bold text-gray-900">{totalViews}</h3>
                         </div>
                         <div className="relative flex-shrink-0">
-                            <div className="absolute w-20 h-20 bg-red-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
-                            <div className="relative w-14 h-14 bg-red-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                                <FiAlertCircle size={28} />
+                            <div className="absolute w-20 h-20 bg-orange-50 rounded-full blur-2xl opacity-40 -top-3 -right-3"></div>
+                            <div className="relative w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-md">
+                                <FiEye size={28} />
                             </div>
                         </div>
                     </div>
@@ -257,11 +292,22 @@ const BlogsOverview = () => {
                         onClick={() => setFilter("pending")}
                         className={`px-3 py-1.5 text-sm rounded-lg ${
                             filter === "pending"
-                                ? "bg-red-500 text-white"
+                                ? "bg-orange-500 text-white"
                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                     >
                         Pending
+                    </button>
+                    
+                    <button
+                        onClick={() => setFilter("reviewed")}
+                        className={`px-3 py-1.5 text-sm rounded-lg ${
+                            filter === "reviewed"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                        Reviewed
                     </button>
                     
                     <div className="ml-auto">
@@ -287,25 +333,26 @@ const BlogsOverview = () => {
                     <table className="w-full">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Blog Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Category</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Created Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Last Updated</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Title</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Author</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Views</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Comments</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {blogsLoading ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center">
+                                    <td colSpan="7" className="px-6 py-8 text-center">
                                         <Spinner size={40} color="text-primary-500" />
                                     </td>
                                 </tr>
                             ) : filteredBlogs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                                        No blogs found
+                                    <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                                        No data available
                                     </td>
                                 </tr>
                             ) : (
@@ -313,31 +360,35 @@ const BlogsOverview = () => {
                                     <tr key={blog._id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-gray-900">{blog.title}</div>
-                                            <div className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                                {blog.excerpt}
-                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                                                {blog.category?.name || "Uncategorized"}
-                                            </span>
+                                            <div className="text-sm text-gray-600">
+                                                {blog.author?.name || "Admin"}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            {formatDate(blog.createdAt)}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs rounded-full ${
                                                 blog.status === "published"
                                                     ? "bg-green-100 text-green-800"
                                                     : blog.status === "draft"
-                                                    ? "bg-yellow-100 text-yellow-800"
+                                                    ? "bg-purple-100 text-purple-800"
+                                                    : blog.status === "pending" || !blog.status
+                                                    ? "bg-orange-100 text-orange-800"
+                                                    : blog.status === "archived"
+                                                    ? "bg-green-100 text-green-800"
                                                     : "bg-gray-100 text-gray-800"
                                             }`}>
-                                                {blog.status.charAt(0).toUpperCase() + blog.status.slice(1)}
+                                                {blog.status ? blog.status.charAt(0).toUpperCase() + blog.status.slice(1) : "Pending"}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                            {formatDate(blog.createdAt)}
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {blog.views || 0}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                            {formatDate(blog.updatedAt)}
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            0
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -356,7 +407,7 @@ const BlogsOverview = () => {
                                                     <FiTrash2 size={18} />
                                                 </button>
                                                 <Link
-                                                    to={`/blog/${blog._id}`}
+                                                    to={`/blog/${blog.slug || blog._id}`}
                                                     target="_blank"
                                                     className="text-green-600 hover:text-green-900"
                                                     title="View"

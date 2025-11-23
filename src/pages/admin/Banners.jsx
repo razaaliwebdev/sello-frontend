@@ -1,0 +1,406 @@
+import { useState } from "react";
+import AdminLayout from "../../components/admin/AdminLayout";
+import {
+    useGetAllBannersQuery,
+    useCreateBannerMutation,
+    useUpdateBannerMutation,
+    useDeleteBannerMutation,
+} from "../../redux/services/adminApi";
+import Spinner from "../../components/Spinner";
+import toast from "react-hot-toast";
+import { FiPlus, FiEdit, FiTrash2, FiX, FiImage } from "react-icons/fi";
+import ConfirmationModal from "../../components/admin/ConfirmationModal";
+
+const Banners = () => {
+    const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [bannerToDelete, setBannerToDelete] = useState(null);
+    const [editingBanner, setEditingBanner] = useState(null);
+    const [formData, setFormData] = useState({
+        title: "",
+        linkUrl: "",
+        type: "homepage",
+        position: "hero",
+        isActive: true,
+        order: 0,
+        startDate: "",
+        endDate: "",
+        image: null,
+    });
+
+    const { data, isLoading, refetch } = useGetAllBannersQuery({});
+    const [createBanner] = useCreateBannerMutation();
+    const [updateBanner] = useUpdateBannerMutation();
+    const [deleteBanner] = useDeleteBannerMutation();
+
+    const banners = data || [];
+
+    const handleInputChange = (e) => {
+        const { name, value, files } = e.target;
+        if (name === "image") {
+            setFormData(prev => ({ ...prev, image: files[0] }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    const handleOpenModal = () => {
+        setEditingBanner(null);
+        setFormData({
+            title: "",
+            linkUrl: "",
+            type: "homepage",
+            position: "hero",
+            isActive: true,
+            order: 0,
+            startDate: "",
+            endDate: "",
+            image: null,
+        });
+        setShowModal(true);
+    };
+
+    const handleEdit = (banner) => {
+        setEditingBanner(banner);
+        setFormData({
+            title: banner.title || "",
+            linkUrl: banner.linkUrl || "",
+            type: banner.type || "homepage",
+            position: banner.position || "hero",
+            isActive: banner.isActive !== undefined ? banner.isActive : true,
+            order: banner.order || 0,
+            startDate: banner.startDate ? new Date(banner.startDate).toISOString().split('T')[0] : "",
+            endDate: banner.endDate ? new Date(banner.endDate).toISOString().split('T')[0] : "",
+            image: null,
+        });
+        setShowModal(true);
+    };
+
+    const handleDeleteClick = (bannerId) => {
+        setBannerToDelete(bannerId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!bannerToDelete) return;
+        
+        try {
+            await deleteBanner(bannerToDelete).unwrap();
+            toast.success("Banner deleted successfully");
+            refetch();
+        } catch (error) {
+            toast.error(error?.data?.message || "Failed to delete banner");
+        } finally {
+            setShowDeleteModal(false);
+            setBannerToDelete(null);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        try {
+            const submitData = new FormData();
+            submitData.append("title", formData.title);
+            submitData.append("linkUrl", formData.linkUrl || "");
+            submitData.append("type", formData.type);
+            submitData.append("position", formData.position);
+            submitData.append("isActive", formData.isActive);
+            submitData.append("order", formData.order);
+            if (formData.startDate) submitData.append("startDate", formData.startDate);
+            if (formData.endDate) submitData.append("endDate", formData.endDate);
+            if (formData.image) submitData.append("image", formData.image);
+            
+            if (editingBanner) {
+                await updateBanner({ 
+                    bannerId: editingBanner._id, 
+                    formData: submitData 
+                }).unwrap();
+                toast.success("Banner updated successfully");
+            } else {
+                await createBanner(submitData).unwrap();
+                toast.success("Banner created successfully");
+            }
+            
+            setShowModal(false);
+            setEditingBanner(null);
+            setFormData({
+                title: "",
+                linkUrl: "",
+                type: "homepage",
+                position: "hero",
+                isActive: true,
+                order: 0,
+                startDate: "",
+                endDate: "",
+                image: null,
+            });
+            refetch();
+        } catch (error) {
+            toast.error(error?.data?.message || "Failed to save banner");
+        }
+    };
+
+    return (
+        <AdminLayout>
+            <div className="p-6 bg-gray-50 min-h-screen">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Banner Management</h2>
+                        <p className="text-sm text-gray-500 mt-1">Manage homepage and promotional banners</p>
+                    </div>
+                    <button
+                        onClick={handleOpenModal}
+                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                    >
+                        <FiPlus size={18} />
+                        Add Banner
+                    </button>
+                </div>
+
+                {/* Banners Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isLoading ? (
+                        <div className="col-span-full flex justify-center items-center h-64">
+                            <Spinner size={60} color="text-primary-500" />
+                        </div>
+                    ) : banners.length === 0 ? (
+                        <div className="col-span-full text-center text-gray-500 py-12">
+                            No banners found
+                        </div>
+                    ) : (
+                        banners.map((banner) => (
+                            <div key={banner._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="relative h-48 bg-gray-100">
+                                    {banner.image ? (
+                                        <img src={banner.image} alt={banner.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <FiImage size={48} className="text-gray-400" />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-2 right-2">
+                                        <span className={`px-2 py-1 text-xs rounded-full ${
+                                            banner.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                        }`}>
+                                            {banner.isActive ? "Active" : "Inactive"}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-1">{banner.title}</h3>
+                                    <p className="text-sm text-gray-500 mb-2">Type: {banner.type}</p>
+                                    <p className="text-sm text-gray-500 mb-4">Position: {banner.position}</p>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleEdit(banner)}
+                                            className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-2"
+                                        >
+                                            <FiEdit size={16} />
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteClick(banner._id)}
+                                            className="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 flex items-center justify-center gap-2"
+                                        >
+                                            <FiTrash2 size={16} />
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Modal */}
+                {showModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    {editingBanner ? "Edit Banner" : "Add New Banner"}
+                                </h3>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    <FiX size={20} />
+                                </button>
+                            </div>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Title *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Banner Image *
+                                    </label>
+                                    <input
+                                        type="file"
+                                        name="image"
+                                        onChange={handleInputChange}
+                                        accept="image/*"
+                                        required={!editingBanner}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Link URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="linkUrl"
+                                        value={formData.linkUrl}
+                                        onChange={handleInputChange}
+                                        placeholder="https://example.com"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Type
+                                        </label>
+                                        <select
+                                            name="type"
+                                            value={formData.type}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        >
+                                            <option value="homepage">Homepage</option>
+                                            <option value="promotional">Promotional</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Position
+                                        </label>
+                                        <select
+                                            name="position"
+                                            value={formData.position}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        >
+                                            <option value="hero">Hero</option>
+                                            <option value="sidebar">Sidebar</option>
+                                            <option value="footer">Footer</option>
+                                            <option value="top">Top</option>
+                                            <option value="bottom">Bottom</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Start Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            name="startDate"
+                                            value={formData.startDate}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            End Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            name="endDate"
+                                            value={formData.endDate}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Order
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="order"
+                                            value={formData.order}
+                                            onChange={handleInputChange}
+                                            min="0"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Status
+                                        </label>
+                                        <select
+                                            name="isActive"
+                                            value={formData.isActive}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.value === "true" }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        >
+                                            <option value="true">Active</option>
+                                            <option value="false">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowModal(false)}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                    >
+                                        {editingBanner ? "Update" : "Create"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                <ConfirmationModal
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="Delete Banner"
+                    message="Are you sure you want to delete this banner? This action cannot be undone."
+                    confirmText="Delete"
+                    confirmButtonClass="bg-red-500 hover:bg-red-600"
+                />
+            </div>
+        </AdminLayout>
+    );
+};
+
+export default Banners;
+

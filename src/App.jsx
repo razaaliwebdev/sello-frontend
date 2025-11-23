@@ -57,6 +57,8 @@ import SupportChat from "./pages/admin/SupportChat.jsx";
 import SupportChatbot from "./pages/admin/SupportChatbot.jsx";
 import ContactFormManagement from "./pages/admin/ContactFormManagement.jsx";
 import CustomerRequests from "./pages/admin/CustomerRequests.jsx";
+import Banners from "./pages/admin/Banners.jsx";
+import Testimonials from "./pages/admin/Testimonials.jsx";
 
 // New Blog Management Pages
 import BlogsOverview from "./pages/admin/BlogsOverview.jsx";
@@ -220,6 +222,8 @@ const App = () => {
           <Route path="/admin/support-chatbot" element={<SupportChatbot />} />
           <Route path="/admin/contact-forms" element={<ContactFormManagement />} />
           <Route path="/admin/customer-requests" element={<CustomerRequests />} />
+          <Route path="/admin/banners" element={<Banners />} />
+          <Route path="/admin/testimonials" element={<Testimonials />} />
         </Route>
       </Routes>
 
