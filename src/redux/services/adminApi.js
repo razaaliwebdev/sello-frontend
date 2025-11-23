@@ -18,7 +18,7 @@ export const adminApi = createApi({
             return headers;
         },
     }),
-    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials"],
+    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials", "Roles", "Invites"],
     endpoints: (builder) => ({
         // Dashboard
         getDashboardStats: builder.query({
@@ -560,6 +560,59 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ["Testimonials"],
         }),
+
+        // Roles & Permissions
+        getAllRoles: builder.query({
+            query: () => "/roles",
+            providesTags: ["Roles"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getRoleById: builder.query({
+            query: (roleId) => `/roles/${roleId}`,
+            providesTags: ["Roles"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        createRole: builder.mutation({
+            query: (data) => ({
+                url: "/roles",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["Roles"],
+        }),
+        updateRole: builder.mutation({
+            query: ({ roleId, ...data }) => ({
+                url: `/roles/${roleId}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["Roles"],
+        }),
+        deleteRole: builder.mutation({
+            query: (roleId) => ({
+                url: `/roles/${roleId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Roles"],
+        }),
+        getPermissionMatrix: builder.query({
+            query: () => "/roles/matrix",
+            providesTags: ["Roles"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        inviteUser: builder.mutation({
+            query: (data) => ({
+                url: "/roles/invite",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["Invites", "Users"],
+        }),
+        getAllInvites: builder.query({
+            query: () => "/roles/invites/all",
+            providesTags: ["Invites"],
+            transformResponse: (response) => response?.data || response,
+        }),
     }),
 });
 
@@ -631,5 +684,13 @@ export const {
     useCreateTestimonialMutation,
     useUpdateTestimonialMutation,
     useDeleteTestimonialMutation,
+    useGetAllRolesQuery,
+    useGetRoleByIdQuery,
+    useCreateRoleMutation,
+    useUpdateRoleMutation,
+    useDeleteRoleMutation,
+    useGetPermissionMatrixQuery,
+    useInviteUserMutation,
+    useGetAllInvitesQuery,
 } = adminApi;
 

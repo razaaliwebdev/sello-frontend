@@ -9,7 +9,11 @@ import {
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiUserPlus, FiMoreVertical } from "react-icons/fi";
+import { FiSearch, FiUserPlus, FiShield, FiDownload } from "react-icons/fi";
+import InviteUserModal from "../../components/admin/InviteUserModal";
+import RolesList from "../../components/admin/RolesList";
+import { useGetPermissionMatrixQuery } from "../../redux/services/adminApi";
+import { useGetMeQuery } from "../../redux/services/api";
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState("general");
@@ -17,7 +21,14 @@ const Settings = () => {
     const [upsertSetting, { isLoading: isSaving }] = useUpsertSettingMutation();
     
     const { data: usersData, isLoading: usersLoading } = useGetAllUsersQuery({ page: 1, limit: 20, role: "admin" });
+    const { data: currentUser } = useGetMeQuery();
+    const { data: permissionMatrixData } = useGetPermissionMatrixQuery(undefined, {
+        skip: activeTab !== "roles"
+    });
+    
     const [searchQuery, setSearchQuery] = useState("");
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [editingRole, setEditingRole] = useState(null);
 
     const settings = settingsData?.settings || {};
     const flatSettings = settingsData?.flat || [];
@@ -236,6 +247,19 @@ const Settings = () => {
                     >
                         User Role
                     </button>
+                    {currentUser?.role === "admin" && (
+                        <button
+                            onClick={() => setActiveTab("roles")}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                activeTab === "roles"
+                                    ? "bg-primary-500 text-white"
+                                    : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                            }`}
+                        >
+                            <FiShield size={18} />
+                            Roles & Permissions
+                        </button>
+                    )}
                 </div>
 
                 {/* General Settings Tab */}
@@ -493,10 +517,15 @@ const Settings = () => {
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
                             </div>
-                            <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors">
-                                <FiUserPlus size={18} />
-                                Invite User
-                            </button>
+                            {currentUser?.role === "admin" && (
+                                <button 
+                                    onClick={() => setShowInviteModal(true)}
+                                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors"
+                                >
+                                    <FiUserPlus size={18} />
+                                    Invite User
+                                </button>
+                            )}
                         </div>
 
                         {/* Search Bar */}
@@ -528,13 +557,12 @@ const Settings = () => {
                                             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Role</th>
                                             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Joined</th>
                                             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Number</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200">
                                         {filteredUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                                                     No admin users found
                                                 </td>
                                             </tr>
@@ -553,11 +581,6 @@ const Settings = () => {
                                                     </td>
                                                     <td className="px-6 py-4 text-gray-500">
                                                         {user.phone || user.contactNumber || "N/A"}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <button className="text-gray-500 hover:text-gray-700">
-                                                            <FiMoreVertical size={20} />
-                                                        </button>
                                                     </td>
                                                 </tr>
                                             ))
@@ -735,7 +758,96 @@ const Settings = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Roles & Permissions Tab */}
+                {activeTab === "roles" && currentUser?.role === "admin" && (
+                    <div className="space-y-6">
+                        {/* Header */}
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">Roles & Permissions</h3>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Manage roles and permissions for admin users
+                                </p>
+                            </div>
+                            <div className="flex gap-2">
+                                {permissionMatrixData && (
+                                    <button
+                                        onClick={() => {
+                                            // Export as JSON
+                                            const dataStr = JSON.stringify(permissionMatrixData, null, 2);
+                                            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                                            const url = URL.createObjectURL(dataBlob);
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.download = `permission-matrix-${new Date().toISOString().split('T')[0]}.json`;
+                                            link.click();
+                                            URL.revokeObjectURL(url);
+                                            toast.success("Permission matrix exported");
+                                        }}
+                                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
+                                    >
+                                        <FiDownload size={18} />
+                                        Export JSON
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        if (permissionMatrixData) {
+                                            // Export as CSV
+                                            const matrix = permissionMatrixData.matrix || [];
+                                            const headers = ["Role", "Display Name", "Access Level", "Purpose", ...Object.keys(matrix[0]?.permissions || {})];
+                                            const rows = matrix.map(row => [
+                                                row.role,
+                                                row.displayName,
+                                                row.accessLevel,
+                                                row.purpose,
+                                                ...Object.values(row.permissions || {})
+                                            ]);
+                                            const csvContent = [
+                                                headers.join(","),
+                                                ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+                                            ].join("\n");
+                                            const blob = new Blob([csvContent], { type: 'text/csv' });
+                                            const url = URL.createObjectURL(blob);
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.download = `permission-matrix-${new Date().toISOString().split('T')[0]}.csv`;
+                                            link.click();
+                                            URL.revokeObjectURL(url);
+                                            toast.success("Permission matrix exported as CSV");
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors"
+                                >
+                                    <FiDownload size={18} />
+                                    Export CSV
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Roles List */}
+                        <RolesList onCreateRole={(role) => {
+                            setEditingRole(role);
+                            setShowInviteModal(true);
+                        }} />
+                    </div>
+                )}
             </div>
+
+            {/* Invite User Modal */}
+            {showInviteModal && (
+                <InviteUserModal
+                    isOpen={showInviteModal}
+                    onClose={() => {
+                        setShowInviteModal(false);
+                        setEditingRole(null);
+                    }}
+                    onSuccess={() => {
+                        // Refetch data if needed
+                    }}
+                />
+            )}
         </AdminLayout>
     );
 };
