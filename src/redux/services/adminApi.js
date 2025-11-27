@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
@@ -715,4 +715,5 @@ export const {
     useGetInviteByTokenQuery,
     useAcceptInviteMutation,
 } = adminApi;
+
 
