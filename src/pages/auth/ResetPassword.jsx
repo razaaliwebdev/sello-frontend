@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { HiOutlineKey } from "react-icons/hi";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import HeaderLogo from "../../components/utils/HeaderLogo";
+import AuthFooter from "../../components/utils/AuthFooter";
 import { useResetPasswordMutation } from "../../redux/services/api";
-import RightSide from "../../components/utils/RightSide";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../../components/Spinner";
@@ -10,6 +11,8 @@ import Spinner from "../../components/Spinner";
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
   const navigate = useNavigate();
 
@@ -29,67 +32,101 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await resetPassword({ password }).unwrap();
-      console.log("Reset response:", response);
+      await resetPassword({ password }).unwrap();
       toast.success("Password reset successfully");
       navigate("/reset-success");
     } catch (err) {
-      console.error("Reset error:", err);
       toast.error(err?.data?.message || "Reset failed, please try again");
     }
   };
 
   return (
-    <div className="flex h-screen flex-wrap flex-col md:flex-row relative">
+    <>
       {isLoading && <Spinner />}
-
-      <div className="md:w-1/2 w-[90%]">
+      <div className="flex flex-col h-screen bg-gray-50">
+        {/* Orange Header */}
         <HeaderLogo />
-        <div className="flex items-center flex-col justify-center">
-          <div className="phoneIcon bg-white shadow-xl h-32 w-32 rounded-full flex items-center justify-center shadow-gray-500 text-4xl md:text-7xl text-primary-500">
-            <HiOutlineKey />
+
+        {/* Main Content - White Panel */}
+        <div className="flex-1 flex items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 md:p-8">
+            {/* Key Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                <HiOutlineKey className="text-5xl text-yellow-500" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
+              New Password
+            </h2>
+
+            <form onSubmit={handleSubmit} className="w-full">
+              {/* New Password Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg pr-10"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your new password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg pr-10"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your new password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Change Password Button */}
+              <button
+                type="submit"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+                disabled={isLoading}
+              >
+                {isLoading ? "Changing..." : "Change Password"}
+              </button>
+            </form>
           </div>
-
-          <form className="md:w-[55%] w-[90%] my-5" onSubmit={handleSubmit}>
-            <div className="w-full">
-              <input
-                type="password"
-                placeholder="New Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-[1px] text-center border-gray-300 my-7 outline-primary-500 py-3 px-2 text-xl"
-              />
-            </div>
-            <div className="w-full">
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border-[1px] text-center border-gray-300 my-7 outline-primary-500 py-3 px-2 text-xl"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full h-12 shadow-lg shadow-gray-400 bg-primary-500 font-medium hover:opacity-90 my-4"
-              disabled={isLoading}
-            >
-              {isLoading ? "Resetting..." : "Continue"}
-            </button>
-          </form>
         </div>
-      </div>
 
-      <div className="md:w-1/2 w-full md:block hidden">
-        <RightSide
-          leftPath={"/verify-otp"}
-          rightPath={"/reset-success"}
-          text={
-            "Sello brings you a smarter way to explore and own cars, offering everything from a 2020 Honda Civic for sale to a used Suzuki Mehran that fits your budget. With a wide selection of low mileage cars, buyers can count on reliability and value in every deal. The platform also features a range of automatic cars for sale to make your driving experience smoother and more convenient. Whether you’re searching for a diesel sedan in (city) or looking to upgrade your current vehicle, Sello connects you with trusted options. It’s the easiest way to buy and sell cars with confidence and convenience."
-          }
+        {/* Dark Blue Footer */}
+        <AuthFooter
+          text="Sello brings you a smarter way to explore and own cars, offering everything from a 2020 Honda Civic for sale to a used Suzuki Mehran that fits your budget. With a wide selection of low mileage cars, buyers can count on reliability and value in every deal. The platform also features a range of automatic cars for sale to make your driving experience smoother and more convenient. Whether you’re searching for a diesel sedan in (city) or looking to upgrade your current vehicle, Sello connects you with trusted options. It’s the easiest way to buy and sell cars with confidence and convenience."
         />
       </div>
-    </div>
+    </>
   );
 };
 

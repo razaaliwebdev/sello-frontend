@@ -13,7 +13,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <GoogleOAuthProvider clientId="90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com"}>
           <SupportChatProvider>
             <App />
           </SupportChatProvider>

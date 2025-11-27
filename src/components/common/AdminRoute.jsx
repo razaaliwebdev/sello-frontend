@@ -1,9 +1,11 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useGetMeQuery } from "../../redux/services/api";
+import { canAccessMenu } from "../../utils/roleAccess";
 import Spinner from "../Spinner";
 
 const AdminRoute = () => {
     const token = localStorage.getItem("token");
+    const location = useLocation();
     const { data: user, isLoading, isError } = useGetMeQuery(undefined, {
         skip: !token,
     });
@@ -28,6 +30,20 @@ const AdminRoute = () => {
 
     if (user?.role !== "admin") {
         return <Navigate to="/home" replace />;
+    }
+
+    // Check if user has access to the current route based on their role
+    const currentPath = location.pathname;
+    
+    // Allow dashboard for all admins
+    if (currentPath === "/admin/dashboard") {
+        return <Outlet />;
+    }
+
+    // Check role-based access for other routes
+    if (!canAccessMenu(user, currentPath)) {
+        // Redirect to dashboard if user doesn't have access
+        return <Navigate to="/admin/dashboard" replace />;
     }
 
     return <Outlet />;

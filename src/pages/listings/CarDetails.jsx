@@ -6,7 +6,7 @@ import CarDetailsEtc from "../../components/sections/carDetails/CarDetailsEtc";
 import BrandMarquee from "../../components/BrandMarquee";
 import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
-import WhyChooseUs from "../../components/sections/home/WhyChooseUs";
+import Ads from "../../components/utils/Ads";
 import BlogSection from "../../components/sections/home/BlogSection";
 import CustomerReviews from "../../components/sections/carDetails/CustomerReviews";
 
@@ -29,7 +29,7 @@ const CarDetails = () => {
         </div>
         <BrandMarquee brands={brands} />
       </div>
-      <WhyChooseUs />
+      <Ads />
       <BlogSection />
     </div>
   );

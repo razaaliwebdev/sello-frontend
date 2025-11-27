@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
+import { canAccessMenu } from "../../utils/roleAccess";
 
 const AdminLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,7 +28,7 @@ const AdminLayout = ({ children }) => {
     const { data: user } = useGetMeQuery();
     const [logout] = useLogoutMutation();
 
-    const menuItems = [
+    const allMenuItems = [
         { path: "/admin/dashboard", icon: FiLayout, label: "Dashboard" },
         { path: "/admin/users", icon: FiUsers, label: "User Management" },
         { path: "/admin/listings", icon: FiList, label: "Listings" },
@@ -41,6 +42,10 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/notifications", icon: FiBell, label: "Notifications" },
         { path: "/admin/settings", icon: FiSettings, label: "Settings" },
     ];
+
+    // Filter menu items based on user's role
+    // Super Admin sees all, team members see only their allowed tabs
+    const menuItems = allMenuItems.filter(item => canAccessMenu(user, item.path));
 
     const handleLogout = async () => {
         try {

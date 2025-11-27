@@ -17,6 +17,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import VerifyOtp from "./pages/auth/VerifyOtp.jsx";
 import ResetSuccess from "./pages/auth/ResetSuccess.jsx";
+import AcceptInvite from "./pages/auth/AcceptInvite.jsx";
 import OurPrivacyPolicy from "./pages/ourPages/OurPrivacyPolicy.jsx";
 import TermsCondition from "./pages/ourPages/TermsCondition.jsx";
 import CarListings from "./pages/listings/CarListings.jsx";
@@ -113,6 +114,7 @@ const App = () => {
     "/reset-password",
     "/verify-otp",
     "/reset-success",
+    "/accept-invite",
   ];
 
   return (
@@ -139,6 +141,7 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/reset-success" element={<ResetSuccess />} />
+        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
 
         {/* Public pages */}
         <Route path="/privacy-policy" element={<OurPrivacyPolicy />} />

@@ -58,7 +58,7 @@ const OTPFields = ({ value, onChange }) => {
 
   return (
     <div
-      className="opt-fields w-full flex justify-center gap-2"
+      className="opt-fields w-full flex justify-center gap-3"
       onPaste={handlePaste}
     >
       {[0, 1, 2, 3].map((_, idx) => (
@@ -70,7 +70,7 @@ const OTPFields = ({ value, onChange }) => {
           ref={(el) => (inputsRef.current[idx] = el)}
           onChange={(e) => handleChange(e, idx)}
           onKeyDown={(e) => handleKeyDown(e, idx)}
-          className="w-16 h-16 text-center text-lg border border-gray-300 rounded focus:outline-none focus:border-primary-500"
+          className="w-14 h-14 md:w-16 md:h-16 text-center text-xl md:text-2xl font-semibold border-2 border-gray-300 rounded focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
         />
       ))}
     </div>

@@ -19,13 +19,13 @@ const BrandsSection = () => {
         </Link>
       </div>
       <BrandMarquee brands={brands} />
-      <div className="maiBrandsLogos  py-5">
+      <div className="maiBrandsLogos  py-5 flex md:flex-row flex-col items-center justify-between">
         {/* <div className="nav flex md:gap-10 gap-7 my-2">
           <button className="">In Stock</button>
           <button className="">New Cars</button>
           <button className="">Used Cars</button>
         </div> */}
-        <div className="grid md:grid-cols-4 grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-4 grid-cols-2 gap-6 md:w-[70%] w-full">
           {brandsCategory.map((brand, index) => {
             const isLastItem = index === brandsCategory.length - 1;
             const isOddNumberOfItems = brandsCategory.length % 2 !== 0;
@@ -48,6 +48,8 @@ const BrandsSection = () => {
             );
           })}
         </div>
+        {/* ad */}
+        <div className="ad"></div>
       </div>
     </section>
   );

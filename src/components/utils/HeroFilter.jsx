@@ -33,10 +33,10 @@ const HeroFilter = () => {
   // }, []);
 
   return (
-    <div className="absolute z-10 inset-0 flex items-center justify-center  text-center p-4">
-      <form className="bg-[#EEEEEE]/60 backdrop-blur-md rounded-tl-3xl rounded-br-3xl flex flex-col md:flex-row gap-6 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-[98%] max-w-6xl mx-auto md:p-0 md:pl-12">
+    <div className="relative md:absolute md:inset-0 z-10 flex items-start md:items-center justify-center text-center px-3 py-6 md:p-4">
+      <form className="bg-[#EEEEEE]/60 backdrop-blur-md rounded md:rounded-tl-3xl md:rounded-br-3xl flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-full max-w-6xl mx-auto p-4 md:p-0 md:pl-12">
         {/* Right Side */}
-        <div className="rightSide grid grid-cols-2 md:grid-cols-3 gap-4 p-3 w-full md:py-6">
+        <div className="rightSide grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 gap-3 md:gap-4 p-1 md:p-3 w-full md:py-6">
           {carFilterData.map((field, i) => (
             <div key={i} className="filter-feild">
               <label className="text-gray-600 text-sm block mb-1">

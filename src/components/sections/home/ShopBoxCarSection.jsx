@@ -14,7 +14,8 @@ const ShopBoxCar = () => {
   }, []);
 
   return (
-    <section className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
+    <section className="px-4 md:px-20 py-12 bg-[#F9FAFB] w-full flex items-center gap-10 md:flex-row flex-col">
+      <div className=" md:w-[70%] w-full">
       <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
         Shop BoxCar Your Way
       </h2>
@@ -25,7 +26,7 @@ const ShopBoxCar = () => {
           <button
             key={tab.value}
             onClick={() => handleTabChange(tab.value)}
-            className={`pb-2 text-base md:text-lg font-medium whitespace-nowrap ${
+            className={`pb-2 md:text-base text-sm font-medium whitespace-nowrap ${
               activeTab === tab.value
                 ? "border-b-2 border-yellow-500 text-black"
                 : "text-gray-500 hover:text-black"
@@ -47,6 +48,9 @@ const ShopBoxCar = () => {
           </p>
         ))}
       </div>
+      </div>
+      {/* ad */}
+      <div className="ad"></div>
     </section>
   );
 };

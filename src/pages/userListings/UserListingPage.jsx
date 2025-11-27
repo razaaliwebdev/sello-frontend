@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
 import UserListings from "../../components/userListings/UsreListings";
 import BannerInUesrListings from "../../components/userListings/BannerInUesrListings";
-import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
+import Ads from '../../components/utils/Ads'
 import ReviewSectionInUser from "../../components/userListings/ReviewSectionInUser";
 import ContactMap from "../../components/userListings/ContactMap";
 import NewsLatter from "../../components/utils/NewsLatter";
@@ -31,7 +31,7 @@ const UserListingPage = () => {
       </div>
       <UserListings />
       <BannerInUesrListings />
-      <WhyChooseUsUtility />
+      <Ads/>
       <ReviewSectionInUser />
       <ContactMap />
       <NewsLatter />

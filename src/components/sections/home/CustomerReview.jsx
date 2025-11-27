@@ -3,7 +3,8 @@ import { images } from "../../../assets/assets";
 
 const CustomerReview = () => {
   return (
-    <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <section className="px-4 md:px-16 py-12 bg-[#F5F5F5] flex items-center gap-10 md:flex-row flex-col">
+      <div className="md:w-[70%] w-full">
       <div className="flex flex-col md:flex-row items-start md:items-center my-7 justify-between gap-4">
         <h2 className="md:text-4xl text-3xl font-semibold">
           What our customers say
@@ -44,7 +45,9 @@ const CustomerReview = () => {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+      <div className="ad"></div>
+    </section>
   );
 };
 

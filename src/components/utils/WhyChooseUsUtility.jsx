@@ -16,7 +16,7 @@ const WhyChooseUsUtility = () => {
               alt={item.title}
               className="w-12 mx-auto md:mx-0 my-2"
             />
-            <h4 className="text-xl font-semibold py-2">{item.title}</h4>
+            {/* <h4 className="text-xl font-semibold py-2">{item.title}</h4> */}
             <p className="text-sm text-gray-700">{item.description}</p>
           </div>
         ))}

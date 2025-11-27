@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import RightSide from "../../components/utils/RightSide";
 import HeaderLogo from "../../components/utils/HeaderLogo";
+import AuthFooter from "../../components/utils/AuthFooter";
 import { images } from "../../assets/assets";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,13 +14,15 @@ import Spinner from "../../components/Spinner";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false); // ✅
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [data, setData] = useState({
     name: "",
     email: "",
     password: "",
+    repeatPassword: "",
   });
 
   const [registerUser] = useRegisterUserMutation();
@@ -30,22 +32,52 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!data.name || !data.email || !data.password || !avatar) {
-      return toast.error("All fields and avatar are required");
+    if (!data.name || !data.email || !data.password || !data.repeatPassword) {
+      return toast.error("All fields are required");
     }
 
+    if (data.password !== data.repeatPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    // Create a default avatar if none is provided
+    if (!avatar) {
+      // Create a simple default avatar using a data URL
+      const canvas = document.createElement("canvas");
+      canvas.width = 200;
+      canvas.height = 200;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FFA602";
+      ctx.fillRect(0, 0, 200, 200);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "80px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(data.name.charAt(0).toUpperCase(), 100, 100);
+      
+      canvas.toBlob((blob) => {
+        const defaultAvatar = new File([blob], "avatar.png", { type: "image/png" });
+        submitForm(defaultAvatar);
+      }, "image/png");
+      return;
+    }
+
+    submitForm(avatar);
+  };
+
+  const submitForm = async (avatarFile) => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("role", "buyer");
-    formData.append("avatar", avatar);
+    formData.append("avatar", avatarFile);
 
     try {
       setLoading(true);
       const res = await registerUser(formData).unwrap();
       toast.success(res.message || "Registered successfully!");
-      setData({ name: "", email: "", password: "" });
+      setData({ name: "", email: "", password: "", repeatPassword: "" });
       setAvatar(null);
       navigate("/login");
     } catch (err) {
@@ -83,64 +115,75 @@ const SignUp = () => {
 
   return (
     <>
-      {(loading || googleLoading) && <Spinner />} {/* ✅ Spinner overlay */}
-      <div className="flex h-screen flex-wrap flex-col md:flex-row overflow-hidden">
-        <div className="md:w-1/2 w-full md:flex-row flex-col flex">
-          <div className="h-20">
-            <HeaderLogo />
-          </div>
-          <div className="md:w-[65%] h-full md:mt-12 mt-0 md:p-2 px-5">
-            <div className="w-full">
-              <img
-                className="mx-auto w-14"
-                src={images.userIcon}
-                alt="userIcon"
-              />
+      {(loading || googleLoading) && <Spinner />}
+      <div className="flex flex-col h-screen bg-gray-50">
+        {/* Orange Header */}
+        <HeaderLogo />
+
+        {/* Main Content - White Panel */}
+        <div className="flex-1 flex items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 md:p-8">
+            {/* User Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <img
+                  className="w-10 h-10"
+                  src={images.userIcon}
+                  alt="userIcon"
+                />
+              </div>
             </div>
-            <div>
-              <h2 className="md:text-3xl text-2xl my-1 md:my-2">Join Sello</h2>
-              <p className="text-gray-400">Create an Account</p>
-            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
+              Please enter your details.
+            </h2>
 
             <form
               onSubmit={handleSubmit}
               className="w-full"
               encType="multipart/form-data"
             >
-              {/* Name */}
-              <div className="field my-1 md:my-2 border-b-[1px] border-black">
-                <label className="block py-1 text-lg">Full Name</label>
+              {/* Full Name Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
                 <input
                   value={data.name}
                   onChange={(e) => setData({ ...data, name: e.target.value })}
-                  className="w-full py-2 border-none outline-none px-0 text-lg"
+                  className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg"
                   type="text"
                   placeholder="Enter full name"
                 />
               </div>
 
-              {/* Email */}
-              <div className="field my-1 md:my-2 border-b-[1px] border-black">
-                <label className="block py-2 text-lg">Email</label>
+              {/* Email Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   value={data.email}
                   onChange={(e) => setData({ ...data, email: e.target.value })}
-                  className="w-full py-2 border-none outline-none px-0 text-lg"
+                  className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg"
                   type="email"
                   placeholder="Enter your email"
                 />
               </div>
 
-              {/* Password */}
-              <div className="field my-1 md:my-2 border-b-[1px] border-black">
-                <label className="block py-2 text-lg">Password</label>
+              {/* Password Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     value={data.password}
                     onChange={(e) =>
                       setData({ ...data, password: e.target.value })
                     }
-                    className="w-full py-2 border-none outline-none px-0 text-lg pr-10"
+                    className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg pr-10"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                   />
@@ -154,82 +197,131 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Avatar */}
-              <div className="field my-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAvatar(e.target.files[0])}
-                  className="text-sm"
-                  required
-                />
+              {/* Repeat Password Field */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Repeat Password
+                </label>
+                <div className="relative">
+                  <input
+                    value={data.repeatPassword}
+                    onChange={(e) =>
+                      setData({ ...data, repeatPassword: e.target.value })
+                    }
+                    className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-lg pr-10"
+                    type={showRepeatPassword ? "text" : "password"}
+                    placeholder="Repeat your password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                  >
+                    {showRepeatPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                  </button>
+                </div>
               </div>
 
-              {/* Terms */}
-              <div className="my-3">
+              {/* Terms Checkbox */}
+              <div className="mb-4">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded-full border-2 bg-primary-500 border-primary-500"
+                    className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                   />
-                  <span className="text-sm">
+                  <span className="text-sm text-gray-700">
                     I accept the{" "}
                     <Link
                       to="/privacy-policy"
-                      className="text-primary-500 font-medium"
+                      className="text-primary-500 hover:underline font-medium"
                     >
                       Privacy Services
                     </Link>{" "}
                     and{" "}
                     <Link
                       to="/terms-conditon"
-                      className="text-primary-500 font-medium"
+                      className="text-primary-500 hover:underline font-medium"
                     >
                       Terms
                     </Link>
+                    .
                   </span>
                 </div>
               </div>
 
-              {/* Submit */}
+              {/* Avatar - Hidden but still required - using a default */}
+              <div className="mb-4 hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setAvatar(e.target.files[0])}
+                  className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                  id="avatar-input"
+                />
+              </div>
+
+              {/* Sign Up Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 shadow-lg shadow-gray-400 bg-primary-500 font-medium hover:opacity-90 my-1 flex items-center justify-center"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
               >
                 {loading ? (
-                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span>
+                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5 inline-block"></span>
                 ) : (
                   "Sign Up"
                 )}
               </button>
 
-              {/* Google Sign Up */}
-              <div className="my-3 flex justify-center">
+              {/* Google Sign Up Button */}
+              <div className="mb-4 googleBtn">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => toast.error("Google login failed")}
                 />
               </div>
 
-              {/* Login link */}
-              <p className="text-center text-gray-400">
+              {/* OR Separator */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">OR</span>
+                </div>
+              </div>
+
+              {/* Sign Up as a Dealer Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  toast.info("Dealer registration coming soon!");
+                  // You can navigate to a dealer signup page when ready
+                  // navigate("/sign-up-dealer");
+                }}
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+              >
+                Sign Up as a Dealer
+              </button>
+
+              {/* Sign In Link */}
+              <p className="text-center text-gray-600 text-sm">
                 Already have an account?{" "}
-                <Link to="/login" className="text-primary-500 hover:underline">
-                  Sign In
+                <Link
+                  to={"/login"}
+                  className="text-primary-500 hover:underline font-medium"
+                >
+                  Sign in
                 </Link>
               </p>
             </form>
           </div>
         </div>
 
-        <div className="md:w-1/2 w-full md:block hidden">
-          <RightSide
-            leftPath="/login"
-            rightPath="/home"
-            text="Sello: Your Trusted Partner for Buying and Selling Cars. Buy and sell cars with ease on Sello. Experience seamless transactions with our expert team."
-          />
-        </div>
+        {/* Dark Blue Footer */}
+        <AuthFooter
+          text="Sello: Your Trusted Partner for Buying and Selling Cars. Buy and sell cars with ease on Sello. Experience seamless transactions with our expert team."
+        />
       </div>
     </>
   );

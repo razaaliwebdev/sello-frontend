@@ -211,3 +211,22 @@
     /* Indigo-600 or your custom color */
     color: black;
 }
+
+/* Google Login Button Styling */
+.googleBtn > div > div > button {
+    width: 100% !important;
+    height: 3rem !important;
+    background: white !important;
+    border: 2px solid #d1d5db !important;
+    border-radius: 0.25rem !important;
+    font-weight: 500 !important;
+    transition: background-color 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.googleBtn > div > div > button:hover {
+    background-color: #f9fafb !important;
+}

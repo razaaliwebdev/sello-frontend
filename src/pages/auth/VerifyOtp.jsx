@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BsTelephoneXFill } from "react-icons/bs";
-import { MdEmail } from "react-icons/md";
+import { FaTimes } from "react-icons/fa";
 import HeaderLogo from "../../components/utils/HeaderLogo";
-import RightSide from "../../components/utils/RightSide";
+import AuthFooter from "../../components/utils/AuthFooter";
 import OtpFields from "../../components/OTPFields";
 import Spinner from "../../components/Spinner";
 import { useVerifyOtpMutation } from "../../redux/services/api";
@@ -22,73 +22,82 @@ const VerifyOtp = () => {
     }
 
     try {
-      const response = await verifyOtp(otp).unwrap();
-      console.log("OTP Verified Response:", response);
-
+      await verifyOtp(otp).unwrap();
       toast.success("OTP verified successfully");
-
-      // Navigate to reset-password page
       navigate("/reset-password");
     } catch (err) {
-      console.error("OTP verification failed:", err);
       toast.error(err?.data?.message || "Invalid OTP, please try again.");
     }
   };
 
+  const handleResend = () => {
+    toast.success("OTP resent successfully");
+    // You can add resend OTP logic here
+  };
+
   return (
-    <div className="flex h-screen flex-wrap flex-col md:flex-row relative">
+    <>
       {isLoading && <Spinner />}
-
-      <div className="md:w-1/2">
+      <div className="flex flex-col h-screen bg-gray-50">
+        {/* Orange Header */}
         <HeaderLogo />
-        <div className="flex items-center flex-col justify-center">
-          <div className="phoneIcon bg-white shadow-xl h-32 w-32 rounded-full flex items-center justify-center shadow-gray-500 text-4xl md:text-7xl text-primary-500">
-            <BsTelephoneXFill />
-          </div>
 
-          <div className="md:w-[55%] w-[90%] my-10 flex py-3 items-center justify-center md:text-2xl border-[1px] border-gray-400 text-gray-400">
-            OTP
-          </div>
-
-          <form className="md:w-[55%] w-[90%]" onSubmit={handleSubmit}>
-            <OtpFields value={otp} onChange={setOtp} />
-
-            <div className="md:text-2xl my-5 text-gray-500 text-center">
-              Enter the OTP we have sent to your registered mobile number to
-              proceed.
+        {/* Main Content - White Panel */}
+        <div className="flex-1 flex items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 md:p-8">
+            {/* Phone Icon with X */}
+            <div className="flex justify-center mb-4">
+              <div className="relative w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                <BsTelephoneXFill className="text-4xl text-gray-600" />
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                  <FaTimes className="text-white text-xs" />
+                </div>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full h-12 shadow-lg shadow-gray-400 bg-primary-500 font-medium hover:opacity-90 my-4"
-              disabled={isLoading}
-            >
-              {isLoading ? "Verifying..." : "Continue"}
-            </button>
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-2">
+              OTP
+            </h2>
+            <p className="text-gray-500 text-center mb-6">
+              Please enter the OTP sent to your registered email address.
+            </p>
 
-            <div className="text-center mt-2 text-lg text-gray-400">
-              Didn't receive it?{" "}
-              <Link
-                className="text-primary-500 hover:underline"
-                to="/forgot-password"
+            <form onSubmit={handleSubmit} className="w-full">
+              {/* OTP Fields */}
+              <div className="mb-6">
+                <OtpFields value={otp} onChange={setOtp} />
+              </div>
+
+              {/* Verify OTP Button */}
+              <button
+                type="submit"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+                disabled={isLoading}
               >
-                Resend
-              </Link>
-            </div>
-          </form>
-        </div>
-      </div>
+                {isLoading ? "Verifying..." : "Verify OTP"}
+              </button>
 
-      <div className="md:w-1/2 w-full md:block hidden">
-        <RightSide
-          leftPath={"/forgot-password"}
-          rightPath={"/reset-password"}
-          text={
-            "Sello is a trusted online car marketplace that makes buying and selling cars simple and hassle-free. Whether you want to buy used cars at great prices or quickly sell your car online, Sello provides a seamless experience for every customer. As a leading car buying website, it connects sellers and buyers with transparency and convenience. From budget-friendly options to premium models, you’ll find a wide range of affordable cars for sale. With Sello, your car journey is smarter, faster, and more reliable."
-          }
+              {/* Resend OTP Link */}
+              <p className="text-center text-gray-600 text-sm">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  className="text-primary-500 hover:underline font-medium"
+                >
+                  Resend OTP
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        {/* Dark Blue Footer */}
+        <AuthFooter
+          text="Sello is a trusted online car marketplace that makes buying and selling cars simple and hassle-free. Whether you want to buy used cars at great prices or quickly sell your car online, Sello provides a seamless experience for every customer. As a leading car buying website, it connects sellers and buyers with transparency and convenience. From budget-friendly options to premium models, you’ll find a wide range of affordable cars for sale. With Sello, your car journey is smarter, faster, and more reliable."
         />
       </div>
-    </div>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 const BuySellCards = () => {
   return (
     <div className="flex flex-col md:flex-row md:gap-16 gap-3 md:pt-16">
+      <div className="flex flex-col md:flex-row md:gap-16 gap-3 md:pt-16 md:w-[70%] w-full">
       {goThemBuyOrSell.map((post, index) => (
         <div className="w-full md:w-1/2  p-8 " key={index}>
           <h3 className="md:text-2xl text-xl font-bold text-gray-900 mb-4">
@@ -24,6 +25,8 @@ const BuySellCards = () => {
           </div>
         </div>
       ))}
+    </div>
+    <div className="ad"></div>
     </div>
   );
 };

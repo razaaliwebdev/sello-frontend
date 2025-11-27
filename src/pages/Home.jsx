@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 import Hero from "../components/sections/home/Hero";
 import BrandsSection from "../components/sections/home/BrandsSection";
-import WhyChooseUs from "../components/sections/home/WhyChooseUs";
 import PopularMakes from "../components/sections/home/PopularMakes";
 import ShopBoxCar from "../components/sections/home/ShopBoxCarSection";
 import CustomerReview from "../components/sections/home/CustomerReview";
@@ -9,6 +8,7 @@ import BlogSection from "../components/sections/home/BlogSection";
 import NewsLatter from "../components/utils/NewsLatter";
 import BuySellCards from "../components/utils/BuySellCards";
 import GetAllCarsSection from "../components/sections/listings/GetAllCarsSection";
+import BannerCarousal from "../components/utils/BannerCarousal";
 
 const Home = () => {
   return (
@@ -16,7 +16,7 @@ const Home = () => {
       <div className="">
         <Hero />
         <BrandsSection />
-        <WhyChooseUs />
+        <BannerCarousal/>
         <PopularMakes />
         <ShopBoxCar />
         <GetAllCarsSection />

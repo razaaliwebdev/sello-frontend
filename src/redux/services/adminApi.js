@@ -613,6 +613,26 @@ export const adminApi = createApi({
             providesTags: ["Invites"],
             transformResponse: (response) => response?.data || response,
         }),
+        // Public invite endpoints (no auth required)
+        getInviteByToken: builder.query({
+            query: (token) => `/roles/invite/${token}`,
+            transformResponse: (response) => response?.data || response,
+        }),
+        acceptInvite: builder.mutation({
+            query: ({ token, password }) => ({
+                url: `/roles/invite/${token}/accept`,
+                method: "POST",
+                body: { password },
+            }),
+            transformResponse: (response) => {
+                // Server returns: { success, message, data: { user, token } }
+                // Extract data field
+                if (response?.data) {
+                    return response.data;
+                }
+                return response;
+            },
+        }),
     }),
 });
 
@@ -692,5 +712,7 @@ export const {
     useGetPermissionMatrixQuery,
     useInviteUserMutation,
     useGetAllInvitesQuery,
+    useGetInviteByTokenQuery,
+    useAcceptInviteMutation,
 } = adminApi;
 
