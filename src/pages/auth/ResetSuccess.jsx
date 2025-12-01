@@ -58,10 +58,7 @@ const ResetSuccess = () => {
         </div>
       </div>
 
-      {/* Dark Blue Footer */}
-      <AuthFooter
-        text="Finding your dream car becomes easier when flexible car finance options are available at your fingertips. With Sello’s smart car loan calculator, you can instantly estimate monthly payments and choose a plan that suits your budget. The platform also makes it simple to apply for auto loan through trusted financial partners, ensuring a smooth approval process. For those who prefer flexibility, Sello offers tailored car leasing plans that make driving a new car more affordable than ever. It’s the perfect blend of convenience, choice, and financial ease."
-      />
+     
     </div>
   );
 };

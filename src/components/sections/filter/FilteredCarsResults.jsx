@@ -77,10 +77,15 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                       <LazyImage
                         src={carImage}
                         alt={`${carMake} ${carModel}`}
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-cover ${car?.isSold ? 'opacity-60' : ''}`}
                         width={208}
                         height={160}
                       />
+                      {car?.isSold && (
+                        <div className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
+                          SOLD
+                        </div>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -162,19 +167,29 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                           <div className="text-sm text-gray-500">
                             Starting from
                           </div>
-                          <div className="text-xl font-bold text-primary-500">
+                          <div className={`text-xl font-bold ${car?.isSold ? 'line-through text-gray-400' : 'text-primary-500'}`}>
                             AED {carPrice}
                           </div>
+                          {car?.isSold && (
+                            <div className="text-sm text-red-600 font-medium mt-1">Sold Out</div>
+                          )}
                         </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/cars/${carId}`);
+                            if (!car?.isSold) {
+                              navigate(`/cars/${carId}`);
+                            }
                           }}
-                          className=" bg-primary-500 hover:placeholder-opacity-85 flex items-center text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+                          disabled={car?.isSold}
+                          className={`flex items-center text-sm font-medium px-4 py-2.5 rounded-lg transition-colors ${
+                            car?.isSold 
+                              ? 'bg-gray-400 cursor-not-allowed text-white' 
+                              : 'bg-primary-500 hover:bg-primary-600 text-white'
+                          }`}
                         >
-                          View Details
-                          <IoIosArrowRoundUp className="ml-1 transform rotate-90 text-base" />
+                          {car?.isSold ? 'Sold Out' : 'View Details'}
+                          {!car?.isSold && <IoIosArrowRoundUp className="ml-1 transform rotate-90 text-base" />}
                         </button>
                       </div>
                     </div>

@@ -233,9 +233,9 @@ const SupportChatWidget = () => {
             <div className="fixed bottom-6 right-6 z-50 group">
                 {/* Wavy ripple effect circles - infinite animation */}
                 <div className="absolute -inset-6 flex items-center justify-center pointer-events-none">
-                    <div className="absolute w-16 h-16 rounded-full bg-primary-500 support-ripple"></div>
-                    <div className="absolute w-16 h-16 rounded-full bg-primary-500 support-ripple-delay-1"></div>
-                    <div className="absolute w-16 h-16 rounded-full bg-primary-500 support-ripple-delay-2"></div>
+                    <div className="absolute w-16 h-16 rounded-full bg-[#050B20] support-ripple"></div>
+                    <div className="absolute w-16 h-16 rounded-full bg-[#050B20] support-ripple-delay-1"></div>
+                    <div className="absolute w-16 h-16 rounded-full bg-[#050B20] support-ripple-delay-2"></div>
                 </div>
                 
                 {/* Tooltip */}
@@ -249,7 +249,7 @@ const SupportChatWidget = () => {
                 {/* Button */}
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="relative bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition-all flex items-center gap-2 hover:scale-105 active:scale-95 z-10 support-button-pulse"
+                    className="relative bg-[#050B20] text-white p-4 rounded-full shadow-lg hover:bg-[#050B20] transition-all flex items-center gap-2 hover:scale-105 active:scale-95 z-10 support-button-pulse"
                     title="Get Support - Click to chat with us!"
                     aria-label="Open support chat"
                 >

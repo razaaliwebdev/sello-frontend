@@ -1,9 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
 
 * {
     font-family: "Outfit", sans-serif;
@@ -11,11 +10,12 @@
     font-style: normal;
 }
 
+/* Generic hide scrollbar helper */
 .hideScrollbar::-webkit-scrollbar {
     display: none;
 }
 
-
+/* Horizontal sliders (popular makes, blog, etc.) */
 #popularMakesSlider {
     scroll-behavior: smooth;
     overflow-x: scroll;
@@ -64,37 +64,37 @@
     0% {
         transform: scale(0.8);
         opacity: 0.8;
-        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+        box-shadow: 0 0 0 0 rgba(5, 11, 32, 0.7);
     }
 
     50% {
         transform: scale(1.2);
         opacity: 0.4;
-        box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+        box-shadow: 0 0 0 10px rgba(5, 11, 32, 0);
     }
 
     100% {
         transform: scale(1.5);
         opacity: 0;
-        box-shadow: 0 0 0 20px rgba(249, 115, 22, 0);
+        box-shadow: 0 0 0 20px rgba(5, 11, 32, 0);
     }
 }
 
 .support-ripple {
     animation: wavePulse 2s ease-out infinite;
-    border: 3px solid rgba(249, 115, 22, 0.6);
+    border: 3px solid rgba(5, 11, 32, 0.6);
 }
 
 .support-ripple-delay-1 {
     animation: wavePulse 2s ease-out infinite;
     animation-delay: 0.5s;
-    border: 3px solid rgba(249, 115, 22, 0.5);
+    border: 3px solid rgba(5, 11, 32, 0.5);
 }
 
 .support-ripple-delay-2 {
     animation: wavePulse 2s ease-out infinite;
     animation-delay: 1s;
-    border: 3px solid rgba(249, 115, 22, 0.4);
+    border: 3px solid rgba(5, 11, 32, 0.4);
 }
 
 /* Button pulse animation */
@@ -102,11 +102,11 @@
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+        box-shadow: 0 0 0 0 rgba(5, 11, 32, 0.7);
     }
 
     50% {
-        box-shadow: 0 0 0 15px rgba(249, 115, 22, 0);
+        box-shadow: 0 0 0 15px rgba(5, 11, 32, 0);
     }
 }
 
@@ -114,6 +114,7 @@
     animation: buttonPulse 2s ease-out infinite;
 }
 
+/* Generic fade-in used in modals/popups */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -130,103 +131,54 @@
     animation: fadeIn 0.2s ease-out;
 }
 
-/* customizing Scrollbar */
+/* Hide scrollbars for custom scroll containers */
 .scrollbar::-webkit-scrollbar {
     display: none;
 }
 
-/* Animations */
-/* spinner.css */
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+.scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
-
-.animate-spin {
-    animation: spin 1.5s linear infinite;
-}
-
-
-/* Drawer slide-in animation */
-@keyframes slideInFromLeft {
-    0% {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.mobile-drawer {
-    animation: slideInFromLeft 0.3s ease-out forwards;
-    background-color: #e0edff;
-    /* Light primary */
-}
-
-@keyframes marquee {
-    0% {
-        transform: translateX(0%);
-    }
-
-    100% {
-        transform: translateX(-100%);
-    }
-}
-
-.animate-marquee {
-    animation: marquee 400s linear infinite;
-}
-
-
-.animate-marquee:hover {
-    animation-play-state: paused;
-}
-
-/* start */
-/* .animate-marquee {
-    animation: marquee 30s linear infinite;
-}
-
-@keyframes marquee {
-    0% {
-        transform: translateX(0%);
-    }
-
-    100% {
-        transform: translateX(-100%);
-    }
-} */
-
-/* end */
-
-
-
 
 ::selection {
     background-color: #FFA602;
-    /* Indigo-600 or your custom color */
     color: black;
 }
 
 /* Google Login Button Styling */
-.googleBtn > div > div > button {
+.googleBtn {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin-bottom: 1rem !important;
+}
+
+.googleBtn>div {
+    width: 100% !important;
+}
+
+.googleBtn>div>div {
+    width: 100% !important;
+}
+
+.googleBtn>div>div>button {
     width: 100% !important;
     height: 3rem !important;
     background: white !important;
     border: 2px solid #d1d5db !important;
-    border-radius: 0.25rem !important;
+    border-radius: 0.5rem !important;
     font-weight: 500 !important;
-    transition: background-color 0.2s !important;
+    transition: all 0.2s !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 0.5rem !important;
+    cursor: pointer !important;
 }
 
-.googleBtn > div > div > button:hover {
-    background-color: #f9fafb !important;
+.googleBtn>div>div>button:hover {
+    background: #f9fafb !important;
+    border-color: #9ca3af !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }

@@ -7,7 +7,7 @@ const SupportButton = ({ className = "", iconSize = 20, showText = false }) => {
     return (
         <button
             onClick={() => openSupportChat()}
-            className={`flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all ${className}`}
+            className={`flex items-center gap-2 px-4 py-2 bg-[#050B20] text-white rounded-lg hover:bg-[#050B20] transition-all ${className}`}
         >
             <FiMessageSquare size={iconSize} />
             {showText && <span>Support</span>}

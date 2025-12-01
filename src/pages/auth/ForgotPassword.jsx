@@ -26,7 +26,9 @@ const ForgotPassword = () => {
       localStorage.setItem("email", email);
       navigate("/verify-otp");
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to send OTP. Please try again.");
+      const errorMessage = err?.data?.message || err?.message || "Failed to send OTP. Please try again later.";
+      toast.error(errorMessage);
+      console.error("Forgot password error:", err);
     }
   };
 
@@ -95,10 +97,7 @@ const ForgotPassword = () => {
           </div>
         </div>
 
-        {/* Dark Blue Footer */}
-        <AuthFooter
-          text="Looking for a reliable way to upgrade or let go of your vehicle? A trusted online car mar-ketplace makes it simple to buy used cars at the right price or sell your car online without hassle. This innovative car buying website connects buyers and sellers quickly, ensuring smooth transactions every time. With a wide range of choices, customers can explore afford-able cars for sale that fit different needs and budgets. The platform is designed to bring convenience, transparency, and confidence to every car deal."
-        />
+    
       </div>
     </>
   );

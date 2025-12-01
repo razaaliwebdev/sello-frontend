@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useGetSingleCarQuery, useGetMeQuery } from "../../../redux/services/api";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetSingleCarQuery, useGetMeQuery, useMarkCarAsSoldMutation } from "../../../redux/services/api";
 import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
 import CarChatWidget from "../../carChat/CarChatWidget";
@@ -8,10 +8,12 @@ import toast from "react-hot-toast";
 
 const CarDetailsEtc = () => {
   const { id } = useParams();
-  const { data: car, isLoading, error } = useGetSingleCarQuery(id, {
+  const navigate = useNavigate();
+  const { data: car, isLoading, error, refetch } = useGetSingleCarQuery(id, {
     skip: !id,
   });
   const { data: currentUser } = useGetMeQuery();
+  const [markCarAsSold] = useMarkCarAsSoldMutation();
   const [showMore, setShowMore] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -140,52 +142,50 @@ const CarDetailsEtc = () => {
           </div>
         </div>
 
-        {/* Status Badge (for seller) */}
+        {/* Owner Actions (for seller) */}
         {currentUser && car.postedBy && currentUser._id === car.postedBy._id && (
-          <div className="flex items-center gap-3 py-3 border-b border-gray-400">
-            <span className="text-sm font-medium text-gray-700">Status:</span>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              car.isSold 
-                ? "bg-red-100 text-red-800" 
-                : "bg-green-100 text-green-800"
-            }`}>
-              {car.isSold ? "Sold Out" : "Available"}
-            </span>
-            <button
-              onClick={async () => {
-                if (window.confirm(`Are you sure you want to mark this car as ${car.isSold ? 'available' : 'sold'}?`)) {
-                  try {
-                    setIsUpdatingStatus(true);
-                    const token = localStorage.getItem("token");
-                    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-                    const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
-                    const response = await fetch(`${API_URL}/cars/${car._id}/sold`, {
-                      method: "PUT",
-                      headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                      },
-                      body: JSON.stringify({ isSold: !car.isSold })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
+          <div className="flex items-center gap-3 py-3 border-b border-gray-400 flex-wrap">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">Status:</span>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                car.isSold 
+                  ? "bg-red-100 text-red-800" 
+                  : "bg-green-100 text-green-800"
+              }`}>
+                {car.isSold ? "Sold Out" : "Available"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={() => navigate(`/edit-car/${car._id}`)}
+                className="px-4 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+              >
+                Edit Car
+              </button>
+              <button
+                onClick={async () => {
+                  if (window.confirm(`Are you sure you want to mark this car as ${car.isSold ? 'available' : 'sold'}?`)) {
+                    try {
+                      setIsUpdatingStatus(true);
+                      await markCarAsSold({ 
+                        carId: car._id, 
+                        isSold: !car.isSold 
+                      }).unwrap();
                       toast.success(`Car marked as ${!car.isSold ? 'sold' : 'available'}`);
-                      window.location.reload(); // Reload to update car data
-                    } else {
-                      toast.error(data.message || "Failed to update status");
+                      refetch(); // Refetch car data
+                    } catch (error) {
+                      toast.error(error?.data?.message || "Failed to update car status");
+                    } finally {
+                      setIsUpdatingStatus(false);
                     }
-                  } catch (error) {
-                    toast.error("Failed to update car status");
-                  } finally {
-                    setIsUpdatingStatus(false);
                   }
-                }
-              }}
-              disabled={isUpdatingStatus}
-              className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
-            >
-              {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
-            </button>
+                }}
+                disabled={isUpdatingStatus}
+                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+              >
+                {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
+              </button>
+            </div>
           </div>
         )}
 

@@ -104,7 +104,7 @@ const SignUp = () => {
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
       } else {
-        navigate("/home");
+        navigate("/");
       }
     } catch (err) {
       toast.error(err?.data?.message || "Google login failed");
@@ -273,21 +273,31 @@ const SignUp = () => {
                 )}
               </button>
 
-              {/* Google Sign Up Button */}
-              <div className="mb-4 googleBtn">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => toast.error("Google login failed")}
-                />
-              </div>
-
-              {/* OR Separator */}
+              {/* Divider */}
               <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">OR</span>
+                </div>
+              </div>
+
+              {/* Google Sign Up Button */}
+              <div className="mb-4 w-full">
+                <div className="googleBtn">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={(error) => {
+                      console.error("Google login error:", error);
+                      toast.error("Google login failed. Please try again.");
+                    }}
+                    useOneTap={false}
+                    theme="outline"
+                    shape="rectangular"
+                    size="large"
+                    text="signup_with"
+                  />
                 </div>
               </div>
 
@@ -318,10 +328,7 @@ const SignUp = () => {
           </div>
         </div>
 
-        {/* Dark Blue Footer */}
-        <AuthFooter
-          text="Sello: Your Trusted Partner for Buying and Selling Cars. Buy and sell cars with ease on Sello. Experience seamless transactions with our expert team."
-        />
+       
       </div>
     </>
   );

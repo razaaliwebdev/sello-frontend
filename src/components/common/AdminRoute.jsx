@@ -29,7 +29,7 @@ const AdminRoute = () => {
     }
 
     if (user?.role !== "admin") {
-        return <Navigate to="/home" replace />;
+        return <Navigate to="/" replace />;
     }
 
     // Check if user has access to the current route based on their role

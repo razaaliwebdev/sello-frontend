@@ -350,7 +350,7 @@ const WhatsAppChatWidget = () => {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition-all z-50 flex items-center gap-2"
+                className="fixed bottom-6 right-6 bg-[#050B20] text-white p-4 rounded-full shadow-lg hover:bg-[#050B20] transition-all z-50 flex items-center gap-2"
             >
                 <FiMessageSquare size={24} />
                 <span className="hidden sm:inline">Support</span>

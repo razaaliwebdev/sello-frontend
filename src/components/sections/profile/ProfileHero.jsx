@@ -16,6 +16,7 @@ const ProfileHero = () => {
   const { openSupportChat } = useSupportChat();
   const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [showStatsPopup, setShowStatsPopup] = useState(false);
   const { data: user, isLoading, isError, error } = useGetMeQuery();
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [metrics, setMetrics] = useState({
@@ -73,9 +74,12 @@ const ProfileHero = () => {
   };
 
   useEffect(() => {
-    if (!showProfilePopup) return;
+    if (!showProfilePopup && !showStatsPopup) return;
     const onKeyDown = (e) => {
-      if (e.key === "Escape") setShowProfilePopup(false);
+      if (e.key === "Escape") {
+        setShowProfilePopup(false);
+        setShowStatsPopup(false);
+      }
     };
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -84,7 +88,7 @@ const ProfileHero = () => {
       document.body.style.overflow = originalOverflow;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [showProfilePopup]);
+  }, [showProfilePopup, showStatsPopup]);
 
   if (isLoading) {
     return (
@@ -292,11 +296,45 @@ const ProfileHero = () => {
               <div className=""></div>
             </div>
           </div>
-          <div className="md:h-full h-auto md:w-[43%] w-full md:absolute md:right-5 relative mt-6 md:mt-0">
-            <h2 className="text-center pb-1 text-xl text-white font-semibold">
-              My Posts
-            </h2>
-            <div className="h-full w-full bg-white shadow-lg rounded-lg shadow-gray-700 p-4 md:p-5">
+          {/* Button to open stats popup - Visible on all screens */}
+          <div className="w-full md:w-auto md:absolute md:right-5 mt-6 md:mt-0">
+            <button
+              onClick={() => setShowStatsPopup(true)}
+              className="bg-[#050B20] px-4 py-2 rounded-lg flex items-center justify-center gap-2 flex-col hover:opacity-90 transition-all duration-300"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <h2 className="text-xl font-semibold text-primary-500 md:text-white">
+                  View My Stats
+                </h2>
+                <MdKeyboardArrowRight className="text-primary-500 md:text-white text-xl" size={25} />
+              </div>
+              <p className="text-sm text-gray-600 md:text-white/80 mt-1 md:mt-0">Click to view detailed statistics</p>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Stats Popup Modal */}
+      {showStatsPopup && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          onClick={() => setShowStatsPopup(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowStatsPopup(false)}
+              className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-500 transition z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <div className="p-6">
+              <h2 className="text-center pb-4 text-2xl font-semibold text-primary-500 border-b mb-4">
+                My Posts & Statistics
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
                 {profileOptions.map((op) => {
                   let dynamicValue = op.values;
@@ -309,7 +347,7 @@ const ProfileHero = () => {
                         alert("hello");
                       }}
                       key={op.id}
-                      className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer"
+                      className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer hover:bg-primary-50 transition-colors"
                     >
                       <div className="h-8 w-8">
                         <img
@@ -318,7 +356,7 @@ const ProfileHero = () => {
                           alt={op.title}
                         />
                       </div>
-                      <div className="text-primary-500 text-sm md:text-base">
+                      <div className="text-primary-500 text-sm md:text-base font-semibold">
                         {dynamicValue}
                       </div>
                       <div className="text-sm md:text-base">{op.title}</div>
@@ -326,9 +364,9 @@ const ProfileHero = () => {
                   );
                 })}
               </div>
-              <div className="">
+              <div className="mt-6">
                 <h2 className="text-lg font-medium my-2">Selling</h2>
-                <div className="w-full md:w-1/2">
+                <div className="w-full">
                   {sellingOptions.map((op) => {
                     let dynamicValue = op.values;
                     if (op.title === "Active Listings")
@@ -336,7 +374,7 @@ const ProfileHero = () => {
                     if (op.title === "Sales") dynamicValue = metrics.sales;
                     return (
                       <div
-                        className="flex items-center cursor-pointer py-1 px-2 hover:bg-gray-100 justify-between my-2 rounded-md"
+                        className="flex items-center cursor-pointer py-2 px-3 hover:bg-gray-100 justify-between my-2 rounded-md transition-colors"
                         key={op.id}
                       >
                         <img
@@ -344,7 +382,7 @@ const ProfileHero = () => {
                           className="h-7 w-7 md:h-8 md:w-8 object-cover"
                           alt={op.title}
                         />
-                        <h4 className="text-sm md:text-base">
+                        <h4 className="text-sm md:text-base flex-1 ml-3">
                           {op.title}
                           {dynamicValue ? ` (${dynamicValue})` : ""}
                         </h4>
@@ -354,13 +392,13 @@ const ProfileHero = () => {
                   })}
                 </div>
               </div>
-              <div className="">
+              <div className="mt-6">
                 <h2 className="text-lg font-medium my-2">Overview</h2>
                 <div className="grid grid-cols-2 gap-3 md:gap-5">
                   {sellingOverview.map((op) => {
                     return (
                       <div
-                        className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 md:p-3 cursor-pointer"
+                        className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 md:p-3 cursor-pointer hover:bg-primary-50 transition-colors"
                         key={op.id}
                       >
                         <img
@@ -374,30 +412,30 @@ const ProfileHero = () => {
                   })}
                 </div>
               </div>
-              <div className="">
+              <div className="mt-6">
                 <h2 className="text-lg font-medium my-2">Performance</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
+                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
                     <h4 className="font-medium text-sm md:text-base">
                       AED{" "}
                       <span className="font-semibold">
                         {metrics.earnings.toLocaleString()}
                       </span>
                     </h4>
-                    <p className="text-sm">
+                    <p className="text-sm mt-1">
                       {metrics.sales > 0
                         ? `${metrics.sales} Sales History`
                         : "No Pay History"}
                     </p>
                   </div>
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
+                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
                     <h4 className="font-semibold text-base md:text-lg">
                       {metrics.clicks.toLocaleString()}
                     </h4>
-                    <p className="text-xs md:text-sm">Clicks On Listings</p>
+                    <p className="text-xs md:text-sm mt-1">Clicks On Listings</p>
                     <span className="text-xs">Last 7 Days</span>
                   </div>
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-2 cursor-pointer">
+                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
                     <div className="flex items-center gap-2 md:gap-5">
                       <h4 className="text-sm md:text-base">{metrics.rating}</h4>
                       <img
@@ -406,7 +444,7 @@ const ProfileHero = () => {
                         className="w-5 h-5 md:w-6 md:h-6 object-cover"
                       />
                     </div>
-                    <div className="">
+                    <div className="mt-1">
                       <p className="text-xs md:text-sm">Click On Listings</p>
                       <span className="text-xs">
                         {metrics.ratingCount} Ratings
@@ -418,7 +456,8 @@ const ProfileHero = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
+      
       {showProfilePopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75"

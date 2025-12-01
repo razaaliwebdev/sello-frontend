@@ -169,12 +169,32 @@ const Login = () => {
                 {isLoading ? "Signing In..." : "Sign In"}
               </button>
 
+              {/* Divider */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">OR</span>
+                </div>
+              </div>
+
               {/* Google Sign In Button */}
-              <div className="mb-4 googleBtn">
-                <GoogleLogin
-                  onSuccess={handleGoogleLoginSuccess}
-                  onError={() => toast.error("Google login failed")}
-                />
+              <div className="mb-4 w-full">
+                <div className="googleBtn">
+                  <GoogleLogin
+                    onSuccess={handleGoogleLoginSuccess}
+                    onError={(error) => {
+                      console.error("Google login error:", error);
+                      toast.error("Google login failed. Please try again.");
+                    }}
+                    useOneTap={false}
+                    theme="outline"
+                    shape="rectangular"
+                    size="large"
+                    text="signin_with"
+                  />
+                </div>
               </div>
 
               {/* Sign Up Link */}
@@ -190,11 +210,6 @@ const Login = () => {
             </form>
           </div>
         </div>
-
-        {/* Dark Blue Footer */}
-        <AuthFooter
-          text="Sello is your go-to destination for everything on wheels, offering a wide variety of used cars for sale along with the latest models for those looking to buy new cars. The platform ensures trust and quality by listing only certified pre-owned cars that meet high standards. Whether you’re planning to buy Toyota Corolla online, searching for a reliable SUV for sale, or exploring budget cars under (price), Sello has options to suit every lifestyle and budget. With its user-friendly process, Sello makes car buying and selling convenient, transparent, and stress-free."
-        />
       </div>
     </>
   );

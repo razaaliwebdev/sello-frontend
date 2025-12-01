@@ -191,13 +191,18 @@ const GetAllCarsSection = () => {
                       <LazyImage
                         src={carImage}
                         alt={`${carMake} ${carModel}`}
-                        className="rounded-t-lg"
+                        className={`rounded-t-lg ${car?.isSold ? 'opacity-60' : ''}`}
                         width="100%"
                         height="100%"
                         onError={() => {
                           // This will be handled by the LazyImage component
                         }}
                       />
+                      {car?.isSold && (
+                        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
+                          SOLD
+                        </div>
+                      )}
                       <button
                         onClick={() => toggleSave(carId)}
                         className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md"
@@ -255,17 +260,17 @@ const GetAllCarsSection = () => {
 
                       <div className="flex items-center justify-between py-4">
                         <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
-                          AED <h5 className="price">{carPrice}</h5>
+                          AED <h5 className={`price ${car?.isSold ? 'line-through text-gray-500' : ''}`}>{carPrice}</h5>
                         </div>
                         <button
                           onClick={() =>
                             car?._id && navigate(`/cars/${car._id}`)
                           }
-                          className="text-primary-500 flex items-center gap-2"
-                          disabled={!car?._id}
+                          className={`flex items-center gap-2 ${car?.isSold ? 'text-gray-400 cursor-not-allowed' : 'text-primary-500'}`}
+                          disabled={!car?._id || car?.isSold}
                         >
-                          View Details
-                          <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
+                          {car?.isSold ? 'Sold Out' : 'View Details'}
+                          {!car?.isSold && <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />}
                         </button>
                       </div>
                     </div>

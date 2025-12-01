@@ -1,22 +1,34 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const api = createApi({
     reducerPath: "api",
-    baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL,
-        credentials: "include",
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem("token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-            return headers;
-        },
-    }),
+    baseQuery: async (args, api, extraOptions) => {
+        const baseResult = await fetchBaseQuery({
+            baseUrl: BASE_URL,
+            credentials: "include",
+            prepareHeaders: (headers) => {
+                const token = localStorage.getItem("token");
+                if (token) {
+                    headers.set("Authorization", `Bearer ${token}`);
+                }
+                return headers;
+            },
+        })(args, api, extraOptions);
+
+        // Handle 401 errors - token expired or invalid
+        if (baseResult.error && baseResult.error.status === 401) {
+            // Clear invalid token
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            // Don't redirect automatically - let components handle it
+        }
+
+        return baseResult;
+    },
     tagTypes: ["User", "SupportChat", "CarChat"],
     endpoints: (builder) => ({
         registerUser: builder.mutation({
@@ -64,11 +76,16 @@ export const api = createApi({
             },
         }),
         googleLogin: builder.mutation({
-            query: (token) => ({
-                url: "/auth/google",
-                method: "POST",
-                body: { token },
-            }),
+            query: (token) => {
+                if (!token || typeof token !== 'string') {
+                    throw new Error('Invalid Google token provided');
+                }
+                return {
+                    url: "/auth/google",
+                    method: "POST",
+                    body: { token: token },
+                };
+            },
             invalidatesTags: ["User"],
             transformResponse: (response) => {
                 // Backend format: { success, message, data: { user, token } }
@@ -355,6 +372,29 @@ export const api = createApi({
             }),
             invalidatesTags: ["CarChat"],
         }),
+
+        // Mark Car as Sold/Available
+        markCarAsSold: builder.mutation({
+            query: ({ carId, isSold }) => ({
+                url: `/cars/${carId}/sold`,
+                method: "PUT",
+                body: { isSold },
+            }),
+            invalidatesTags: ["Cars", "User"],
+        }),
+
+        // Edit Car
+        editCar: builder.mutation({
+            query: ({ carId, formData }) => ({
+                url: `/cars/${carId}`,
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["Cars", "User"],
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
+        }),
     }),
 });
 
@@ -385,4 +425,6 @@ export const {
     useSendCarChatMessageMutation,
     useEditCarChatMessageMutation,
     useDeleteCarChatMessageMutation,
+    useMarkCarAsSoldMutation,
+    useEditCarMutation,
 } = api;

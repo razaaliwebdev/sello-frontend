@@ -14,23 +14,23 @@ export const isSuperAdmin = (user) => {
     if (!user || user.role !== "admin") {
         return false;
     }
-    
+
     // Original admins (adminRole is null/undefined) have full access
     if (!user.adminRole || user.adminRole === null) {
         return true;
     }
-    
+
     // Super Admin role has full access
     if (user.adminRole === "Super Admin") {
         return true;
     }
-    
+
     // Users with inviteUsers permission also have full access
     const permissions = user.permissions || {};
     if (permissions.inviteUsers === true) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -93,6 +93,7 @@ const ROLE_MENU_ACCESS = {
         "/admin/dashboard",
         // Custom roles get access based on their permissions
         // This will be handled by permission checks
+        "/admin/settings",
     ],
 };
 
@@ -115,7 +116,7 @@ export const getAllowedMenuPaths = (user) => {
         // Fallback: if no adminRole, give full access (original admin)
         return ROLE_MENU_ACCESS["Super Admin"];
     }
-    
+
     return ROLE_MENU_ACCESS[adminRole] || ROLE_MENU_ACCESS["Support Agent"];
 };
 

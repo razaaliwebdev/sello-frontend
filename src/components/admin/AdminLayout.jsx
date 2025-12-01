@@ -11,11 +11,11 @@ import {
     FiUser,
     FiHeart,
     FiBell,
-    FiSettings,
     FiLogOut,
     FiMenu,
     FiX,
     FiFileText,
+    FiSettings,
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";

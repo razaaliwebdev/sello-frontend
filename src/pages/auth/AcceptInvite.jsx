@@ -7,7 +7,7 @@ import { FiMail, FiUser, FiShield, FiClock } from "react-icons/fi";
 import toast from "react-hot-toast";
 import Spinner from "../../components/Spinner";
 import { useGetInviteByTokenQuery, useAcceptInviteMutation } from "../../redux/services/adminApi";
-import { useGetMeQuery } from "../../redux/services/api";
+// import { useGetMeQuery } from "../../redux/services/api";
 
 const AcceptInvite = () => {
   const { token } = useParams();
@@ -254,15 +254,7 @@ const AcceptInvite = () => {
           </div>
         </div>
 
-        <div className="md:w-1/2 w-full md:block hidden">
-          <RightSide
-            leftPath={"/"}
-            rightPath={"/login"}
-            text={
-              "You've been invited to join the Sello Admin Panel. Complete your account setup by creating a secure password. Once your account is created, you'll have access to the admin dashboard based on your assigned role and permissions."
-            }
-          />
-        </div>
+  
       </div>
     </>
   );

@@ -25,6 +25,7 @@ import CarDetails from "./pages/listings/CarDetails.jsx";
 import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
 import CreatePost from "./pages/posts/CreatePost.jsx";
+import EditCar from "./pages/posts/EditCar.jsx";
 import AllBrands from "./pages/AllBrands.jsx";
 import FilterPage from "./pages/filter/FilterPage.jsx";
 import FilteredResults from "./pages/listings/FilteredResults.jsx";
@@ -53,13 +54,13 @@ import AdminChatbot from "./pages/admin/Chatbot.jsx";
 import AdminCustomers from "./pages/admin/CustomerRequests.jsx";
 import AdminPromotions from "./pages/admin/Promotions.jsx";
 import AdminNotifications from "./pages/admin/Notifications.jsx";
-import AdminSettings from "./pages/admin/Settings.jsx";
 import SupportChat from "./pages/admin/SupportChat.jsx";
 import SupportChatbot from "./pages/admin/SupportChatbot.jsx";
 import ContactFormManagement from "./pages/admin/ContactFormManagement.jsx";
 import CustomerRequests from "./pages/admin/CustomerRequests.jsx";
 import Banners from "./pages/admin/Banners.jsx";
 import Testimonials from "./pages/admin/Testimonials.jsx";
+import Settings from "./pages/admin/Settings.jsx";
 
 // New Blog Management Pages
 import BlogsOverview from "./pages/admin/BlogsOverview.jsx";
@@ -133,6 +134,7 @@ const App = () => {
       <Routes>
         {/* HOME */}
         <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
 
         {/* Auth */}
         <Route path="/login" element={<Login />} />
@@ -164,6 +166,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <CreatePost />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-car/:id"
+          element={
+            <ProtectedRoute>
+              <EditCar />
             </ProtectedRoute>
           }
         />
@@ -220,13 +230,13 @@ const App = () => {
           <Route path="/admin/customers" element={<CustomerRequests />} />
           <Route path="/admin/promotions" element={<AdminPromotions />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/support-chat" element={<SupportChat />} />
           <Route path="/admin/support-chatbot" element={<SupportChatbot />} />
           <Route path="/admin/contact-forms" element={<ContactFormManagement />} />
           <Route path="/admin/customer-requests" element={<CustomerRequests />} />
           <Route path="/admin/banners" element={<Banners />} />
           <Route path="/admin/testimonials" element={<Testimonials />} />
+          <Route path="/admin/settings" element={<Settings />} />
         </Route>
       </Routes>
 

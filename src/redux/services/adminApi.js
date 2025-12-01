@@ -1,23 +1,35 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL,
-        credentials: "include",
-        prepareHeaders: (headers, { extra, endpoint }) => {
-            const token = localStorage.getItem("token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-            // Don't set Content-Type for FormData - browser will set it with boundary
-            // RTK Query will handle this automatically
-            return headers;
-        },
-    }),
+    baseQuery: async (args, api, extraOptions) => {
+        const baseResult = await fetchBaseQuery({
+            baseUrl: BASE_URL,
+            credentials: "include",
+            prepareHeaders: (headers, { extra, endpoint }) => {
+                const token = localStorage.getItem("token");
+                if (token) {
+                    headers.set("Authorization", `Bearer ${token}`);
+                }
+                // Don't set Content-Type for FormData - browser will set it with boundary
+                // RTK Query will handle this automatically
+                return headers;
+            },
+        })(args, api, extraOptions);
+
+        // Handle 401 errors - token expired or invalid
+        if (baseResult.error && baseResult.error.status === 401) {
+            // Clear invalid token
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            // Don't redirect automatically - let components handle it
+        }
+
+        return baseResult;
+    },
     tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials", "Roles", "Invites"],
     endpoints: (builder) => ({
         // Dashboard
@@ -289,22 +301,7 @@ export const adminApi = createApi({
         }),
 
         // Settings
-        getAllSettings: builder.query({
-            query: (params = {}) => {
-                const searchParams = new URLSearchParams(params).toString();
-                return `/settings?${searchParams}`;
-            },
-            providesTags: ["Settings"],
-            transformResponse: (response) => response?.data || response,
-        }),
-        upsertSetting: builder.mutation({
-            query: ({ key, ...data }) => ({
-                url: `/settings/${key}`,
-                method: "PUT",
-                body: data,
-            }),
-            invalidatesTags: ["Settings"],
-        }),
+        // Settings APIs (no longer used in UI, kept for backwards compatibility)
 
         // Chatbot
         getChatbotConfig: builder.query({
@@ -669,8 +666,7 @@ export const {
     useGetAnalyticsQuery,
     useGetAllPromotionsQuery,
     useGetPromotionStatsQuery,
-    useGetAllSettingsQuery,
-    useUpsertSettingMutation,
+    // settings hooks removed (page deleted)
     useGetChatbotConfigQuery,
     useUpdateChatbotConfigMutation,
     useGetChatbotStatsQuery,
