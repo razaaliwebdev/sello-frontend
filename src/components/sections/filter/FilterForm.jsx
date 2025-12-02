@@ -21,9 +21,11 @@ import { useNavigate } from "react-router-dom";
 import { useCarCategories } from "../../../hooks/useCarCategories";
 
 const FilterForm = ({ onFilter }) => {
-  const { makes, models, getModelsByMake, isLoading: categoriesLoading } = useCarCategories();
+  const { makes, models, getModelsByMake, countries, cities, getCitiesByCountry, isLoading: categoriesLoading } = useCarCategories();
   const [selectedMake, setSelectedMake] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
+  const [availableCities, setAvailableCities] = useState([]);
   
   const [filters, setFilters] = useState({
     search: "",
@@ -52,6 +54,7 @@ const FilterForm = ({ onFilter }) => {
     minEngineCapacity: "",
     maxEngineCapacity: "",
     technicalFeatures: "",
+    country: "",
     city: "",
   });
 
@@ -70,31 +73,77 @@ const FilterForm = ({ onFilter }) => {
     // When make changes, update available models
     if (field === "make") {
       setSelectedMake(value);
-      const selectedMakeObj = makes.find(m => m.name === value);
-      if (selectedMakeObj) {
-        const makeModels = getModelsByMake[selectedMakeObj._id] || [];
-        setAvailableModels(makeModels);
-        // Reset model if it's not available for the new make
-        if (filters.model && !makeModels.find(m => m.name === filters.model)) {
-          setFilters((prev) => ({ ...prev, model: "" }));
+      if (value) {
+        const selectedMakeObj = makes.find(m => m.name === value);
+        if (selectedMakeObj) {
+          const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+          setAvailableModels(makeModels.length > 0 ? makeModels : models);
+          // Reset model if it's not available for the new make
+          if (filters.model && makeModels.length > 0 && !makeModels.find(m => m.name === filters.model)) {
+            setFilters((prev) => ({ ...prev, model: "" }));
+          }
+        } else {
+          setAvailableModels(models);
         }
       } else {
-        setAvailableModels([]);
-        setFilters((prev) => ({ ...prev, model: "" }));
+        // Show all models when make is cleared
+        setAvailableModels(models);
+      }
+    }
+    
+    // When country changes, update available cities
+    if (field === "country") {
+      setSelectedCountry(value);
+      if (value) {
+        const selectedCountryObj = countries.find(c => c.name === value);
+        if (selectedCountryObj) {
+          const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+          setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+          // Reset city if it's not available for the new country
+          if (filters.city && countryCities.length > 0 && !countryCities.find(c => c.name === filters.city)) {
+            setFilters((prev) => ({ ...prev, city: "" }));
+          }
+        } else {
+          setAvailableCities(cities);
+        }
+      } else {
+        // Show all cities when country is cleared
+        setAvailableCities(cities);
       }
     }
   };
   
-  // Initialize available models when make is selected on mount
+  // Initialize available models - show all if no make selected, filtered if make selected
   useEffect(() => {
     if (filters.make && makes.length > 0) {
       const selectedMakeObj = makes.find(m => m.name === filters.make);
       if (selectedMakeObj) {
         const makeModels = getModelsByMake[selectedMakeObj._id] || [];
-        setAvailableModels(makeModels);
+        setAvailableModels(makeModels.length > 0 ? makeModels : models);
+      } else {
+        setAvailableModels(models);
       }
+    } else {
+      // Show all models when no make is selected
+      setAvailableModels(models);
     }
-  }, [filters.make, makes, getModelsByMake]);
+  }, [filters.make, makes, models, getModelsByMake]);
+
+  // Initialize available cities - show all if no country selected, filtered if country selected
+  useEffect(() => {
+    if (filters.country && countries.length > 0) {
+      const selectedCountryObj = countries.find(c => c.name === filters.country);
+      if (selectedCountryObj) {
+        const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+        setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+      } else {
+        setAvailableCities(cities);
+      }
+    } else {
+      // Show all cities when no country is selected
+      setAvailableCities(cities);
+    }
+  }, [filters.country, countries, cities, getCitiesByCountry]);
 
   const handleRangeChange = (type, values) => {
     if (type === "price") {
@@ -254,6 +303,7 @@ const FilterForm = ({ onFilter }) => {
       backendFilters.engineMax = filters.maxEngineCapacity;
     if (filters.technicalFeatures)
       backendFilters.features = filters.technicalFeatures;
+    if (filters.country) backendFilters.country = filters.country;
     if (filters.city) backendFilters.city = filters.city;
 
     // Remove empty values
@@ -353,10 +403,16 @@ const FilterForm = ({ onFilter }) => {
               <select
                 value={filters.model}
                 onChange={(e) => handleChange("model", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                disabled={categoriesLoading || !filters.make}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                disabled={categoriesLoading}
               >
-                <option value="">All Models</option>
+                <option value="">
+                  {categoriesLoading 
+                    ? "Loading..." 
+                    : availableModels.length === 0 
+                      ? "No models available" 
+                      : "All Models"}
+                </option>
                 {availableModels.map((model) => (
                   <option key={model._id} value={model.name}>
                     {model.name}
@@ -575,6 +631,51 @@ const FilterForm = ({ onFilter }) => {
         <TechnicalFeaturesSpecs
           onChange={(value) => handleChange("technicalFeatures", value)}
         />
+        
+        {/* Country and City */}
+        <div className="field space-y-2">
+          <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
+            <div className="w-full sm:w-1/2">
+              <label className="block mb-1">Country</label>
+              <select
+                value={filters.country}
+                onChange={(e) => handleChange("country", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                disabled={categoriesLoading}
+              >
+                <option value="">All Countries</option>
+                {countries.map((country) => (
+                  <option key={country._id} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-full sm:w-1/2">
+              <label className="block mb-1">City</label>
+              <select
+                value={filters.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                disabled={categoriesLoading}
+              >
+                <option value="">
+                  {categoriesLoading 
+                    ? "Loading..." 
+                    : availableCities.length === 0 
+                      ? "No cities available" 
+                      : "All Cities"}
+                </option>
+                {availableCities.map((city) => (
+                  <option key={city._id} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+        
         <LocationButton onChange={handleLocationChange} />
 
         {/* Submit */}

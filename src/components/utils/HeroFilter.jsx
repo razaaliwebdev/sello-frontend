@@ -1,96 +1,237 @@
-import React, { useEffect, useState } from "react";
-import { carFilterData } from "../../assets/carFilterData";
+import React, { useState, useMemo } from "react";
+import { useCarCategories } from "../../hooks/useCarCategories";
 
 const HeroFilter = () => {
-  const [year, setYear] = useState("");
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
-  const [km, setKm] = useState("");
-  const [engine, setEngine] = useState("");
-  const [status, setStatus] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  // Dynamic categories from admin panel
+  const {
+    makes,
+    models,
+    years,
+    getModelsByMake,
+    isLoading: categoriesLoading,
+  } = useCarCategories();
 
-  const MARKETCHECK_API_KEY = "moVS1VykrNPtKGbEyZyk2KBOYADDSz70";
-  const MARJKETCHECK_API_SECRET = "M0m6HyF2ePAKlGqV";
+  const [filters, setFilters] = useState({
+    year: "",
+    make: "",
+    model: "",
+    mileage: "< 10000",
+    engine: "5 Speed Manual",
+    status: "Old Car",
+    minPrice: "",
+    maxPrice: "",
+  });
 
-  // Removed direct API call to marketcheck.com due to CORS restrictions
-  // This should be handled by the backend if needed
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const url = `https://api.marketcheck.com/v1/search?api_key=${MARKETCHECK_API_KEY}&country=US&price_range=10000-50000`;
-  //     try {
-  //       const response = await fetch(url);
-  //       if (!response.ok) throw new Error("Network response was not ok");
-  //       const data = await response.json();
-  //       console.log(data);
-  //     } catch (error) {
-  //       console.error("Error fetching car data:", error);
-  //     }
-  //   }
-  //   fetchData();
-  // }, []);
+  const handleChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = () => {
+    console.log("Search submitted:", filters, "Tab:", activeTab);
+  };
+
+  // Year options from categories (fallback to a static list)
+  const yearOptions = useMemo(() => {
+    if (years && years.length > 0) {
+      return years
+        .map((y) => y.name)
+        .filter(Boolean)
+        .sort((a, b) => parseInt(b) - parseInt(a));
+    }
+    return ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
+  }, [years]);
+
+  // Make options from categories (fallback to a static list)
+  const makeOptions = useMemo(() => {
+    if (makes && makes.length > 0) {
+      return makes
+        .map((m) => m.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+    }
+    return ["Audi", "BMW", "Mercedes", "Toyota", "Honda"];
+  }, [makes]);
+
+  // Model options from categories, filtered by selected make when present
+  const modelOptions = useMemo(() => {
+    if (models && models.length > 0) {
+      if (filters.make && makes && makes.length > 0 && getModelsByMake) {
+        const selectedMake = makes.find((m) => m.name === filters.make);
+        if (selectedMake) {
+          const listForMake = getModelsByMake[selectedMake._id] || [];
+          const byMake = listForMake.length ? listForMake : models;
+          return byMake.map((m) => m.name).filter(Boolean);
+        }
+      }
+      // No make selected → show all models
+      return models.map((m) => m.name).filter(Boolean);
+    }
+    // Fallback static models if no categories yet
+    return ["A7 Sportback", "A4", "A6", "Q5", "Q7"];
+  }, [models, makes, getModelsByMake, filters.make]);
+
+  const mileageOptions = ["< 10000", "10000-25000", "25000-50000", "50000+"];
+  const engineOptions = ["5 Speed Manual", "6 Speed Auto", "Electric", "Hybrid"];
+  const statusOptions = ["Old Car", "New Car", "Certified", "Premium"];
 
   return (
-    <div className="relative md:absolute md:inset-0 z-10 flex items-start md:items-center justify-center text-center px-3 py-6 md:p-4">
-      <form className="bg-[#EEEEEE]/60 backdrop-blur-md rounded md:rounded-tl-3xl md:rounded-br-3xl flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-full max-w-6xl mx-auto p-4 md:p-0 md:pl-12">
-        {/* Right Side */}
-        <div className="rightSide grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 gap-3 md:gap-4 p-1 md:p-3 w-full md:py-6">
-          {carFilterData.map((field, i) => (
-            <div key={i} className="filter-feild">
-              <label className="text-gray-600 text-sm block mb-1">
-                {field.label}
-              </label>
-              <select className="w-full h-9 px-2 rounded">
-                {field.options.map((opt, idx) => (
-                  <option key={idx} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
+    <div className=" p-4 md:p-8 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Main Filter Container */}
+        <div className=" rounded-xl shadow-2xl overflow-hidden border-4  bg-primary-500">
+          {/* Header Section */}
+          <div className="bg-[#050B20] px-6 py-4 border-b border-[#050B20]">
+            <h2 className="text-2xl font-bold text-white">
+              Find Your Perfect Car
+            </h2>
+          </div>
 
-        {/* Left Side (Pricing) */}
-        <div className="leftSide bg-white/50 rounded-tl-3xl px-4 py-5 md:py-6 md:px-7 w-full md:w-auto">
-          <h4 className="mb-3 text-gray-800 text-lg">Pricing (AED)</h4>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div>
-              <label
-                className="block text-left text-gray-600 text-sm md:text-md mb-1"
-                htmlFor="from"
+          {/* Tabs Section */}
+          <div className="flex bg-[#050B20] border-b border-[#050B20]">
+            {["all", "used", "new"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`px-8 py-3 text-sm font-bold uppercase transition-all ${
+                  activeTab === tab
+                    ? "bg-primary-500 text-gray-900"
+                    : "bg-[#050B20]/50 text-white hover:bg-gray-700"
+                }`}
               >
-                From
-              </label>
-              <input
-                className="p-2 w-full rounded outline-primary-500"
-                type="number"
-                id="from"
-              />
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Filter Section */}
+          <div className="flex flex-col lg:flex-row">
+            {/* Left Section - Orange Background with Filters */}
+            <div className="bg-primary-500 p-6 flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                {/* Year Filter */}
+                <FilterSelect
+                  label="Year"
+                  value={filters.year}
+                  onChange={(v) => handleChange("year", v)}
+                  options={yearOptions}
+                  disabled={categoriesLoading}
+                />
+
+                {/* Make Filter */}
+                <FilterSelect
+                  label="Select make"
+                  value={filters.make}
+                  onChange={(v) => handleChange("make", v)}
+                  options={makeOptions}
+                  disabled={categoriesLoading}
+                />
+
+                {/* Model Filter */}
+                <FilterSelect
+                  label="Select model"
+                  value={filters.model}
+                  onChange={(v) => handleChange("model", v)}
+                  options={modelOptions}
+                  disabled={categoriesLoading}
+                />
+
+                {/* Mileage Filter */}
+                <FilterSelect
+                  label="Moved (km)"
+                  value={filters.mileage}
+                  onChange={(v) => handleChange("mileage", v)}
+                  options={mileageOptions}
+                />
+
+                {/* Engine Filter */}
+                <FilterSelect
+                  label="Select engine"
+                  value={filters.engine}
+                  onChange={(v) => handleChange("engine", v)}
+                  options={engineOptions}
+                />
+
+                {/* Status Filter */}
+                <FilterSelect
+                  label="Car Status"
+                  value={filters.status}
+                  onChange={(v) => handleChange("status", v)}
+                  options={statusOptions}
+                />
+              </div>
             </div>
-            <div>
-              <label
-                className="block text-left text-gray-600 text-sm md:text-md mb-1"
-                htmlFor="to"
+
+            {/* Right Section - Dark Background with Pricing */}
+            <div className="bg-gray-800 p-6 lg:w-72 flex flex-col justify-between">
+              <div>
+                <h4 className="text-white text-sm font-semibold mb-4">
+                  Pricing ( AED )
+                </h4>
+
+                <div className="flex gap-4 mb-6">
+                  <div>
+                    <label className="block text-white text-xs font-medium mb-2">
+                      From
+                    </label>
+                    <input
+                      type="number"
+                      value={filters.minPrice}
+                      onChange={(e) => handleChange("minPrice", e.target.value)}
+                      placeholder="Min"
+                      className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white text-xs font-medium mb-2">
+                      To
+                    </label>
+                    <input
+                      type="number"
+                      value={filters.maxPrice}
+                      onChange={(e) => handleChange("maxPrice", e.target.value)}
+                      placeholder="Max"
+                      className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-primary-500 hover:bg-primary-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                To
-              </label>
-              <input
-                className="p-2 w-full rounded outline-primary-500"
-                type="number"
-                id="to"
-              />
+                Search Car
+              </button>
             </div>
           </div>
-          <button className="w-full sm:w-auto px-7 py-2 hover:bg-opacity-90 bg-primary-500 mt-4 sm:mt-5 rounded">
-            Search Car
-          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
+
+/* Reusable Components */
+
+const FilterSelect = ({ label, value, onChange, options }) => (
+  <div className="flex flex-col">
+    <label className="text-gray-900 text-xs font-bold mb-2 uppercase">
+      {label}
+    </label>
+    <select
+      className="w-full h-10 px-3 rounded-md bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 border border-gray-300 cursor-pointer"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {options.map((opt, idx) => (
+        <option key={idx} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 export default HeroFilter;

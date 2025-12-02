@@ -19,19 +19,24 @@ const Categories = () => {
         brand: "",
         model: "",
         year: "",
+        country: "",
         display: "show",
         status: "active",
         image: null,
         imagePreview: null
     });
 
-    const { data, isLoading, refetch } = useGetAllCategoriesQuery({
-        type: "car",
-        isActive: true
-    });
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortField, setSortField] = useState("name");
+    const [sortDirection, setSortDirection] = useState("asc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
 
-    const [createCategory] = useCreateCategoryMutation();
-    const [updateCategory] = useUpdateCategoryMutation();
+    // Fetch all categories (car + location, active + inactive)
+    const { data, isLoading, refetch } = useGetAllCategoriesQuery({});
+
+    const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+    const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
     const [deleteCategory] = useDeleteCategoryMutation();
 
     const categories = data || [];
@@ -54,6 +59,38 @@ const Categories = () => {
         return [];
     }, [categories, activeTab]);
 
+    // Apply search & sort
+    const processedCategories = useMemo(() => {
+        let list = [...filteredCategories];
+
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            list = list.filter(cat => cat.name.toLowerCase().includes(term));
+        }
+
+        list.sort((a, b) => {
+            const dir = sortDirection === "asc" ? 1 : -1;
+            if (sortField === "status") {
+                return (a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1) * dir;
+            }
+            // default sort by name
+            return a.name.localeCompare(b.name) * dir;
+        });
+
+        return list;
+    }, [filteredCategories, searchTerm, sortField, sortDirection]);
+
+    const totalPages = Math.max(1, Math.ceil(processedCategories.length / pageSize));
+
+    const pagedCategories = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return processedCategories.slice(start, start + pageSize);
+    }, [processedCategories, currentPage, pageSize]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab, searchTerm]);
+
     // Get brands for model/year parent selection
     const brands = useMemo(() => {
         return categories.filter(cat => cat.subType === "make" && cat.isActive);
@@ -64,12 +101,17 @@ const Categories = () => {
         if (!formData.brand) return [];
         const selectedBrand = brands.find(b => b._id === formData.brand);
         if (!selectedBrand) return [];
-        return categories.filter(cat => 
-            cat.subType === "model" && 
-            cat.parentCategory?._id === selectedBrand._id &&
+        return categories.filter(cat =>
+            cat.subType === "model" &&
+            (cat.parentCategory?._id === selectedBrand._id || cat.parentCategory === selectedBrand._id) &&
             cat.isActive
         );
     }, [categories, brands, formData.brand]);
+
+    // Countries for city parent selection
+    const countries = useMemo(() => {
+        return categories.filter(cat => cat.subType === "country" && cat.isActive);
+    }, [categories]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -107,21 +149,35 @@ const Categories = () => {
 
     const handleEdit = (category) => {
         setEditingCategory(category);
-        setFormData({
+
+        const baseForm = {
             name: category.name || "",
-            brand: category.parentCategory?._id || category.parentCategory || "",
-            model: category.parentCategory?._id || category.parentCategory || "",
-            year: category.name || "",
+            brand: "",
+            model: "",
+            year: "",
+            country: "",
             display: category.isActive ? "show" : "hide",
             status: category.isActive ? "active" : "inactive",
             image: null,
             imagePreview: category.image || null
-        });
+        };
+
+        if (category.subType === "model") {
+            baseForm.brand = category.parentCategory?._id || category.parentCategory || "";
+        } else if (category.subType === "year") {
+            baseForm.year = category.name || "";
+        } else if (category.subType === "city") {
+            baseForm.country = category.parentCategory?._id || category.parentCategory || "";
+        }
+
+        setFormData(baseForm);
         setShowModal(true);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (isCreating || isUpdating) return;
         
         try {
             const submitData = new FormData();
@@ -145,19 +201,26 @@ const Categories = () => {
                 submitData.append("parentCategory", formData.brand);
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "years") {
-                if (!formData.brand || !formData.model) {
-                    toast.error("Please select a brand and model");
-                    return;
-                }
-                submitData.append("name", formData.year);
+                // Years can be standalone or linked to a model
+                submitData.append("name", formData.year || formData.name);
                 submitData.append("type", "car");
                 submitData.append("subType", "year");
-                submitData.append("parentCategory", formData.model);
+                if (formData.model) {
+                    submitData.append("parentCategory", formData.model);
+                } else if (formData.brand) {
+                    // If only brand is selected, link to brand (for backward compatibility)
+                    submitData.append("parentCategory", formData.brand);
+                }
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "city") {
+                if (!formData.country) {
+                    toast.error("Please select a country");
+                    return;
+                }
                 submitData.append("name", formData.name);
                 submitData.append("type", "location");
                 submitData.append("subType", "city");
+                submitData.append("parentCategory", formData.country);
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "state") {
                 submitData.append("name", formData.name);
@@ -193,6 +256,7 @@ const Categories = () => {
                 brand: "",
                 model: "",
                 year: "",
+                country: "",
                 display: "show",
                 status: "active",
                 image: null,
@@ -242,7 +306,7 @@ const Categories = () => {
                 {/* Tabs and Add Button */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                     <div className="p-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex gap-2">
                                 {['brands', 'models', 'years', 'city', 'state', 'country'].map((tab) => (
                                     <button
@@ -258,13 +322,22 @@ const Categories = () => {
                                     </button>
                                 ))}
                             </div>
-                            <button
-                                onClick={handleOpenModal}
-                                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 text-sm"
-                            >
-                                <span className="text-lg">+</span>
-                                Add New Category
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Search by name"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                />
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 text-sm"
+                                >
+                                    <span className="text-lg">+</span>
+                                    Add New Category
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -274,7 +347,7 @@ const Categories = () => {
                     <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
                         <Spinner size={60} color="text-primary-500" />
                     </div>
-                ) : filteredCategories.length === 0 ? (
+                ) : processedCategories.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                         <p className="text-gray-500 text-lg">No categories found</p>
                     </div>
@@ -284,17 +357,38 @@ const Categories = () => {
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Name</th>
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer"
+                                            onClick={() => {
+                                                setSortField("name");
+                                                setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
+                                            }}
+                                        >
+                                            Name
+                                        </th>
                                         {activeTab === "brands" && (
                                             <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Logo</th>
                                         )}
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                                        <th
+                                            className="px-6 py-3 text-left text-xs font-semibold text-gray-700 cursor-pointer"
+                                            onClick={() => {
+                                                setSortField("status");
+                                                setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
+                                            }}
+                                        >
+                                            Status
+                                        </th>
+                                        {(activeTab === "models" || activeTab === "city") && (
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">
+                                                {activeTab === "models" ? "Brand" : "Country"}
+                                            </th>
+                                        )}
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Display</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {filteredCategories.map((category) => (
+                                    {pagedCategories.map((category) => (
                                         <tr key={category._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div>
@@ -332,6 +426,17 @@ const Categories = () => {
                                                     {category.isActive ? "Active" : "Inactive"}
                                                 </span>
                                             </td>
+                                            {(activeTab === "models" || activeTab === "city") && (
+                                                <td className="px-6 py-4">
+                                                    <p className="text-sm text-gray-700">
+                                                        {category.parentCategory 
+                                                            ? (typeof category.parentCategory === 'object' 
+                                                                ? category.parentCategory.name 
+                                                                : 'N/A')
+                                                            : 'N/A'}
+                                                    </p>
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4">
                                                 <button
                                                     onClick={() => handleToggleStatus(category)}
@@ -376,6 +481,27 @@ const Categories = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 text-sm text-gray-600">
+                            <span>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                    className="px-2 py-1 border rounded disabled:opacity-50"
+                                >
+                                    Prev
+                                </button>
+                                <button
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    className="px-2 py-1 border rounded disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -559,16 +685,35 @@ const Categories = () => {
                                     <>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Brand *
+                                                Year *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="year"
+                                                value={formData.year || formData.name}
+                                                onChange={(e) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        year: e.target.value,
+                                                        name: e.target.value
+                                                    }));
+                                                }}
+                                                placeholder="e.g., 2024"
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Brand (Optional - for linking to specific brand)
                                             </label>
                                             <select
                                                 name="brand"
                                                 value={formData.brand}
                                                 onChange={handleInputChange}
-                                                required
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                             >
-                                                <option value="">Select Brand</option>
+                                                <option value="">No Brand (Standalone Year)</option>
                                                 {brands.map((brand) => (
                                                     <option key={brand._id} value={brand._id}>
                                                         {brand.name}
@@ -578,37 +723,22 @@ const Categories = () => {
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Model *
+                                                Model (Optional - requires brand)
                                             </label>
                                             <select
                                                 name="model"
                                                 value={formData.model}
                                                 onChange={handleInputChange}
-                                                required
                                                 disabled={!formData.brand}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
                                             >
-                                                <option value="">Select Model</option>
+                                                <option value="">No Model (Standalone Year)</option>
                                                 {models.map((model) => (
                                                     <option key={model._id} value={model._id}>
                                                         {model.name}
                                                     </option>
                                                 ))}
                                             </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Year *
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="year"
-                                                value={formData.year}
-                                                onChange={handleInputChange}
-                                                placeholder="e.g., 2024"
-                                                required
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                            />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -656,6 +786,25 @@ const Categories = () => {
                                                 required
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                             />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Country *
+                                            </label>
+                                            <select
+                                                name="country"
+                                                value={formData.country}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            >
+                                                <option value="">Select Country</option>
+                                                {countries.map((country) => (
+                                                    <option key={country._id} value={country._id}>
+                                                        {country.name}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -763,9 +912,17 @@ const Categories = () => {
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                        disabled={isCreating || isUpdating}
+                                        className="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
-                                        {editingCategory ? "Update" : "Create"}
+                                        {(isCreating || isUpdating) ? (
+                                            <>
+                                                <Spinner size={16} color="text-white" />
+                                                {editingCategory ? "Updating..." : "Creating..."}
+                                            </>
+                                        ) : (
+                                            editingCategory ? "Update" : "Create"
+                                        )}
                                     </button>
                                 </div>
                             </form>

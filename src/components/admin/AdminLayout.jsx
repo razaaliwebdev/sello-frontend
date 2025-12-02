@@ -16,6 +16,7 @@ import {
     FiX,
     FiFileText,
     FiSettings,
+    FiGrid 
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
@@ -33,6 +34,7 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/users", icon: FiUsers, label: "User Management" },
         { path: "/admin/listings", icon: FiList, label: "Listings" },
         { path: "/admin/dealers", icon: FiBriefcase, label: "Dealer Management" },
+        { path: "/admin/categories", icon: FiGrid, label: "Categories" },
         { path: "/admin/blogs", icon: FiFileText, label: "Blog Management" },
         { path: "/admin/analytics", icon: FiBarChart2, label: "Reports & Analytics" },
         { path: "/admin/chat", icon: FiMessageSquare, label: "Chat Monitoring" },
@@ -87,9 +89,11 @@ const AdminLayout = ({ children }) => {
                 <nav className="flex-1 overflow-y-auto py-4 scrollbar">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
-                        // Check if current path matches or starts with the item path (for blog sub-routes)
-                        const isMainItemActive = location.pathname === item.path || 
-                            (item.path === "/admin/blogs" && location.pathname.startsWith("/admin/blog"));
+                        // Check if current path matches or starts with the item path (for sections with sub-routes)
+                        const isMainItemActive =
+                            location.pathname === item.path ||
+                            (item.path === "/admin/blogs" && location.pathname.startsWith("/admin/blog")) ||
+                            (item.path === "/admin/categories" && location.pathname.startsWith("/admin/categor"));
                         
                         return (
                             <Link

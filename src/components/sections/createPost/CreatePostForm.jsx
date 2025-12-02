@@ -24,10 +24,12 @@ import { useCarCategories } from "../../../hooks/useCarCategories";
 
 const CreatePostForm = () => {
   const navigate = useNavigate();
-  const { makes, models, getModelsByMake, years, isLoading: categoriesLoading } = useCarCategories();
+  const { makes, models, getModelsByMake, years, countries, cities, getCitiesByCountry, isLoading: categoriesLoading } = useCarCategories();
   const [selectedMake, setSelectedMake] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
   const [availableModels, setAvailableModels] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
+  const [availableCities, setAvailableCities] = useState([]);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -47,6 +49,7 @@ const CreatePostForm = () => {
     features: [],
     regionalSpec: "",
     bodyType: "",
+    country: "",
     city: "",
     location: "",
     sellerType: "",
@@ -61,6 +64,60 @@ const CreatePostForm = () => {
   });
 
   const [createCar, { isLoading }] = useCreateCarMutation();
+
+  // Initialize available models - show all if no make selected, filtered if make selected
+  useEffect(() => {
+    if (formData.make && makes.length > 0) {
+      const selectedMakeObj = makes.find(m => m.name === formData.make);
+      if (selectedMakeObj) {
+        const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+        setAvailableModels(makeModels);
+      } else {
+        // If make not found, show all models
+        setAvailableModels(models);
+      }
+    } else {
+      // Show all models when no make is selected
+      setAvailableModels(models);
+    }
+  }, [formData.make, makes, models, getModelsByMake]);
+
+  // Initialize available years when model is selected or data loads
+  useEffect(() => {
+    if (formData.model && availableModels.length > 0) {
+      const selectedModelObj = availableModels.find(m => m.name === formData.model);
+      if (selectedModelObj) {
+        const modelYears = years.filter(y => {
+          const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
+          return parentId === selectedModelObj._id;
+        });
+        setAvailableYears(modelYears);
+      } else {
+        // If no model selected, show all years
+        setAvailableYears(years);
+      }
+    } else {
+      // Show all years if no model selected
+      setAvailableYears(years);
+    }
+  }, [formData.model, availableModels, years]);
+
+  // Initialize available cities - show all if no country selected, filtered if country selected
+  useEffect(() => {
+    if (formData.country && countries.length > 0) {
+      const selectedCountryObj = countries.find(c => c.name === formData.country);
+      if (selectedCountryObj) {
+        const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+        setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+      } else {
+        // If country not found, show all cities
+        setAvailableCities(cities);
+      }
+    } else {
+      // Show all cities when no country is selected
+      setAvailableCities(cities);
+    }
+  }, [formData.country, countries, cities, getCitiesByCountry]);
 
   const handleChange = (field, value) => {
     // Handle features to ensure it's a flat array
@@ -77,14 +134,21 @@ const CreatePostForm = () => {
       // When make changes, update available models
       if (field === "make") {
         setSelectedMake(value);
-        const selectedMakeObj = makes.find(m => m.name === value);
-        if (selectedMakeObj) {
-          const makeModels = getModelsByMake[selectedMakeObj._id] || [];
-          setAvailableModels(makeModels);
-          // Reset model if it's not available for the new make
-          if (formData.model && !makeModels.find(m => m.name === formData.model)) {
-            setFormData((prev) => ({ ...prev, model: "" }));
+        if (value) {
+          const selectedMakeObj = makes.find(m => m.name === value);
+          if (selectedMakeObj) {
+            const makeModels = getModelsByMake[selectedMakeObj._id] || [];
+            setAvailableModels(makeModels.length > 0 ? makeModels : models);
+            // Reset model if it's not available for the new make
+            if (formData.model && makeModels.length > 0 && !makeModels.find(m => m.name === formData.model)) {
+              setFormData((prev) => ({ ...prev, model: "" }));
+            }
+          } else {
+            setAvailableModels(models);
           }
+        } else {
+          // Show all models when make is cleared
+          setAvailableModels(models);
         }
       }
       
@@ -101,6 +165,27 @@ const CreatePostForm = () => {
           if (formData.year && !modelYears.find(y => y.name === formData.year.toString())) {
             setFormData((prev) => ({ ...prev, year: "" }));
           }
+        }
+      }
+      
+      // When country changes, update available cities
+      if (field === "country") {
+        setSelectedCountry(value);
+        if (value) {
+          const selectedCountryObj = countries.find(c => c.name === value);
+          if (selectedCountryObj) {
+            const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
+            setAvailableCities(countryCities.length > 0 ? countryCities : cities);
+            // Reset city if it's not available for the new country
+            if (formData.city && countryCities.length > 0 && !countryCities.find(c => c.name === formData.city)) {
+              setFormData((prev) => ({ ...prev, city: "" }));
+            }
+          } else {
+            setAvailableCities(cities);
+          }
+        } else {
+          // Show all cities when country is cleared
+          setAvailableCities(cities);
         }
       }
     }
@@ -209,6 +294,7 @@ const CreatePostForm = () => {
         features: [],
         regionalSpec: "",
         bodyType: "",
+        country: "",
         city: "",
         location: "",
         sellerType: "",
@@ -221,6 +307,11 @@ const CreatePostForm = () => {
         ownerType: "",
         images: [],
       });
+      setSelectedMake("");
+      setSelectedCountry("");
+      setAvailableModels([]);
+      setAvailableYears([]);
+      setAvailableCities([]);
       navigate(`/my-listings`);
     } catch (err) {
       console.error("Create Car Error:", err);
@@ -274,15 +365,49 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div className="mb-2">
-          <label className="block mb-1">City</label>
-          <Input
-            inputType="text"
-            value={formData.city}
-            onChange={(e) => handleChange("city", e.target.value)}
-            placeholder="Enter city"
-            required
-          />
+        <div className="flex gap-6 my-2 w-full items-center">
+          <div className="w-1/2">
+            <label className="block mb-1">Country</label>
+            <select
+              value={formData.country || ""}
+              onChange={(e) => handleChange("country", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              required
+              disabled={categoriesLoading}
+            >
+              <option value="">Select Country</option>
+              {countries.map((country) => (
+                <option key={country._id} value={country.name}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="w-1/2">
+            <label className="block mb-1">City</label>
+            <select
+              value={formData.city}
+              onChange={(e) => handleChange("city", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              required
+              disabled={categoriesLoading}
+            >
+              <option value="">
+                {categoriesLoading 
+                  ? "Loading..." 
+                  : availableCities.length === 0 
+                    ? "No cities available" 
+                    : formData.country
+                      ? "Select City"
+                      : "Select City (or select Country to filter)"}
+              </option>
+              {availableCities.map((city) => (
+                <option key={city._id} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="mb-2">
@@ -319,11 +444,19 @@ const CreatePostForm = () => {
             <select
               value={formData.model}
               onChange={(e) => handleChange("model", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               required
-              disabled={categoriesLoading || !formData.make}
+              disabled={categoriesLoading}
             >
-              <option value="">Select Model</option>
+              <option value="">
+                {categoriesLoading 
+                  ? "Loading..." 
+                  : availableModels.length === 0 
+                    ? "No models available" 
+                    : formData.make
+                      ? "Select Model"
+                      : "Select Model (or select Make to filter)"}
+              </option>
               {availableModels.map((model) => (
                 <option key={model._id} value={model.name}>
                   {model.name}
@@ -351,7 +484,7 @@ const CreatePostForm = () => {
               onChange={(e) => handleChange("year", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
-              disabled={categoriesLoading || !formData.model}
+              disabled={categoriesLoading}
             >
               <option value="">Select Year</option>
               {availableYears.length > 0 ? (
