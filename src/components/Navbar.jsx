@@ -5,6 +5,7 @@ import SearchBar from "./utils/SearchBar";
 import { FaCirclePlus, FaBars, FaXmark } from "react-icons/fa6";
 import gsap from "gsap";
 import { useGetMeQuery } from "../redux/services/api";
+import NotificationBell from "./common/NotificationBell";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -136,6 +137,8 @@ const Navbar = () => {
                   Admin
                 </Link>
               )}
+              {/* Notification Bell */}
+              <NotificationBell />
               {/* Avatar */}
               <div
                 onClick={() => navigate("/profile")}

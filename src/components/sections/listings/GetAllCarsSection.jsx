@@ -2,9 +2,16 @@ import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
-import { useGetCarsQuery } from "../../../redux/services/api";
+import { useNavigate, useLocation } from "react-router-dom";
+import { 
+  useGetCarsQuery, 
+  useGetMeQuery,
+  useGetSavedCarsQuery,
+  useSaveCarMutation,
+  useUnsaveCarMutation 
+} from "../../../redux/services/api";
 import LazyImage from "../../common/LazyImage";
+import toast from "react-hot-toast";
 
 // Skeleton Loader Component
 const CarCardSkeleton = () => (
@@ -36,18 +43,39 @@ const CarCardSkeleton = () => (
 
 const GetAllCarsSection = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("all");
-  const [savedCars, setSavedCars] = useState([]);
   const [page, setPage] = useState(1);
   const [isPageChanging, setIsPageChanging] = useState(false);
+
+  // Check if we're on home page or listing page
+  const isHomePage = location.pathname === "/" || location.pathname === "/home";
+  const limit = isHomePage ? 6 : 12; // Show 6 on home, 12 on listing page
+
+  // Get user data and saved cars
+  const token = localStorage.getItem("token");
+  const { data: userData, isLoading: isLoadingUser, isError: isUserError } = useGetMeQuery(undefined, {
+    skip: !token, // Skip if no token
+  });
+  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
+    skip: !token || isLoadingUser || isUserError, // Only fetch if user is logged in
+  });
+  const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
+  const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
+
+  // Extract saved car IDs
+  const savedCars = useMemo(() => {
+    if (!savedCarsData || !Array.isArray(savedCarsData)) return [];
+    return savedCarsData.map(car => car._id || car.id).filter(Boolean);
+  }, [savedCarsData]);
 
   // Memoize query params to prevent unnecessary refetches
   const queryParams = useMemo(() => ({
     page,
-    limit: 6,
+    limit,
     // Only apply condition filter if not 'all cars'
     ...(activeTab !== "all" && { condition: activeTab }),
-  }), [page, activeTab]);
+  }), [page, activeTab, limit]);
 
   // Call backend with pagination and filtering
   const { data: carsData, isLoading, error } = useGetCarsQuery(queryParams);
@@ -80,11 +108,48 @@ const GetAllCarsSection = () => {
 
   // handlePageChange();
 
-  const toggleSave = useCallback((id) => {
-    setSavedCars((prev) =>
-      prev.includes(id) ? prev.filter((carId) => carId !== id) : [...prev, id]
-    );
-  }, []);
+  const toggleSave = useCallback(async (carId, e) => {
+    e?.stopPropagation(); // Prevent navigation when clicking save button
+    
+    // Check token first - this is the most reliable check
+    const currentToken = localStorage.getItem("token");
+    if (!currentToken) {
+      toast.error("Please login to save cars");
+      navigate("/login");
+      return;
+    }
+
+    const isSaved = savedCars.includes(carId);
+
+    try {
+      if (isSaved) {
+        await unsaveCar(carId).unwrap();
+        toast.success("Car removed from saved list");
+      } else {
+        await saveCar(carId).unwrap();
+        toast.success("Car saved successfully");
+      }
+    } catch (error) {
+      // Check if it's an authentication error
+      const errorStatus = error?.status || error?.data?.status;
+      const errorMessage = error?.data?.message || error?.message || "";
+      
+      if (errorStatus === 401 || errorStatus === 403 || 
+          errorMessage.toLowerCase().includes("auth") || 
+          errorMessage.toLowerCase().includes("login") ||
+          errorMessage.toLowerCase().includes("unauthorized")) {
+        toast.error("Your session has expired. Please login again.");
+        // Only clear token and redirect if it's actually an auth error
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        }, 1000);
+      } else {
+        toast.error(errorMessage || "Failed to update saved cars");
+      }
+    }
+  }, [savedCars, saveCar, unsaveCar, navigate]);
 
   // Define the available tabs - memoized
   const tabs = useMemo(() => [
@@ -164,7 +229,7 @@ const GetAllCarsSection = () => {
           ))}
         </div>
 
-        {/* Cars Grid */}
+        {/* Cars Grid - Show only 6 on home page, all on listing page */}
         <div className="my-5 grid md:grid-cols-3 grid-cols-1 md:gap-10 gap-6">
           {filteredCars.length === 0 ? (
             <p className="col-span-full text-center text-gray-500 py-8">
@@ -173,7 +238,7 @@ const GetAllCarsSection = () => {
                 : `No ${activeTab} cars found.`}
             </p>
           ) : (
-            filteredCars.map((car, index) => {
+            (isHomePage ? filteredCars.slice(0, 6) : filteredCars).map((car, index) => {
               const carId = car?._id || index;
               const carImage = car?.images?.[0] || images.carPlaceholder;
               const carMake = car?.make || "Unknown Make";
@@ -204,13 +269,15 @@ const GetAllCarsSection = () => {
                         </div>
                       )}
                       <button
-                        onClick={() => toggleSave(carId)}
-                        className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md"
+                        onClick={(e) => toggleSave(carId, e)}
+                        disabled={isSaving || isUnsaving}
+                        className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 z-10"
+                        title={savedCars.includes(carId) ? "Remove from saved" : "Save car"}
                       >
                         {savedCars.includes(carId) ? (
                           <BsBookmarkFill className="text-primary-500 text-xl" />
                         ) : (
-                          <BsBookmark className="text-primary-500 text-xl" />
+                          <BsBookmark className="text-gray-400 hover:text-primary-500 text-xl transition-colors" />
                         )}
                       </button>
                     </div>
@@ -281,8 +348,27 @@ const GetAllCarsSection = () => {
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
+        {/* View All Link - Show on home page when there are cars */}
+        {isHomePage && filteredCars.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (activeTab !== "all") {
+                  params.append("condition", activeTab);
+                }
+                navigate(`/cars?${params.toString()}`);
+              }}
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium flex items-center gap-2"
+            >
+              View All Vehicles
+              <IoIosArrowRoundUp className="text-xl rotate-[40deg]" />
+            </button>
+          </div>
+        )}
+
+        {/* Pagination Controls - Only show on listing page, not home page */}
+        {!isHomePage && totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 mt-10">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
@@ -297,7 +383,7 @@ const GetAllCarsSection = () => {
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages}
-              className="px-4 py-2 border rounded-lg shadow-sm bg-primary hover:bg-opacity-80 disabled:opacity-50"
+              className="px-4 py-2 border rounded-lg shadow-sm bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50"
             >
               Next
             </button>

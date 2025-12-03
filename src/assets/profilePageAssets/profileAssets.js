@@ -41,7 +41,8 @@ export const profileAssets = {
     girlImage,
     phoneIcon,
     mailIcon,
-    chatIcon
+    chatIcon,
+    sellIcon
 }
 
 

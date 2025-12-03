@@ -73,12 +73,20 @@ const Categories = () => {
             if (sortField === "status") {
                 return (a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1) * dir;
             }
+            
+            // Special sorting for years: numeric sort
+            if (activeTab === "years") {
+                const yearA = parseInt(a.name) || 0;
+                const yearB = parseInt(b.name) || 0;
+                return (yearA - yearB) * dir;
+            }
+            
             // default sort by name
             return a.name.localeCompare(b.name) * dir;
         });
 
         return list;
-    }, [filteredCategories, searchTerm, sortField, sortDirection]);
+    }, [filteredCategories, searchTerm, sortField, sortDirection, activeTab]);
 
     const totalPages = Math.max(1, Math.ceil(processedCategories.length / pageSize));
 
@@ -166,6 +174,7 @@ const Categories = () => {
             baseForm.brand = category.parentCategory?._id || category.parentCategory || "";
         } else if (category.subType === "year") {
             baseForm.year = category.name || "";
+            // Years are independent, no parent category
         } else if (category.subType === "city") {
             baseForm.country = category.parentCategory?._id || category.parentCategory || "";
         }
@@ -201,16 +210,11 @@ const Categories = () => {
                 submitData.append("parentCategory", formData.brand);
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "years") {
-                // Years can be standalone or linked to a model
+                // Years are independent (standalone) - no parent category required
                 submitData.append("name", formData.year || formData.name);
                 submitData.append("type", "car");
                 submitData.append("subType", "year");
-                if (formData.model) {
-                    submitData.append("parentCategory", formData.model);
-                } else if (formData.brand) {
-                    // If only brand is selected, link to brand (for backward compatibility)
-                    submitData.append("parentCategory", formData.brand);
-                }
+                // No parentCategory - years are independent
                 submitData.append("isActive", formData.status === "active");
             } else if (activeTab === "city") {
                 if (!formData.country) {
@@ -308,7 +312,7 @@ const Categories = () => {
                     <div className="p-4">
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex gap-2">
-                                {['brands', 'models', 'years', 'city', 'state', 'country'].map((tab) => (
+                                {['brands', 'models', 'years', 'country', 'state', 'city'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
@@ -688,7 +692,7 @@ const Categories = () => {
                                                 Year *
                                             </label>
                                             <input
-                                                type="text"
+                                                type="number"
                                                 name="year"
                                                 value={formData.year || formData.name}
                                                 onChange={(e) => {
@@ -699,60 +703,11 @@ const Categories = () => {
                                                     }));
                                                 }}
                                                 placeholder="e.g., 2024"
+                                                min="1900"
+                                                max="2100"
                                                 required
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Brand (Optional - for linking to specific brand)
-                                            </label>
-                                            <select
-                                                name="brand"
-                                                value={formData.brand}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                            >
-                                                <option value="">No Brand (Standalone Year)</option>
-                                                {brands.map((brand) => (
-                                                    <option key={brand._id} value={brand._id}>
-                                                        {brand.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Model (Optional - requires brand)
-                                            </label>
-                                            <select
-                                                name="model"
-                                                value={formData.model}
-                                                onChange={handleInputChange}
-                                                disabled={!formData.brand}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
-                                            >
-                                                <option value="">No Model (Standalone Year)</option>
-                                                {models.map((model) => (
-                                                    <option key={model._id} value={model._id}>
-                                                        {model.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Display
-                                            </label>
-                                            <select
-                                                name="display"
-                                                value={formData.display}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                            >
-                                                <option value="show">Show</option>
-                                                <option value="hide">Hide</option>
-                                            </select>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">

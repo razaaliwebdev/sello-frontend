@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetAllBlogsQuery, useUpdateBlogMutation } from "../../redux/services/adminApi";
+import { useGetAllBlogsQuery, useUpdateBlogMutation, useGetAllCategoriesQuery } from "../../redux/services/adminApi";
+import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiX, FiSave } from "react-icons/fi";
+import { FiX, FiSave, FiArrowLeft } from "react-icons/fi";
 import TiptapEditor from "../../components/admin/TiptapEditor";
 
 const BlogEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { data: blogsData, isLoading: isLoadingBlog } = useGetAllBlogsQuery({});
+    const { data: categoriesData, isLoading: categoriesLoading } = useGetAllCategoriesQuery({ type: "blog", isActive: true });
     const [updateBlog, { isLoading }] = useUpdateBlogMutation();
+    const blogCategories = categoriesData || [];
     const [formData, setFormData] = useState({
         title: "",
         excerpt: "",
@@ -116,20 +119,23 @@ const BlogEdit = () => {
     }
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Edit Blog Post</h2>
-                    <p className="text-sm text-gray-500 mt-1">Update your blog content</p>
+        <AdminLayout>
+            <div className="p-6 bg-gray-50 min-h-screen">
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate("/admin/blogs")}
+                            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                            title="Back to Blogs"
+                        >
+                            <FiArrowLeft size={20} />
+                        </button>
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Edit Blog Post</h2>
+                            <p className="text-sm text-gray-500 mt-1">Update your blog content</p>
+                        </div>
+                    </div>
                 </div>
-                <button
-                    onClick={() => navigate("/admin/blogs")}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                >
-                    <FiX size={18} />
-                    Close
-                </button>
-            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -291,19 +297,23 @@ const BlogEdit = () => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Category
                                     </label>
-                                    <select
-                                        name="category"
-                                        value={formData.category}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                    >
-                                        <option value="">Select a category</option>
-                                        {blogsData?.categories?.map((category) => (
-                                            <option key={category._id} value={category._id}>
-                                                {category.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    {categoriesLoading ? (
+                                        <Spinner size={20} color="text-primary-500" />
+                                    ) : (
+                                        <select
+                                            name="category"
+                                            value={formData.category}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        >
+                                            <option value="">Select a category</option>
+                                            {blogCategories.map((category) => (
+                                                <option key={category._id} value={category._id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
                                 
                                 <div>
@@ -368,15 +378,17 @@ const BlogEdit = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
                         >
                             {isLoading && <Spinner size={16} color="text-white" />}
+                            <FiSave size={18} />
                             Update Blog
                         </button>
                     </div>
                 </div>
             </form>
-        </div>
+            </div>
+        </AdminLayout>
     );
 };
 

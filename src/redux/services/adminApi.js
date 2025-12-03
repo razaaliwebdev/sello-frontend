@@ -101,6 +101,14 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ["Cars"],
         }),
+        getListingHistory: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/admin/listings/history?${searchParams}`;
+            },
+            providesTags: ["Cars"],
+            transformResponse: (response) => response?.data || response,
+        }),
 
         // Dealers
         getAllDealers: builder.query({
@@ -293,6 +301,34 @@ export const adminApi = createApi({
             },
             providesTags: ["Promotions"],
             transformResponse: (response) => response?.data || response,
+        }),
+        getPromotionById: builder.query({
+            query: (promotionId) => `/promotions/${promotionId}`,
+            providesTags: ["Promotions"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        createPromotion: builder.mutation({
+            query: (data) => ({
+                url: "/promotions",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["Promotions"],
+        }),
+        updatePromotion: builder.mutation({
+            query: ({ promotionId, ...data }) => ({
+                url: `/promotions/${promotionId}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["Promotions"],
+        }),
+        deletePromotion: builder.mutation({
+            query: (promotionId) => ({
+                url: `/promotions/${promotionId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Promotions"],
         }),
         getPromotionStats: builder.query({
             query: () => "/promotions/statistics",
@@ -665,6 +701,10 @@ export const {
     useEditChatMessageMutation,
     useGetAnalyticsQuery,
     useGetAllPromotionsQuery,
+    useGetPromotionByIdQuery,
+    useCreatePromotionMutation,
+    useUpdatePromotionMutation,
+    useDeletePromotionMutation,
     useGetPromotionStatsQuery,
     // settings hooks removed (page deleted)
     useGetChatbotConfigQuery,

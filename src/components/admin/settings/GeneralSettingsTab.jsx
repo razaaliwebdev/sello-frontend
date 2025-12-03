@@ -27,7 +27,8 @@ const GeneralSettingsTab = () => {
     // General
     siteName: "",
     contactEmail: "",
-    businessLogo: "", // URL
+    siteLogo: "", // URL - Site logo
+    businessLogo: "", // URL - Keep for backward compatibility
     maxListingsPerDealer: 50,
     commissionRate: 5,
     
@@ -73,7 +74,9 @@ const GeneralSettingsTab = () => {
 
         setSettings(prev => ({
           ...prev,
-          ...fetchedSettings
+          ...fetchedSettings,
+          // If siteLogo doesn't exist but businessLogo does, use businessLogo
+          siteLogo: fetchedSettings.siteLogo || fetchedSettings.businessLogo || prev.siteLogo
         }));
       }
     } catch (error) {
@@ -119,8 +122,10 @@ const GeneralSettingsTab = () => {
       );
 
       if (response.data.success) {
+        handleChange("siteLogo", response.data.data.url);
+        // Also update businessLogo for backward compatibility
         handleChange("businessLogo", response.data.data.url);
-        toast.success("Logo uploaded successfully");
+        toast.success("Site logo uploaded successfully");
       }
     } catch (error) {
       console.error("Upload Error:", error);
@@ -146,7 +151,8 @@ const GeneralSettingsTab = () => {
       const settingsToSave = [
         { key: "siteName", value: settings.siteName, category: "general", type: "string" },
         { key: "contactEmail", value: settings.contactEmail, category: "general", type: "string" },
-        { key: "businessLogo", value: settings.businessLogo || "", category: "general", type: "string" },
+        { key: "siteLogo", value: settings.siteLogo || settings.businessLogo || "", category: "general", type: "string" },
+        { key: "businessLogo", value: settings.siteLogo || settings.businessLogo || "", category: "general", type: "string" }, // Backward compatibility
         { key: "maxListingsPerDealer", value: settings.maxListingsPerDealer || 50, category: "general", type: "number" },
         { key: "commissionRate", value: settings.commissionRate || 5, category: "payment", type: "number" },
         { key: "allowRegistration", value: settings.allowRegistration || false, category: "general", type: "boolean" },
@@ -213,8 +219,8 @@ const GeneralSettingsTab = () => {
           <div className="md:col-span-2 flex flex-col sm:flex-row items-center gap-6 mb-4 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <div className="relative group">
               <div className="w-24 h-24 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
-                {settings.businessLogo ? (
-                  <img src={settings.businessLogo} alt="Logo" className="w-full h-full object-cover" />
+                {(settings.siteLogo || settings.businessLogo) ? (
+                  <img src={settings.siteLogo || settings.businessLogo} alt="Site Logo" className="w-full h-full object-cover" />
                 ) : (
                   <FaCamera className="text-gray-300 text-3xl" />
                 )}
@@ -226,9 +232,9 @@ const GeneralSettingsTab = () => {
               )}
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <h4 className="font-medium text-gray-800">Business Logo</h4>
+              <h4 className="font-medium text-gray-800">Site Logo</h4>
               <p className="text-sm text-gray-500 mb-3">
-                Upload your business logo. Recommended size: 512x512px.
+                Upload your site logo. Recommended size: 512x512px. This will be displayed across the site.
               </p>
               <label className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors shadow-sm">
                 <FaUpload />

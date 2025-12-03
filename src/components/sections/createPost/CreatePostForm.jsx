@@ -62,6 +62,8 @@ const CreatePostForm = () => {
     ownerType: "",
     images: [],
   });
+  const [locationName, setLocationName] = useState("");
+  const [isCapturingLocation, setIsCapturingLocation] = useState(false);
 
   const [createCar, { isLoading }] = useCreateCarMutation();
 
@@ -633,31 +635,122 @@ const CreatePostForm = () => {
           <label className="block mb-1">Current Location</label>
           <button
             type="button"
-            onClick={() => {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const coords = `[${position.coords.longitude}, ${position.coords.latitude}]`;
-                    handleChange("geoLocation", coords);
-                    toast.success("Location captured!");
-                  },
-                  (error) => toast.error("Geolocation error: " + error.message)
-                );
-              } else {
-                toast.error("Geolocation not supported.");
+            onClick={async () => {
+              if (!navigator.geolocation) {
+                toast.error("Geolocation is not supported by your browser.");
+                return;
               }
+              
+              setIsCapturingLocation(true);
+              navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                  try {
+                    const longitude = position.coords.longitude;
+                    const latitude = position.coords.latitude;
+                    const coords = `[${longitude}, ${latitude}]`;
+                    handleChange("geoLocation", coords);
+                    
+                    // Try to get location name using reverse geocoding
+                    try {
+                      const apiKey = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+                      if (apiKey) {
+                        const response = await fetch(
+                          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+                        );
+                        const data = await response.json();
+                        if (data.status === "OK" && data.results.length > 0) {
+                          const address = data.results[0].formatted_address;
+                          setLocationName(address);
+                          toast.success(`Location captured: ${address}`);
+                        } else {
+                          setLocationName(`Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                          toast.success("Location captured!");
+                        }
+                      } else {
+                        setLocationName(`Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                        toast.success("Location captured!");
+                      }
+                    } catch (geocodeError) {
+                      setLocationName(`Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                      toast.success("Location captured!");
+                    }
+                  } catch (error) {
+                    toast.error("Failed to process location: " + error.message);
+                  } finally {
+                    setIsCapturingLocation(false);
+                  }
+                },
+                (error) => {
+                  setIsCapturingLocation(false);
+                  let errorMsg = "Failed to get location. ";
+                  switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                      errorMsg += "Please allow location access.";
+                      break;
+                    case error.POSITION_UNAVAILABLE:
+                      errorMsg += "Location information unavailable.";
+                      break;
+                    case error.TIMEOUT:
+                      errorMsg += "Location request timed out.";
+                      break;
+                    default:
+                      errorMsg += error.message;
+                  }
+                  toast.error(errorMsg);
+                },
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 0
+                }
+              );
             }}
-            className="w-full flex items-center justify-between px-5 py-2 border border-gray-300 rounded-md my-2"
+            disabled={isCapturingLocation}
+            className={`w-full flex items-center justify-between px-5 py-3 border-2 border-gray-300 rounded-lg my-2 transition-all ${
+              formData.geoLocation 
+                ? "border-green-500 bg-green-50" 
+                : "border-gray-300 hover:border-primary-500 hover:bg-gray-50"
+            } ${isCapturingLocation ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
-            <img
-              src={images.location}
-              className="w-7 h-7"
-              alt="location icons"
-            />
-            <div className="text-gray-800">Dubai</div>
-            <span></span>
+            <div className="flex items-center gap-3">
+              <img
+                src={images.location}
+                className={`w-6 h-6 ${formData.geoLocation ? "text-green-600" : ""}`}
+                alt="location icon"
+              />
+              <div className="text-left">
+                <div className={`text-sm font-medium ${formData.geoLocation ? "text-green-700" : "text-gray-700"}`}>
+                  {isCapturingLocation 
+                    ? "Capturing location..." 
+                    : locationName || formData.geoLocation 
+                      ? (locationName || "Location captured") 
+                      : "Click to capture your current location"}
+                </div>
+                {formData.geoLocation && (
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {formData.geoLocation}
+                  </div>
+                )}
+              </div>
+            </div>
+            {isCapturingLocation ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
+            ) : formData.geoLocation ? (
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            )}
           </button>
-          <p>Current: {formData.geoLocation}</p>
+          {!formData.geoLocation && (
+            <p className="text-xs text-gray-500 mt-1">
+              We need your location to help buyers find your car
+            </p>
+          )}
         </div>
 
         <div>

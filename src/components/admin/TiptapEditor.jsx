@@ -176,7 +176,7 @@ const MenuBar = ({ editor }) => {
     );
 };
 
-const TiptapEditor = ({ value, onChange, placeholder }) => {
+const TiptapEditor = ({ value = "", onChange, placeholder }) => {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -189,25 +189,28 @@ const TiptapEditor = ({ value, onChange, placeholder }) => {
                 types: ['heading', 'paragraph'],
             }),
         ],
-        content: value,
+        content: value || "",
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());
         },
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
+                'data-placeholder': placeholder || "Write your blog post content here...",
             },
         },
     });
 
-    // Update content if value changes externally (e.g. initial load)
+    // Update content if value changes externally (e.g. initial load or edit mode)
     useEffect(() => {
-        if (editor && value && editor.getHTML() !== value) {
-            // Only update if the content is different to avoid cursor jumping
-            // This is a simple check; for production might need more robust comparison
-             if (editor.getText() === '' && value) {
-                 editor.commands.setContent(value);
-             }
+        if (editor && value !== undefined) {
+            const currentContent = editor.getHTML();
+            // Only update if the content is actually different
+            // This prevents cursor jumping when typing
+            if (currentContent !== value) {
+                // Use setContent with emitUpdate: false to prevent triggering onChange
+                editor.commands.setContent(value || "", false);
+            }
         }
     }, [value, editor]);
 

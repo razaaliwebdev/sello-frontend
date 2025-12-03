@@ -234,13 +234,13 @@ const CarDetailsEtc = () => {
           )}
         </div>
 
-        {/* Expand/Collapse More Details */}
+        {/* Show More/Show Less Details */}
         <div className="flex justify-end">
           <button
             onClick={() => setShowMore(!showMore)}
             className="text-primary-500 underline text-lg mt-5 font-medium"
           >
-            {showMore ? "Collapse" : "Expand"}
+            {showMore ? "Show Less" : "Show More"}
           </button>
         </div>
 

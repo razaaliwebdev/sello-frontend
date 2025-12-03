@@ -179,9 +179,14 @@ const UserListings = () => {
                     <div className="flex items-center gap-5 justify-center">
                       <button 
                         onClick={() => navigate(`/edit-car/${car._id}`)}
-                        className="px-6 w-[45%] hover:bg-primary-600 py-2 bg-primary-500 text-white text-lg font-medium rounded-md transition-colors"
+                        disabled={car?.isSold}
+                        className={`px-6 w-[45%] py-2 text-lg font-medium rounded-md transition-colors ${
+                          car?.isSold
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-primary-500 hover:bg-primary-600 text-white"
+                        }`}
                       >
-                        Edit
+                        {car?.isSold ? "Edit Disabled" : "Edit"}
                       </button>
                       <button 
                         onClick={() => handleMarkAsSold(car, car?.isSold)}

@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { images } from "../../../assets/assets";
 import LazyImage from "../../common/LazyImage";
+import { 
+  useGetMeQuery,
+  useGetSavedCarsQuery,
+  useSaveCarMutation,
+  useUnsaveCarMutation 
+} from "../../../redux/services/api";
+import toast from "react-hot-toast";
 
 // Skeleton loader (reused from GetAllCarsSection)
 const CarCardSkeleton = () => (
@@ -28,12 +35,65 @@ const CarCardSkeleton = () => (
 
 const FilteredCarsResults = ({ filteredCars, isLoading }) => {
   const navigate = useNavigate();
-  const [savedCars, setSavedCars] = useState([]);
+  
+  // Get user data and saved cars
+  const token = localStorage.getItem("token");
+  const { data: userData, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
+    skip: !token, // Skip if no token
+  });
+  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
+    skip: !userData || isLoadingUser || !token, // Only fetch if user is logged in
+  });
+  const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
+  const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
 
-  const toggleSave = (id) => {
-    setSavedCars((prev) =>
-      prev.includes(id) ? prev.filter((carId) => carId !== id) : [...prev, id]
-    );
+  // Extract saved car IDs
+  const savedCars = useMemo(() => {
+    if (!savedCarsData || !Array.isArray(savedCarsData)) return [];
+    return savedCarsData.map(car => car._id || car.id).filter(Boolean);
+  }, [savedCarsData]);
+
+  const toggleSave = async (carId, e) => {
+    e?.stopPropagation();
+    
+    // Check token first - this is the most reliable check
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login to save cars");
+      navigate("/login");
+      return;
+    }
+
+    const isSaved = savedCars.includes(carId);
+
+    try {
+      if (isSaved) {
+        await unsaveCar(carId).unwrap();
+        toast.success("Car removed from saved list");
+      } else {
+        await saveCar(carId).unwrap();
+        toast.success("Car saved successfully");
+      }
+    } catch (error) {
+      // Check if it's an authentication error
+      const errorStatus = error?.status || error?.data?.status;
+      const errorMessage = error?.data?.message || error?.message || "";
+      
+      if (errorStatus === 401 || errorStatus === 403 || 
+          errorMessage.toLowerCase().includes("auth") || 
+          errorMessage.toLowerCase().includes("login") ||
+          errorMessage.toLowerCase().includes("unauthorized")) {
+        toast.error("Your session has expired. Please login again.");
+        // Only clear token and redirect if it's actually an auth error
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        }, 1000);
+      } else {
+        toast.error(errorMessage || "Failed to update saved cars");
+      }
+    }
   };
 
   // Normalize cars data
@@ -87,16 +147,15 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                         </div>
                       )}
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSave(carId);
-                        }}
-                        className="absolute top-3 right-3 bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors"
+                        onClick={(e) => toggleSave(carId, e)}
+                        disabled={isSaving || isUnsaving}
+                        className="absolute top-3 right-3 bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors disabled:opacity-50 z-10"
+                        title={savedCars.includes(carId) ? "Remove from saved" : "Save car"}
                       >
                         {savedCars.includes(carId) ? (
                           <BsBookmarkFill className="text-primary-500 text-lg" />
                         ) : (
-                          <BsBookmark className="text-gray-400 text-lg hover:text-primary-500" />
+                          <BsBookmark className="text-gray-400 text-lg hover:text-primary-500 transition-colors" />
                         )}
                       </button>
                     </div>

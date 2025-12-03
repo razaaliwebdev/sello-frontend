@@ -89,12 +89,19 @@ const SignUp = () => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      setGoogleLoading(true); // ✅ Start spinner
-
+      setGoogleLoading(true);
+      
+      if (!credentialResponse?.credential) {
+        throw new Error("No credential received from Google");
+      }
+      
       const token = credentialResponse.credential;
-      const res = await googleLogin(token).unwrap(); // RTK Query mutation
+      const res = await googleLogin(token).unwrap();
 
-      // ✅ Save token and user info if returned
+      if (!res.token || !res.user) {
+        throw new Error("Invalid response from server");
+      }
+
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
 
@@ -107,9 +114,23 @@ const SignUp = () => {
         navigate("/");
       }
     } catch (err) {
-      toast.error(err?.data?.message || "Google login failed");
+      console.error("Google sign-up error:", err);
+      
+      let errorMessage = "Google sign-up failed. Please try again.";
+      
+      if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.status === 401) {
+        errorMessage = "Authentication failed. Please try again.";
+      } else if (err?.status === 403) {
+        errorMessage = "Access denied. Please contact support.";
+      }
+      
+      toast.error(errorMessage);
     } finally {
-      setGoogleLoading(false); // ✅ Stop spinner
+      setGoogleLoading(false);
     }
   };
 
@@ -289,14 +310,27 @@ const SignUp = () => {
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={(error) => {
-                      console.error("Google login error:", error);
-                      toast.error("Google login failed. Please try again.");
+                      console.error("Google OAuth error:", error);
+                      let errorMsg = "Google sign-up failed. ";
+                      
+                      if (error?.type === "popup_closed_by_user") {
+                        errorMsg = "Sign-up cancelled.";
+                      } else if (error?.type === "popup_failed_to_open") {
+                        errorMsg = "Popup blocked. Please allow popups for this site.";
+                      } else if (error?.type === "idpiframe_initialization_failed") {
+                        errorMsg = "Google authentication service unavailable. Please check your internet connection.";
+                      } else {
+                        errorMsg += "Please try again or use email/password sign-up.";
+                      }
+                      
+                      toast.error(errorMsg);
                     }}
                     useOneTap={false}
                     theme="outline"
                     shape="rectangular"
                     size="large"
                     text="signup_with"
+                    auto_select={false}
                   />
                 </div>
               </div>

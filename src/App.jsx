@@ -32,6 +32,7 @@ import FilteredResults from "./pages/listings/FilteredResults.jsx";
 import UserListingPage from "./pages/userListings/UserListingPage.jsx";
 import LoanPlansPage from "./pages/loanPlans/LoanPlansPage.jsx";
 import ProfilePage from "./pages/profile/ProfilePage.jsx";
+import SavedCars from "./pages/SavedCars.jsx";
 import Blog from "./pages/blog/Blog.jsx";
 import AllBlog from "./pages/blog/AllBlog.jsx";
 import BlogDetails from "./pages/blog/BlogDetails.jsx";
@@ -190,6 +191,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/saved-cars"
+          element={
+            <ProtectedRoute>
+              <SavedCars />
             </ProtectedRoute>
           }
         />

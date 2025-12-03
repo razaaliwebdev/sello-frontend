@@ -31,6 +31,8 @@ const Btns = () => {
     }
   };
   
+  const isSold = !!car?.isSold;
+
   const handleChat = () => {
     if (!currentUser) {
       toast.error("Please login to chat with seller");
@@ -40,14 +42,18 @@ const Btns = () => {
       toast.error("You cannot chat with yourself");
       return;
     }
-    if (car && car.isSold) {
-      toast.error("This car has been sold");
+    if (isSold) {
+      toast.error("This car has been sold. Chat is disabled.");
       return;
     }
     setShowChat(true);
   };
   
   const handleCall = () => {
+    if (isSold) {
+      toast.error("This car has been sold. Calling is disabled.");
+      return;
+    }
     if (car && car.contactNumber) {
       window.location.href = `tel:${car.contactNumber}`;
     } else {
@@ -61,12 +67,13 @@ const Btns = () => {
         <div className="flex gap-8 items-center md:justify-between">
           {threeBtns.map((btn) => (
             <button
+              disabled={isSold && (btn.name === "call" || btn.name === "chat")}
               onClick={() => {
                 if (btn.name === "call") handleCall();
                 if (btn.name === "chat") handleChat();
                 if (btn.name === "share") handleShare();
               }}
-              className=""
+              className={`${isSold && (btn.name === "call" || btn.name === "chat") ? "opacity-50 cursor-not-allowed" : ""}`}
               key={btn.id}
             >
               <img className="md:h-14 h-8" src={btn.image} alt={btn.name} />

@@ -78,7 +78,7 @@ const Users = () => {
                 <div className="mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Manage all users and their accounts
+                        Manage regular users (buyers, sellers, dealers). Admin users are managed in Settings.
                     </p>
                 </div>
 
@@ -127,16 +127,6 @@ const Users = () => {
                                     }`}
                                 >
                                     Dealers
-                                </button>
-                                <button
-                                    onClick={() => setRoleFilter("admin")}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        roleFilter === "admin" 
-                                            ? "bg-primary-500 text-white" 
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
-                                >
-                                    Early Users
                                 </button>
                                 <button
                                     onClick={() => setStatusFilter("suspended")}

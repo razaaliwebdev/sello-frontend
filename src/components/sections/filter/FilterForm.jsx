@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useGetFilteredCarsQuery } from "../../../redux/services/api";
+// import { useGetFilteredCarsQuery } from "../../../redux/services/api"; // Removed - parent handles query
 import toast from "react-hot-toast";
 import RangeFilter from "../../utils/filter/RangeFilter";
 import Input from "../../utils/filter/Input";
@@ -17,7 +17,7 @@ import HorsePowerSpecs from "../../utils/filter/HorsePowerSpecs";
 import EngineCapacitySpecs from "../../utils/filter/EngineCapacitySpecs";
 import TechnicalFeaturesSpecs from "../../utils/filter/TechnicalFeaturesSpecs";
 import LocationButton from "../../utils/filter/LocationButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCarCategories } from "../../../hooks/useCarCategories";
 
 const FilterForm = ({ onFilter }) => {
@@ -58,14 +58,33 @@ const FilterForm = ({ onFilter }) => {
     city: "",
   });
 
-  const [queryParams, setQueryParams] = useState(null);
+  // Removed internal query - parent component handles it
+  // const [queryParams, setQueryParams] = useState(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const {
-    data: filteredCars,
-    isLoading,
-    error,
-  } = useGetFilteredCarsQuery(queryParams, { skip: !queryParams });
+  // Read URL parameters on mount and apply filters
+  useEffect(() => {
+    const makeParam = searchParams.get("make");
+    if (makeParam && makes.length > 0) {
+      // Check if the make exists in our categories
+      const makeExists = makes.find(m => m.name.toLowerCase() === makeParam.toLowerCase());
+      if (makeExists) {
+        setFilters(prev => {
+          // Only update if different to avoid infinite loops
+          if (prev.make !== makeExists.name) {
+            // Auto-trigger search when brand is set from URL
+            const backendFilters = { make: makeExists.name };
+            // setQueryParams(backendFilters); // Removed - parent handles it
+            if (onFilter) onFilter(backendFilters);
+            return { ...prev, make: makeExists.name };
+          }
+          return prev;
+        });
+        setSelectedMake(makeExists.name);
+      }
+    }
+  }, [searchParams, makes, onFilter]);
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -317,30 +336,70 @@ const FilterForm = ({ onFilter }) => {
     console.log("Frontend Filters:", filters);
     console.log("Backend Query Parameters:", cleanFilters);
 
-    setQueryParams(cleanFilters);
+    // setQueryParams(cleanFilters); // Let parent handle query
     if (onFilter) onFilter(cleanFilters);
     toast.success("Filters applied successfully!");
   };
 
-  useEffect(() => {
-    if (filteredCars && !isLoading) {
-      navigate("/search-results", { state: { filteredCars, isLoading } });
-    }
-  }, [filteredCars, isLoading, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      console.error("API Error:", error);
-      toast.error(error?.data?.message || "Failed to filter cars");
-    }
-  }, [error]);
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      minPrice: "",
+      maxPrice: "",
+      make: "",
+      model: "",
+      minYear: "",
+      maxYear: "",
+      minMileage: "",
+      maxMileage: "",
+      bodyType: "",
+      regionalSpec: "",
+      fuelType: "",
+      transmission: "",
+      minCylinders: "",
+      maxCylinders: "",
+      exteriorColor: "",
+      interiorColor: "",
+      minDoors: "",
+      maxDoors: "",
+      ownerType: "",
+      warranty: "",
+      minHorsePower: "",
+      maxHorsePower: "",
+      minEngineCapacity: "",
+      maxEngineCapacity: "",
+      technicalFeatures: "",
+      country: "",
+      city: "",
+    });
+    // setQueryParams(null); // Removed - parent handles it
+    if (onFilter) onFilter(null); // Notify parent to clear results
+    setSelectedMake("");
+    setSelectedCountry("");
+    setAvailableModels(models);
+    setAvailableCities(cities);
+    toast.success("Filters cleared");
+  };
 
   return (
     <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Filter Cars</h2>
+          <p className="text-sm text-gray-600 mt-1">Find your perfect car with advanced filters</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleClearFilters}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Clear All
+        </button>
+      </div>
       <form className="space-y-6 h-auto" onSubmit={handleSubmit}>
         {/* Title Search */}
         <div className="field space-y-2">
-          <label className="block mb-1">Search by Title</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">Search by Title</label>
           <Input
             inputType="text"
             value={filters.search}
@@ -683,9 +742,8 @@ const FilterForm = ({ onFilter }) => {
           <button
             type="submit"
             className="bg-primary-500 px-4 py-2 rounded hover:opacity-90 transition w-full text-xl shadow-lg shadow-gray-400 font-semibold"
-            disabled={isLoading}
           >
-            {isLoading ? "Applying Filters..." : "Apply Filters"}
+            Apply Filters
           </button>
         </div>
       </form>

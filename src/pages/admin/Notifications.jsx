@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
     useGetAllNotificationsQuery,
@@ -7,15 +7,61 @@ import {
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiPlus, FiX } from "react-icons/fi";
+import { FiPlus, FiX, FiTrash2, FiCheck, FiAlertCircle, FiInfo, FiCheckCircle } from "react-icons/fi";
+import { MdNotifications, MdNotificationsActive } from "react-icons/md";
+import { io } from "socket.io-client";
 
 const Notifications = () => {
     const [showModal, setShowModal] = useState(false);
-    const { data, isLoading, refetch } = useGetAllNotificationsQuery({ page: 1, limit: 20 });
+    const [socket, setSocket] = useState(null);
+    const [filter, setFilter] = useState("all"); // all, info, success, warning, error, system
+    const { data, isLoading, refetch } = useGetAllNotificationsQuery({ page: 1, limit: 50 });
     const [createNotification, { isLoading: isCreating }] = useCreateNotificationMutation();
     const [deleteNotification] = useDeleteNotificationMutation();
 
     const notifications = data?.notifications || [];
+    const totalNotifications = notifications.length;
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
+    // Filter notifications
+    const filteredNotifications = notifications.filter(notif => {
+        if (filter === "all") return true;
+        return notif.type === filter;
+    });
+
+    // Initialize Socket.io for real-time updates
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+        const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
+
+        const newSocket = io(SOCKET_URL, {
+            auth: { token },
+            query: { token },
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+        });
+
+        newSocket.on('connect', () => {
+            console.log('Admin notification socket connected');
+        });
+
+        newSocket.on('new-notification', (data) => {
+            console.log('New notification created:', data);
+            toast.success("New notification sent to users", { icon: '🔔' });
+            refetch();
+        });
+
+        setSocket(newSocket);
+
+        return () => {
+            if (newSocket) {
+                newSocket.close();
+            }
+        };
+    }, [refetch]);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -23,6 +69,7 @@ const Notifications = () => {
         type: "system",
         targetAudience: "all",
         actionUrl: "",
+        actionText: "",
         scheduleFor: "",
     });
 
@@ -41,14 +88,16 @@ const Notifications = () => {
             const notificationData = {
                 title: formData.title.trim(),
                 message: formData.message.trim(),
-                type: formData.type === "system" ? "info" : formData.type, // Map "system" to "info" for backend
-                recipient: formData.targetAudience === "all" ? null : formData.targetAudience, // null = broadcast to all
+                type: formData.type,
+                recipient: null, // Will be null for role-based or all users
+                targetAudience: formData.targetAudience, // Send targetAudience to backend
                 actionUrl: formData.actionUrl.trim() || null,
+                actionText: formData.actionText.trim() || null,
                 expiresAt: formData.scheduleFor ? new Date(formData.scheduleFor) : null,
             };
 
             await createNotification(notificationData).unwrap();
-            toast.success("Notification created successfully");
+            toast.success("Notification created and sent successfully!");
             setShowModal(false);
             setFormData({
                 title: "",
@@ -56,6 +105,7 @@ const Notifications = () => {
                 type: "system",
                 targetAudience: "all",
                 actionUrl: "",
+                actionText: "",
                 scheduleFor: "",
             });
             refetch();
@@ -69,9 +119,10 @@ const Notifications = () => {
         setFormData({
             title: "",
             message: "",
-            type: "system",
+            type: "info",
             targetAudience: "all",
             actionUrl: "",
+            actionText: "",
             scheduleFor: "",
         });
     };
@@ -87,22 +138,166 @@ const Notifications = () => {
         }
     };
 
+    const getNotificationIcon = (type) => {
+        switch (type) {
+            case 'success':
+                return <FiCheckCircle className="text-green-500" />;
+            case 'warning':
+                return <FiAlertCircle className="text-yellow-500" />;
+            case 'error':
+                return <FiAlertCircle className="text-red-500" />;
+            case 'system':
+                return <MdNotifications className="text-purple-500" />;
+            case 'info':
+            default:
+                return <FiInfo className="text-blue-500" />;
+        }
+    };
+
+    const getNotificationBadgeColor = (type) => {
+        switch (type) {
+            case 'success':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'warning':
+                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'error':
+                return 'bg-red-100 text-red-800 border-red-200';
+            case 'system':
+                return 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'info':
+            default:
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+        }
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     return (
         <AdminLayout>
             <div className="p-6 bg-gray-50 min-h-screen">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
-                        <p className="text-sm text-gray-500 mt-1">Send notifications to users</p>
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                                <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <MdNotificationsActive className="text-2xl text-primary-600" />
+                                </div>
+                                Notifications Management
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-2">Send and manage notifications for all users</p>
+                        </div>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
+                        >
+                            <FiPlus size={20} />
+                            Create Notification
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 transition-colors"
-                    >
-                        <FiPlus size={18} />
-                        New Notifications
-                    </button>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Total Notifications</p>
+                                    <p className="text-2xl font-bold text-gray-900 mt-1">{totalNotifications}</p>
+                                </div>
+                                <MdNotifications className="text-3xl text-primary-500" />
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Unread</p>
+                                    <p className="text-2xl font-bold text-gray-900 mt-1">{unreadCount}</p>
+                                </div>
+                                <MdNotificationsActive className="text-3xl text-yellow-500" />
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Read</p>
+                                    <p className="text-2xl font-bold text-gray-900 mt-1">{totalNotifications - unreadCount}</p>
+                                </div>
+                                <FiCheck className="text-3xl text-green-500" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filter Tabs */}
+                    <div className="flex gap-2 mb-4">
+                        <button
+                            onClick={() => setFilter("all")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "all"
+                                    ? "bg-primary-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            All ({notifications.length})
+                        </button>
+                        <button
+                            onClick={() => setFilter("info")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "info"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            Info
+                        </button>
+                        <button
+                            onClick={() => setFilter("success")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "success"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            Success
+                        </button>
+                        <button
+                            onClick={() => setFilter("warning")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "warning"
+                                    ? "bg-yellow-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            Warning
+                        </button>
+                        <button
+                            onClick={() => setFilter("error")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "error"
+                                    ? "bg-red-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            Error
+                        </button>
+                        <button
+                            onClick={() => setFilter("system")}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                filter === "system"
+                                    ? "bg-purple-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                            }`}
+                        >
+                            System
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content Area */}
@@ -110,74 +305,99 @@ const Notifications = () => {
                     <div className="flex justify-center items-center h-64">
                         <Spinner size={60} color="text-primary-500" />
                     </div>
-                ) : notifications.length === 0 ? (
+                ) : filteredNotifications.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                        <p className="text-gray-500 text-lg">No notifications found. Create your first one!</p>
+                        <MdNotifications className="text-5xl text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">
+                            {filter === "all" ? "No notifications found. Create your first one!" : `No ${filter} notifications found.`}
+                        </p>
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Title</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Message</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Type</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Target</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Created</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {notifications.map((notification) => (
-                                    <tr key={notification._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 font-medium text-gray-900">{notification.title}</td>
-                                        <td className="px-6 py-4 text-gray-500 max-w-md truncate">{notification.message}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                                {notification.type || "info"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-500">
-                                            {notification.recipient ? notification.recipient?.name || "Specific User" : "All Users"}
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-500 text-sm">
-                                            {new Date(notification.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => handleDelete(notification._id)}
-                                                className="text-red-500 hover:text-red-600 text-sm"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Title</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Message</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Target</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredNotifications.map((notification) => (
+                                        <tr key={notification._id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    {getNotificationIcon(notification.type || "info")}
+                                                    <span className={`px-2 py-1 text-xs rounded-full border ${getNotificationBadgeColor(notification.type || "info")}`}>
+                                                        {notification.type || "info"}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{notification.title}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-500 max-w-md truncate">{notification.message}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-sm text-gray-500">
+                                                    {notification.recipient ? (
+                                                        <span className="text-primary-600 font-medium">
+                                                            {notification.recipient?.name || "Specific User"}
+                                                        </span>
+                                                    ) : notification.targetRole ? (
+                                                        <span className="text-primary-600 font-medium capitalize">
+                                                            {notification.targetRole}s Only
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-600">All Users</span>
+                                                    )}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {formatDate(notification.createdAt)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <button
+                                                    onClick={() => handleDelete(notification._id)}
+                                                    className="text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 
                 {/* Create Notification Modal */}
                 {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                        <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
                             {/* Modal Header */}
-                            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-gray-900">Create New Notification</h3>
+                            <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+                                <h3 className="text-xl font-bold">Create New Notification</h3>
                                 <button
                                     onClick={handleCloseModal}
-                                    className="text-gray-500 hover:text-gray-700"
+                                    className="text-white hover:text-gray-200 transition-colors"
                                 >
                                     <FiX size={24} />
                                 </button>
                             </div>
 
                             {/* Modal Body */}
-                            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <form onSubmit={handleSubmit} className="p-6 space-y-5">
                                 {/* Notification Title */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Notification Title <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -187,13 +407,13 @@ const Notifications = () => {
                                         onChange={handleChange}
                                         required
                                         placeholder="e.g., New Feature Available"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                     />
                                 </div>
 
                                 {/* Message */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Message <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
@@ -203,67 +423,85 @@ const Notifications = () => {
                                         required
                                         placeholder="Enter your notification message..."
                                         rows="4"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
                                     />
                                 </div>
 
-                                {/* Notification Type */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Notification Type <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        name="type"
-                                        value={formData.type}
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    >
-                                        <option value="system">System</option>
-                                        <option value="info">Info</option>
-                                        <option value="success">Success</option>
-                                        <option value="warning">Warning</option>
-                                        <option value="error">Error</option>
-                                    </select>
+                                {/* Notification Type and Target Audience */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Notification Type */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Notification Type <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            name="type"
+                                            value={formData.type}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                        >
+                                            <option value="system">System</option>
+                                            <option value="info">Info</option>
+                                            <option value="success">Success</option>
+                                            <option value="warning">Warning</option>
+                                            <option value="error">Error</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Target Audience */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Target Audience <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            name="targetAudience"
+                                            value={formData.targetAudience}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                        >
+                                            <option value="all">All Users</option>
+                                            <option value="buyers">Buyers Only</option>
+                                            <option value="sellers">Sellers Only</option>
+                                            <option value="dealers">Dealers Only</option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                {/* Target Audience */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Target Audience <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        name="targetAudience"
-                                        value={formData.targetAudience}
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    >
-                                        <option value="all">All Users</option>
-                                        <option value="buyers">Buyers</option>
-                                        <option value="sellers">Sellers</option>
-                                        <option value="dealers">Dealers</option>
-                                    </select>
-                                </div>
-
-                                {/* Action Link (Optional) */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Action Link (Optional)
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="actionUrl"
-                                        value={formData.actionUrl}
-                                        onChange={handleChange}
-                                        placeholder="https://..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    />
+                                {/* Action Link and Text */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Action Link (Optional)
+                                        </label>
+                                        <input
+                                            type="url"
+                                            name="actionUrl"
+                                            value={formData.actionUrl}
+                                            onChange={handleChange}
+                                            placeholder="https://..."
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Action Text (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="actionText"
+                                            value={formData.actionText}
+                                            onChange={handleChange}
+                                            placeholder="e.g., View Details"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Schedule For (Optional) */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Schedule For (Optional)
                                     </label>
                                     <input
@@ -271,8 +509,9 @@ const Notifications = () => {
                                         name="scheduleFor"
                                         value={formData.scheduleFor}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">Leave empty to send immediately</p>
                                 </div>
 
                                 {/* Modal Footer */}
@@ -280,16 +519,16 @@ const Notifications = () => {
                                     <button
                                         type="button"
                                         onClick={handleCloseModal}
-                                        className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isCreating}
-                                        className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 transition-colors"
+                                        className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md hover:shadow-lg"
                                     >
-                                        {isCreating ? "Creating..." : "Create Notification"}
+                                        {isCreating ? "Creating..." : "Create & Send Notification"}
                                     </button>
                                 </div>
                             </form>

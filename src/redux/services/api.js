@@ -20,16 +20,21 @@ export const api = createApi({
         })(args, api, extraOptions);
 
         // Handle 401 errors - token expired or invalid
+        // Only clear token for certain endpoints, not for all 401s
         if (baseResult.error && baseResult.error.status === 401) {
-            // Clear invalid token
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+            const url = args?.url || '';
+            // Only clear token for auth-related endpoints, not for save/unsave operations
+            // Let the component handle the error for save operations
+            if (url.includes('/users/me') || url.includes('/auth/')) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+            }
             // Don't redirect automatically - let components handle it
         }
 
         return baseResult;
     },
-    tagTypes: ["User", "SupportChat", "CarChat"],
+    tagTypes: ["User", "SupportChat", "CarChat", "Notification", "Blog", "Testimonial"],
     endpoints: (builder) => ({
         registerUser: builder.mutation({
             query: (userData) => ({
@@ -152,6 +157,42 @@ export const api = createApi({
             transformResponse: (response) => {
                 return response?.data || response;
             },
+        }),
+        updateProfile: builder.mutation({
+            query: (formData) => ({
+                url: "/users/profile",
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
+        }),
+        // Save/Unsave Car (Wishlist)
+        saveCar: builder.mutation({
+            query: (carId) => ({
+                url: `/users/save-car/${carId}`,
+                method: "POST",
+            }),
+            invalidatesTags: ["User", "Cars"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        unsaveCar: builder.mutation({
+            query: (carId) => ({
+                url: `/users/unsave-car/${carId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["User", "Cars"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getSavedCars: builder.query({
+            query: () => ({
+                url: "/users/saved-cars",
+                method: "GET",
+            }),
+            providesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
         }),
         logout: builder.mutation({
             query: () => ({
@@ -395,6 +436,100 @@ export const api = createApi({
                 return response?.data || response;
             },
         }),
+
+        // Notification Endpoints
+        getUserNotifications: builder.query({
+            query: ({ page = 1, limit = 20, isRead } = {}) => {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    limit: String(limit),
+                });
+                if (isRead !== undefined) params.append('isRead', String(isRead));
+                return {
+                    url: `/notifications/me?${params.toString()}`,
+                    method: "GET",
+                };
+            },
+            providesTags: ["Notification"],
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
+        }),
+        markNotificationAsRead: builder.mutation({
+            query: (notificationId) => ({
+                url: `/notifications/${notificationId}/read`,
+                method: "PUT",
+            }),
+            invalidatesTags: ["Notification"],
+        }),
+        markAllNotificationsAsRead: builder.mutation({
+            query: () => ({
+                url: `/notifications/read-all`,
+                method: "PUT",
+            }),
+            invalidatesTags: ["Notification"],
+        }),
+
+        // Blog Endpoints (Public)
+        getBlogs: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams();
+                if (params.page) searchParams.append('page', params.page);
+                if (params.limit) searchParams.append('limit', params.limit);
+                if (params.status) searchParams.append('status', params.status);
+                if (params.category) searchParams.append('category', params.category);
+                if (params.search) searchParams.append('search', params.search);
+                if (params.isFeatured !== undefined) searchParams.append('isFeatured', params.isFeatured);
+                return `/blogs?${searchParams.toString()}`;
+            },
+            providesTags: ["Blog"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getBlogById: builder.query({
+            query: (blogId) => `/blogs/${blogId}`,
+            providesTags: ["Blog"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Testimonials/Reviews
+        getTestimonials: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams();
+                if (params.isActive !== undefined) searchParams.append('isActive', params.isActive);
+                if (params.featured !== undefined) searchParams.append('featured', params.featured);
+                const queryString = searchParams.toString();
+                return `/testimonials${queryString ? `?${queryString}` : ''}`;
+            },
+            providesTags: ["Testimonial"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        submitReview: builder.mutation({
+            query: (formData) => ({
+                url: "/testimonials/submit",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["Testimonial"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Newsletter
+        subscribeNewsletter: builder.mutation({
+            query: (email) => ({
+                url: "/newsletter/subscribe",
+                method: "POST",
+                body: { email },
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        unsubscribeNewsletter: builder.mutation({
+            query: (email) => ({
+                url: "/newsletter/unsubscribe",
+                method: "POST",
+                body: { email },
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
     }),
 });
 
@@ -407,6 +542,10 @@ export const {
     useVerifyOtpMutation,
     useResetPasswordMutation,
     useGetMeQuery,
+    useUpdateProfileMutation,
+    useSaveCarMutation,
+    useUnsaveCarMutation,
+    useGetSavedCarsQuery,
     useLogoutMutation,
     useGetCarsQuery,
     useGetSingleCarQuery,
@@ -427,4 +566,13 @@ export const {
     useDeleteCarChatMessageMutation,
     useMarkCarAsSoldMutation,
     useEditCarMutation,
+    useGetUserNotificationsQuery,
+    useMarkNotificationAsReadMutation,
+    useMarkAllNotificationsAsReadMutation,
+    useGetBlogsQuery,
+    useGetBlogByIdQuery,
+    useGetTestimonialsQuery,
+    useSubmitReviewMutation,
+    useSubscribeNewsletterMutation,
+    useUnsubscribeNewsletterMutation,
 } = api;

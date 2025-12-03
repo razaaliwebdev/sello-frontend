@@ -58,8 +58,12 @@ export const useCarCategories = () => {
     const getModelsByMake = useMemo(() => {
         const map = {};
         models.forEach((model) => {
+            // Skip if no parentCategory
+            if (!model.parentCategory) {
+                return;
+            }
             const makeId =
-                typeof model.parentCategory === "object"
+                typeof model.parentCategory === "object" && model.parentCategory !== null
                     ? model.parentCategory._id
                     : model.parentCategory;
             if (makeId) {
@@ -75,8 +79,12 @@ export const useCarCategories = () => {
     const getYearsByModel = useMemo(() => {
         const map = {};
         years.forEach((year) => {
+            // Years are now independent - skip if no parentCategory
+            if (!year.parentCategory) {
+                return; // Skip years without parent (independent years)
+            }
             const modelId =
-                typeof year.parentCategory === "object"
+                typeof year.parentCategory === "object" && year.parentCategory !== null
                     ? year.parentCategory._id
                     : year.parentCategory;
             if (modelId) {
@@ -92,8 +100,12 @@ export const useCarCategories = () => {
     const getCitiesByCountry = useMemo(() => {
         const map = {};
         cities.forEach((city) => {
+            // Skip if no parentCategory
+            if (!city.parentCategory) {
+                return;
+            }
             const countryId =
-                typeof city.parentCategory === "object"
+                typeof city.parentCategory === "object" && city.parentCategory !== null
                     ? city.parentCategory._id
                     : city.parentCategory;
             if (countryId) {

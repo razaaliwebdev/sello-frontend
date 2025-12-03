@@ -113,7 +113,7 @@ const Listings = () => {
                     <div className="p-4">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                             {/* Status Tabs */}
-                            <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                                 <button
                                     onClick={() => setStatusFilter("all")}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

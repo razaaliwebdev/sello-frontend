@@ -6,10 +6,11 @@ import {
   sellingOverview,
   profileAssets,
 } from "../../../assets/profilePageAssets/profileAssets";
-import { MdKeyboardArrowRight } from "react-icons/md";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useGetMeQuery, useLogoutMutation } from "../../../redux/services/api";
+import { MdKeyboardArrowRight, MdEdit, MdCheck, MdClose } from "react-icons/md";
+import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaCheckCircle } from "react-icons/fa";
+import { useGetMeQuery, useLogoutMutation, useUpdateProfileMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
 import { useSupportChat } from "../../../contexts/SupportChatContext";
+import NotificationsSection from "./NotificationsSection";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -17,8 +18,28 @@ const ProfileHero = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showStatsPopup, setShowStatsPopup] = useState(false);
-  const { data: user, isLoading, isError, error } = useGetMeQuery();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    avatar: null,
+    avatarPreview: null,
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  
+  const { data: user, isLoading, isError, error, refetch } = useGetMeQuery(undefined, {
+    skip: !localStorage.getItem("token"), // Skip if no token
+  });
+  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
+    skip: !user || isLoading, // Only fetch if user is logged in
+  });
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  
   const [metrics, setMetrics] = useState({
     posts: 0,
     activeListings: 0,
@@ -30,24 +51,33 @@ const ProfileHero = () => {
   });
 
   useEffect(() => {
-    if (!user) return;
-    const posts = user.carsPosted?.length || 0;
-    const sales = user.carsPurchased?.length || 0;
-    const earnings =
-      user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) || 0;
-    const clicks = 1000; // Sample; replace with real data
-    const rating = 4.5; // Sample; replace with real data
-    const ratingCount = 10;
-    setMetrics({
-      posts,
-      activeListings: posts,
-      sales,
-      earnings,
-      clicks,
-      rating,
-      ratingCount,
-    });
-  }, [user]);
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        avatar: null,
+        avatarPreview: user.avatar || null,
+      });
+      const posts = user.carsPosted?.length || 0;
+      const sales = user.carsPurchased?.length || 0;
+      const savedCount = user.savedCars?.length || savedCarsData?.length || 0;
+      const earnings =
+        user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) || 0;
+      const clicks = 1000; // Sample; replace with real data
+      const rating = 4.5; // Sample; replace with real data
+      const ratingCount = 10;
+      setMetrics({
+        posts,
+        activeListings: posts,
+        sales,
+        earnings,
+        clicks,
+        rating,
+        ratingCount,
+        savedCount,
+      });
+    }
+  }, [user, savedCarsData]);
 
   useEffect(() => {
     if (isError && error?.status === 401) {
@@ -58,6 +88,58 @@ const ProfileHero = () => {
 
   const handleProfilePopup = () => {
     setShowProfilePopup(true);
+    setIsEditing(false);
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        avatar: null,
+        avatarPreview: user.avatar || null,
+      });
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          avatar: file,
+          avatarPreview: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const formDataToSend = new FormData();
+      if (formData.name) {
+        formDataToSend.append("name", formData.name);
+      }
+      if (formData.avatar) {
+        formDataToSend.append("avatar", formData.avatar);
+      }
+
+      await updateProfile(formDataToSend).unwrap();
+      await refetch();
+      setIsEditing(false);
+      setShowProfilePopup(false);
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert(err?.data?.message || "Failed to update profile. Please try again.");
+    }
   };
 
   const handleLogout = async () => {
@@ -69,7 +151,6 @@ const ProfileHero = () => {
       console.error("Logout failed:", err);
       localStorage.removeItem("token");
       navigate("/login");
-      alert(`Logout failed: ${err?.data?.message || "Please try again"}`);
     }
   };
 
@@ -79,6 +160,7 @@ const ProfileHero = () => {
       if (e.key === "Escape") {
         setShowProfilePopup(false);
         setShowStatsPopup(false);
+        setIsEditing(false);
       }
     };
     const originalOverflow = document.body.style.overflow;
@@ -92,228 +174,238 @@ const ProfileHero = () => {
 
   if (isLoading) {
     return (
-      <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
-        <div className="text-xl">Loading profile...</div>
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <div className="text-xl text-gray-600">Loading profile...</div>
+        </div>
       </div>
     );
   }
 
   if (isError && error?.status !== 401) {
     return (
-      <div className="md:h-[150vh] h-full w-full bg-white flex items-center justify-center">
-        <div className="text-red-500">
-          Error: {error?.data?.message || "Failed to load profile"}
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-2">Error loading profile</div>
+          <div className="text-gray-600">{error?.data?.message || "Failed to load profile"}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="md:h-[150vh] h-full w-full bg-white">
-      <div className="md:h-[95%] h-full md:py-0 py-16 w-full bg-primary-500 flex items-end">
-        <div className="md:h-[90%] h-full relative w-full px-3 md:px-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0">
-          <div className="md:h-full h-auto md:w-[43%] w-full relative p-5 rounded-lg">
-            <div className="">
-              <div className="mx-auto absolute -top-14 left-1/2 -translate-x-1/2 md:left-[43%] md:translate-x-0 h-20 w-20 rounded-3xl bg-black overflow-hidden border-2 border-white">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Profile Header Section */}
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
+            {/* Avatar Section */}
+            <div className="relative group">
+              <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl">
                 <img
                   className="h-full w-full object-cover"
                   src={
                     user?.avatar ||
-                    "https://images.unsplash.com/photo-1672567711579-a8615fe2d373?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fG1vZGVscyUyMG9yYW5nZXxlbnwwfHwwfHx8MA%3D%3D"
+                    "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || "User") + "&background=random&size=200"
                   }
                   alt="User Avatar"
                 />
               </div>
+              <button
+                onClick={handleProfilePopup}
+                className="absolute bottom-0 right-0 bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Edit Profile"
+              >
+                <MdEdit className="text-xl" />
+              </button>
             </div>
-            <div
-              onClick={() => navigate("/create-post")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.AddPostIcon}
-                  alt="Add post icon"
-                  className="h-full w-full object-cover"
-                />
+
+            {/* User Info Section */}
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold text-white">
+                  {user?.name || "User"}
+                </h1>
+                {user?.verified && (
+                  <FaCheckCircle className="text-white text-xl" title="Verified Account" />
+                )}
               </div>
-              <h5 className="md:text-xl text-white">Add Posts</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
+              <p className="text-white/90 text-lg mb-4">{user?.email || ""}</p>
+              
+              {/* Quick Stats */}
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="text-white text-sm opacity-90">Posts</div>
+                  <div className="text-white text-xl font-bold">{metrics.posts}</div>
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="text-white text-sm opacity-90">Sales</div>
+                  <div className="text-white text-xl font-bold">{metrics.sales}</div>
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="text-white text-sm opacity-90">Earnings</div>
+                  <div className="text-white text-xl font-bold">AED {metrics.earnings.toLocaleString()}</div>
+                </div>
+              </div>
             </div>
-            <div
-              onClick={handleProfilePopup}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer relative hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.userIcon}
-                  alt="User icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Profile</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3 w-full md:w-auto">
+              <button
+                onClick={() => setShowStatsPopup(true)}
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                View Statistics
+                <MdKeyboardArrowRight className="text-xl" />
+              </button>
+              <button
+                onClick={() => navigate("/create-post")}
+                className="bg-white text-primary-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                Create Post
+                <MdKeyboardArrowRight className="text-xl" />
+              </button>
             </div>
-            <div
-              onClick={() => navigate("/my-listings")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.myListIcon}
-                  alt="My posts icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">
-                My Posts ({metrics.posts})
-              </h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => navigate("/my-chats")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.chatIcon}
-                  alt="My chats icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">My Chats</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300">
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.buildingIcon}
-                  alt="City icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Dubai</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div className="border-[1px] border-white/50 w-[55%] my-3 md:my-4"></div>
-            <div
-              onClick={() => navigate("/blogs")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.blogIcon}
-                  alt="Blogs icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Blogs</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => openSupportChat()}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.supportIcon}
-                  alt="Support icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Support</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => navigate("/terms-conditon")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.termAndCondition}
-                  alt="Terms icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Terms & Condition</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.addsIcon}
-                  alt="Advertising icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Advertising</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.lockIcon}
-                  alt="Security icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Security</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={() => navigate("/")}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.bellIcon}
-                  alt="Notification icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">Notification</h5>
-              <MdKeyboardArrowRight className="text-white text-xl" size={25} />
-            </div>
-            <div
-              onClick={handleLogout}
-              className="flex items-center justify-between w-full md:w-[55%] mt-3 md:mt-3 cursor-pointer hover:bg-black hover:bg-opacity-10 rounded-lg p-4 transition-all ease-out duration-300"
-            >
-              <div className="h-9 w-9">
-                <img
-                  src={profileAssets.logoutIcon}
-                  alt="Logout icon"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h5 className="md:text-xl text-white">
-                {isLoggingOut ? "Logging out..." : "Logout"}
-              </h5>
-              <div className=""></div>
-            </div>
-          </div>
-          {/* Button to open stats popup - Visible on all screens */}
-          <div className="w-full md:w-auto md:absolute md:right-5 mt-6 md:mt-0">
-            <button
-              onClick={() => setShowStatsPopup(true)}
-              className="bg-[#050B20] px-4 py-2 rounded-lg flex items-center justify-center gap-2 flex-col hover:opacity-90 transition-all duration-300"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <h2 className="text-xl font-semibold text-primary-500 md:text-white">
-                  View My Stats
-                </h2>
-                <MdKeyboardArrowRight className="text-primary-500 md:text-white text-xl" size={25} />
-              </div>
-              <p className="text-sm text-gray-600 md:text-white/80 mt-1 md:mt-0">Click to view detailed statistics</p>
-            </button>
           </div>
         </div>
       </div>
-      
+
+      {/* Main Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Sidebar - Menu Options */}
+          <div className="md:col-span-1">
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-2">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Menu</h2>
+              
+              <button
+                onClick={handleProfilePopup}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                    <FaUser className="text-primary-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Edit Profile</span>
+                </div>
+                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
+              </button>
+
+              <button
+                onClick={() => navigate("/my-listings")}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                    <img src={profileAssets.myListIcon} alt="My Listings" className="h-6 w-6" />
+                  </div>
+                  <span className="text-gray-700 font-medium">My Posts ({metrics.posts})</span>
+                </div>
+                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
+              </button>
+
+              <button
+                onClick={() => navigate("/my-chats")}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                    <img src={profileAssets.chatIcon} alt="Chats" className="h-6 w-6" />
+                  </div>
+                  <span className="text-gray-700 font-medium">My Chats</span>
+                </div>
+                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
+              </button>
+
+              <div className="border-t my-2"></div>
+
+              <button
+                onClick={() => openSupportChat()}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                    <img src={profileAssets.supportIcon} alt="Support" className="h-6 w-6" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Support</span>
+                </div>
+                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
+              </button>
+
+              <div className="border-t my-2"></div>
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between p-4 hover:bg-red-50 rounded-lg transition-colors group text-red-600"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                    <img src={profileAssets.logoutIcon} alt="Logout" className="h-6 w-6" />
+                  </div>
+                  <span className="font-medium">
+                    {isLoggingOut ? "Logging out..." : "Logout"}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Content Area - Stats Cards and Notifications */}
+          <div className="md:col-span-2 space-y-6">
+            {/* Overview Stats */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Overview</h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600 text-sm">Total Posts</span>
+                    <img src={profileAssets.myListIcon} alt="Posts" className="h-6 w-6 opacity-60" />
+                  </div>
+                  <div className="text-3xl font-bold text-primary-600">{metrics.posts}</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600 text-sm">Total Sales</span>
+                    <img src={profileAssets.sellIcon || profileAssets.myListIcon} alt="Sales" className="h-6 w-6 opacity-60" />
+                  </div>
+                  <div className="text-3xl font-bold text-green-600">{metrics.sales}</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600 text-sm">Total Earnings</span>
+                    <span className="text-2xl">💰</span>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-600">AED {metrics.earnings.toLocaleString()}</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-6 border border-yellow-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600 text-sm">Rating</span>
+                    <img src={profileAssets.starIcon} alt="Rating" className="h-6 w-6 opacity-60" />
+                  </div>
+                  <div className="text-3xl font-bold text-yellow-600">{metrics.rating} ⭐</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowStatsPopup(true)}
+                className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                View Detailed Statistics
+                <MdKeyboardArrowRight className="text-xl" />
+              </button>
+            </div>
+
+            {/* Notifications Section */}
+            <NotificationsSection />
+          </div>
+        </div>
+      </div>
+
       {/* Stats Popup Modal */}
       {showStatsPopup && (
         <div
@@ -339,14 +431,20 @@ const ProfileHero = () => {
                 {profileOptions.map((op) => {
                   let dynamicValue = op.values;
                   if (op.title === "Posts") dynamicValue = metrics.posts;
+                  if (op.title === "Saved") dynamicValue = metrics.savedCount || 0;
                   if (op.title === "Verified")
                     dynamicValue = user?.verified ? "Yes" : "No";
+                  
+                  const handleClick = () => {
+                    if (op.title === "Saved") {
+                      navigate("/saved-cars");
+                    }
+                  };
+                  
                   return (
                     <div
-                      onClick={() => {
-                        alert("hello");
-                      }}
                       key={op.id}
+                      onClick={handleClick}
                       className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer hover:bg-primary-50 transition-colors"
                     >
                       <div className="h-8 w-8">
@@ -457,101 +555,156 @@ const ProfileHero = () => {
           </div>
         </div>
       )}
-      
+
+      {/* Profile Edit Popup Modal */}
       {showProfilePopup && (
         <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75"
-          onClick={() => setShowProfilePopup(false)}
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          onClick={() => {
+            if (!isEditing) {
+              setShowProfilePopup(false);
+            }
+          }}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md p-6 relative animate-fadeIn max-h-[85vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-fadeIn max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setShowProfilePopup(false)}
-              className="absolute top-3 right-3 text-xl text-gray-500 hover:text-red-500 transition"
+              onClick={() => {
+                setShowProfilePopup(false);
+                setIsEditing(false);
+              }}
+              className="absolute top-3 right-3 text-xl text-gray-500 hover:text-red-500 transition z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md"
             >
               ✕
             </button>
-            <div className="flex flex-col items-center">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary-500 group">
-                <img
-                  src={
-                    user?.avatar ||
-                    profileAssets.profileImg ||
-                    "https://via.placeholder.com/150"
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm opacity-0 group-hover:opacity-100 cursor-pointer transition z-[1000]">
-                  Change
+
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative group mb-4">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
+                  <img
+                    src={
+                      formData.avatarPreview ||
+                      user?.avatar ||
+                      "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || "User") + "&background=random&size=200"
+                    }
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm opacity-0 group-hover:opacity-100 cursor-pointer transition rounded-full">
+                  <MdEdit className="text-2xl" />
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        const imgUrl = URL.createObjectURL(e.target.files[0]);
-                        console.log("New Image Selected:", imgUrl);
-                      }
-                    }}
+                    onChange={handleAvatarChange}
                   />
                 </label>
               </div>
-              <h3 className="mt-3 font-semibold text-lg">
+              <h3 className="text-xl font-semibold text-gray-800">
                 {user?.name || "User"}
               </h3>
-              <p className="text-gray-500 text-sm">
-                {user?.email || "email@example.com"}
-              </p>
+              <p className="text-gray-500 text-sm mt-1">{user?.email || ""}</p>
             </div>
-            <div className="mt-6 space-y-4">
+
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaUser className="inline mr-2" />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none transition"
+                  placeholder="Enter your name"
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaEnvelope className="inline mr-2" />
                   Email
                 </label>
                 <input
                   type="email"
-                  className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                  defaultValue={user?.email || "email@example.com"}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-gray-50 cursor-not-allowed"
+                  value={user?.email || ""}
                   disabled
                 />
+                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Password
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Profile Picture
                 </label>
-                <div className="relative">
+                <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary-400 transition-colors">
                   <input
-                    type={showPassword ? "text" : "password"}
-                    className="w-full mt-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary-400 outline-none"
-                    placeholder="Enter new password"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={!isEditing}
                   />
-                  {showPassword ? (
-                    <FaEye
-                      onClick={() => setShowPassword(false)}
-                      className="absolute right-3 top-3 cursor-pointer text-gray-500 hover:text-primary-500"
-                    />
-                  ) : (
-                    <FaEyeSlash
-                      onClick={() => setShowPassword(true)}
-                      className="absolute right-3 top-3 cursor-pointer text-gray-500 hover:text-primary-500"
-                    />
-                  )}
-                </div>
-                <p
-                  onClick={() => navigate("/reset-password")}
-                  className="text-right my-2 text-primary-500 cursor-pointer"
-                >
-                  Reset Password
-                </p>
+                  <div className="text-sm text-gray-600">
+                    {formData.avatar ? "Change Image" : "Click to upload new image"}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">JPG, PNG up to 5MB</div>
+                </label>
               </div>
             </div>
-            <div className="mt-6 flex justify-center">
-              <button className="bg-primary-500 px-6 py-2 rounded-lg hover:opacity-90 transition">
-                Save Changes
-              </button>
+
+            <div className="mt-6 flex gap-3">
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <MdEdit className="text-xl" />
+                  Edit Profile
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setFormData({
+                        name: user?.name || "",
+                        email: user?.email || "",
+                        avatar: null,
+                        avatarPreview: user?.avatar || null,
+                      });
+                    }}
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MdClose className="text-xl" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={isUpdating}
+                    className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isUpdating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <MdCheck className="text-xl" />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

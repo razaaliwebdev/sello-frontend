@@ -1,10 +1,36 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCarCategories } from "../hooks/useCarCategories";
 
-const BrandMarquee = ({ brands = [] }) => {
+const BrandMarquee = ({ brands: propBrands = [] }) => {
   const sliderRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Fetch brands from admin categories
+  const { makes, isLoading } = useCarCategories();
+  
+  // Use categories if available, otherwise fall back to prop brands
+  const brands = makes && makes.length > 0 
+    ? makes.filter(brand => brand.isActive && brand.image) // Only show active brands with images
+    : propBrands;
 
-  // Duplicate brands to allow seamless looping
-  const items = [...brands, ...brands];
+  // For infinite scroll marquee, we need duplicates for seamless loop
+  // Only duplicate if we have multiple brands (for single brand, no need to duplicate)
+  const items = useMemo(() => {
+    if (brands.length === 0) return [];
+    // If only 1 brand, don't duplicate (no need for infinite scroll with single item)
+    if (brands.length === 1) {
+      return brands;
+    }
+    // For multiple brands, duplicate once (standard marquee pattern)
+    return [...brands, ...brands];
+  }, [brands]);
+  
+  // Handle brand click - navigate to filter page with brand search
+  const handleBrandClick = (brandName) => {
+    // Navigate to filter page with make parameter
+    navigate(`/filter?make=${encodeURIComponent(brandName)}`);
+  };
 
   const scroll = (direction) => {
     if (!sliderRef.current) return;
@@ -12,18 +38,27 @@ const BrandMarquee = ({ brands = [] }) => {
     sliderRef.current.scrollBy({ left: amount, behavior: "smooth" });
   };
 
-  // Auto-scroll for infinite loop
+  // Auto-scroll for infinite loop (only if we have multiple brands)
   useEffect(() => {
     const el = sliderRef.current;
-    if (!el || items.length === 0) return;
+    if (!el || items.length === 0 || brands.length === 0) return;
+    
+    // Don't auto-scroll if only 1 brand (no need for infinite loop)
+    if (brands.length === 1) return;
 
     const speed = 1.5; // px per tick
+    
+    // Calculate the width of one set of brands (original array, not duplicated)
+    // Since we duplicate once, scrollWidth / 2 gives us the width of one set
+    const singleSetWidth = el.scrollWidth / 2;
+    
     const interval = setInterval(() => {
       if (!el) return;
-      const halfWidth = el.scrollWidth / 2;
 
-      if (el.scrollLeft >= halfWidth) {
-        // Reset to start of first sequence for seamless loop
+      // Reset when we've scrolled through one complete set of brands
+      // This prevents showing duplicates - reset happens at exactly half the total width
+      if (el.scrollLeft >= singleSetWidth) {
+        // Reset to start for seamless loop
         el.scrollLeft = 0;
       } else {
         el.scrollLeft += speed;
@@ -31,11 +66,11 @@ const BrandMarquee = ({ brands = [] }) => {
     }, 16); // ~60fps
 
     return () => clearInterval(interval);
-  }, [items.length]);
+  }, [items.length, brands.length]);
 
   return (
     <div className="w-full py-6 backdrop-blur-sm">
-      <div className="relative rounded-xl px-10 py-4">
+      <div className="relative rounded-xl px-10 py-4 overflow-hidden">
         {/* Slider buttons */}
         <button
           type="button"
@@ -57,29 +92,56 @@ const BrandMarquee = ({ brands = [] }) => {
         {/* Slider track - auto & infinite */}
         <div
           ref={sliderRef}
-          className="flex gap-4 md:gap-6 overflow-x-auto scrollbar snap-x snap-mandatory scroll-smooth"
+          className="flex gap-4 md:gap-6 overflow-x-hidden snap-x snap-mandatory scroll-smooth scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          {items.map((brand, index) => (
-            <div
-              key={`brand-${index}`}
-              className="bg-white rounded-xl p-4 flex items-center justify-center w-24 h-24 md:w-32 md:h-32 shadow-sm flex-shrink-0 snap-start"
-            >
-              {brand.img ? (
-                <img
-                  src={brand.img}
-                  alt={brand.name || `brand-${index}`}
-                  className="object-contain w-full h-full"
-                  onError={(e) => {
-                    e.target.src = "/fallback-logo.png";
-                    e.target.className =
-                      "object-contain w-full h-full opacity-50";
-                  }}
-                />
-              ) : (
-                <div className="text-gray-400 text-xs">No Image</div>
-              )}
+          {isLoading ? (
+            <div className="flex items-center justify-center w-full py-8">
+              <p className="text-gray-500">Loading brands...</p>
             </div>
-          ))}
+          ) : items.length === 0 ? (
+            <div className="flex items-center justify-center w-full py-8">
+              <p className="text-gray-500">No brands available</p>
+            </div>
+          ) : (
+            items.map((brand, index) => {
+              const brandName = brand.name || brand.brandName || `brand-${index}`;
+              const brandImage = brand.image || brand.img;
+              
+              return (
+                <div
+                  key={`brand-${brand._id || index}-${index}`}
+                  onClick={() => handleBrandClick(brandName)}
+                  className="bg-white rounded-xl p-4 flex flex-col items-center justify-center w-24 h-28 md:w-32 md:h-36 shadow-sm flex-shrink-0 snap-start cursor-pointer hover:shadow-md transition-shadow group"
+                >
+                  {brandImage ? (
+                    <div className="flex-1 flex items-center justify-center mb-2">
+                      <img
+                        src={brandImage}
+                        alt={brandName}
+                        className="object-contain w-full h-full max-h-16 md:max-h-20"
+                        onError={(e) => {
+                          e.target.src = "/fallback-logo.png";
+                          e.target.className =
+                            "object-contain w-full h-full max-h-16 md:max-h-20 opacity-50";
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center mb-2">
+                      <div className="text-gray-400 text-xs">No Image</div>
+                    </div>
+                  )}
+                  {/* Brand name below logo */}
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium text-gray-700 group-hover:text-primary-500 transition-colors line-clamp-2">
+                      {brandName}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

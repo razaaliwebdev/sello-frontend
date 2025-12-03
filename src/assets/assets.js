@@ -160,10 +160,6 @@ export const menuLinks = [
         name: "Blog"
     },
     {
-        path: "/pages",
-        name: "Pages"
-    },
-    {
         path: "/about",
         name: "About"
     },
