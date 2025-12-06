@@ -1,8 +1,9 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+// Use environment variable or default to port 3000 (matching server)
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const api = createApi({
     reducerPath: "api",
@@ -97,15 +98,26 @@ export const api = createApi({
                 if (response?.data?.user && response?.data?.token) {
                     return {
                         token: response.data.token,
-                        user: response.data.user
+                        user: response.data.user,
+                        message: response.message
                     };
                 }
                 // Fallback for old format
                 if (response?.token && response?.user) {
                     return {
                         token: response.token,
-                        user: response.user
+                        user: response.user,
+                        message: response.message
                     };
+                }
+                // If response structure is unexpected, return as is
+                console.warn("Unexpected Google login response structure:", response);
+                return response;
+            },
+            transformErrorResponse: (response) => {
+                // Ensure error responses are properly formatted
+                if (response?.data) {
+                    return response.data;
                 }
                 return response;
             },
@@ -547,7 +559,7 @@ export const api = createApi({
             }),
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Recommendations & Similar Listings
         getSimilarListings: builder.query({
             query: (carId) => ({
@@ -556,7 +568,7 @@ export const api = createApi({
             }),
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Recently Viewed
         getRecentlyViewed: builder.query({
             query: (params = {}) => {
@@ -569,7 +581,7 @@ export const api = createApi({
             providesTags: ["User"],
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Track Recently Viewed
         trackRecentlyViewed: builder.mutation({
             query: (carId) => ({
@@ -577,7 +589,7 @@ export const api = createApi({
                 method: "POST",
             }),
         }),
-        
+
         // Recommended Listings
         getRecommendedListings: builder.query({
             query: (params = {}) => {
@@ -589,7 +601,7 @@ export const api = createApi({
             },
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Boost endpoints
         boostPost: builder.mutation({
             query: ({ carId, ...data }) => ({
@@ -631,7 +643,7 @@ export const api = createApi({
             }),
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Subscription endpoints
         getSubscriptionPlans: builder.query({
             query: () => ({
@@ -671,7 +683,7 @@ export const api = createApi({
             }),
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // User Reviews (for sellers/users)
         addUserReview: builder.mutation({
             query: (data) => ({
@@ -739,7 +751,7 @@ export const {
     useGetSimilarListingsQuery,
     useGetRecentlyViewedQuery,
     useTrackRecentlyViewedMutation,
-        useGetRecommendedListingsQuery,
+    useGetRecommendedListingsQuery,
     useBoostPostMutation,
     useGetBoostStatusQuery,
     useRemoveBoostMutation,

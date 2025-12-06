@@ -63,39 +63,54 @@ const Login = () => {
       const token = credentialResponse.credential;
       const res = await googleLogin(token).unwrap();
 
-      if (!res.token || !res.user) {
-        throw new Error("Invalid response from server");
+      // Check response structure - handle both transformed and raw responses
+      const responseToken = res?.token || res?.data?.token;
+      const responseUser = res?.user || res?.data?.user;
+
+      if (!responseToken || !responseUser) {
+        console.error("Invalid response structure:", res);
+        throw new Error("Invalid response from server. Please try again.");
       }
 
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
+      localStorage.setItem("token", responseToken);
+      localStorage.setItem("user", JSON.stringify(responseUser));
 
       toast.success("Google login successful");
       
       // Redirect based on user role
-      if (res.user?.role === "admin") {
+      if (responseUser?.role === "admin") {
         navigate("/admin/dashboard");
-      } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
+      } else if (responseUser?.role === "dealer" && responseUser?.dealerInfo?.verified) {
         navigate("/dealer/dashboard");
-      } else if (res.user?.role === "seller") {
+      } else if (responseUser?.role === "seller") {
         navigate("/seller/dashboard");
       } else {
         navigate("/");
       }
     } catch (err) {
       console.error("Google login error:", err);
+      console.error("Error details:", {
+        status: err?.status,
+        data: err?.data,
+        message: err?.message,
+        originalStatus: err?.originalStatus
+      });
       
-      // Extract error message
       let errorMessage = "Google login failed. Please try again.";
       
+      // Handle RTK Query errors
       if (err?.data?.message) {
         errorMessage = err.data.message;
+      } else if (err?.data?.error) {
+        errorMessage = err.data.error;
       } else if (err?.message) {
         errorMessage = err.message;
-      } else if (err?.status === 401) {
-        errorMessage = "Authentication failed. Please try again.";
-      } else if (err?.status === 403) {
+      } else if (err?.status === 401 || err?.originalStatus === 401) {
+        errorMessage = "Authentication failed. Please check your Google account and try again.";
+      } else if (err?.status === 403 || err?.originalStatus === 403) {
         errorMessage = "Access denied. Please contact support.";
+      } else if (err?.status === 500 || err?.originalStatus === 500) {
+        errorMessage = "Server error. Google authentication may not be configured. Please contact support.";
       }
       
       toast.error(errorMessage);
