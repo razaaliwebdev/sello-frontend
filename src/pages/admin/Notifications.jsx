@@ -303,7 +303,7 @@ const Notifications = () => {
                 {/* Content Area */}
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
-                        <Spinner size={60} color="text-primary-500" />
+                        <Spinner fullScreen={false} />
                     </div>
                 ) : filteredNotifications.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">

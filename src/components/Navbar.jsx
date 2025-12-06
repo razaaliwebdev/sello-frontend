@@ -6,6 +6,7 @@ import { FaCirclePlus, FaBars, FaXmark } from "react-icons/fa6";
 import gsap from "gsap";
 import { useGetMeQuery } from "../redux/services/api";
 import NotificationBell from "./common/NotificationBell";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -122,19 +123,29 @@ const Navbar = () => {
         <div className="flex items-center gap-4 text-white text-3xl">
           {!isLoading && currentUser ? (
             <div className="flex items-center gap-4">
-              {/* Admin Link */}
+              {/* Dashboard Links */}
               {currentUser.role === "admin" && (
                 <Link
                   to="/admin/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-orange-500 rounded-md hover:bg-orange-600 ${
-                    location.pathname === "/cars" ||
-                    location.pathname === "/users" ||
-                    location.pathname === "/blog"
-                      ? "text-white"
-                      : "text-white"
-                  }`}
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
                 >
                   Admin
+                </Link>
+              )}
+              {currentUser.role === "dealer" && currentUser.dealerInfo?.verified && (
+                <Link
+                  to="/dealer/dashboard"
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                >
+                  Dealer Dashboard
+                </Link>
+              )}
+              {currentUser.role === "seller" && (
+                <Link
+                  to="/seller/dashboard"
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                >
+                  Seller Dashboard
                 </Link>
               )}
               {/* Notification Bell */}
@@ -155,7 +166,7 @@ const Navbar = () => {
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="md:px-6 md:py-2 py-1 px-4 bg-[#050B20] rounded-md text-lg text-white"
+              className="md:px-6 md:py-2 py-1 px-4 bg-primary-500 rounded-md text-lg text-white hover:bg-primary-600 transition-colors"
             >
               Login
             </button>
@@ -239,7 +250,7 @@ const Navbar = () => {
               Create Post
             </button>
 
-            {/* Admin Link (Mobile) */}
+            {/* Dashboard Links (Mobile) */}
             {!isLoading && currentUser?.role === "admin" && (
               <Link
                 to="/admin/dashboard"
@@ -247,6 +258,24 @@ const Navbar = () => {
                 className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
               >
                 <span>Admin Panel</span>
+              </Link>
+            )}
+            {!isLoading && currentUser?.role === "dealer" && currentUser?.dealerInfo?.verified && (
+              <Link
+                to="/dealer/dashboard"
+                onClick={closeDrawer}
+                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+              >
+                <span>Dealer Dashboard</span>
+              </Link>
+            )}
+            {!isLoading && currentUser?.role === "seller" && (
+              <Link
+                to="/seller/dashboard"
+                onClick={closeDrawer}
+                className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
+              >
+                <span>Seller Dashboard</span>
               </Link>
             )}
           </div>

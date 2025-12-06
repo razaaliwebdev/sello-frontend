@@ -18,7 +18,7 @@ const LatestBlogsSection = () => {
   if (isLoading) {
     return (
       <div className="w-full p-4 flex justify-center items-center min-h-[400px]">
-        <Spinner size={50} color="text-primary-500" />
+        <Spinner fullScreen={false} />
       </div>
     );
   }

@@ -99,7 +99,7 @@ const BlogEdit = () => {
     if (isLoadingBlog) {
         return (
             <div className="flex justify-center items-center h-64">
-                <Spinner size={60} color="text-orange-500" />
+                <Spinner fullScreen={false} />
             </div>
         );
     }
@@ -298,7 +298,7 @@ const BlogEdit = () => {
                                         Category
                                     </label>
                                     {categoriesLoading ? (
-                                        <Spinner size={20} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     ) : (
                                         <select
                                             name="category"
@@ -380,7 +380,7 @@ const BlogEdit = () => {
                             disabled={isLoading}
                             className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
                         >
-                            {isLoading && <Spinner size={16} color="text-white" />}
+                            {isLoading && <Spinner fullScreen={false} />}
                             <FiSave size={18} />
                             Update Blog
                         </button>

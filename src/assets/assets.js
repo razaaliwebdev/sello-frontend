@@ -142,6 +142,9 @@ export const images = {
     mailbox
 };
 
+// Export app and social media icons for footer
+export { apple, android, facebook, twitter, instagram, linkedin };
+
 
 
 // DATA
@@ -172,7 +175,192 @@ export const menuLinks = [
 // Footer Data like links etc
 export const footerData = [
     {
-        title: "Company",
+        title: "USED CARS BY LOCATION",
+        links: [
+            {
+                name: "Used Cars in Dubai",
+                path: "/filter?city=Dubai"
+            },
+            {
+                name: "Used Cars in Abu Dhabi",
+                path: "/filter?city=Abu Dhabi"
+            },
+            {
+                name: "Used Cars in Sharjah",
+                path: "/filter?city=Sharjah"
+            },
+            {
+                name: "Used Cars in UAE",
+                path: "/cars"
+            }
+        ]
+    },
+    {
+        title: "USED CARS BY BODY TYPE",
+        links: [
+            {
+                name: "Used Sedan Cars for Sale in UAE",
+                path: "/filter?bodyType=Sedan"
+            },
+            {
+                name: "Used SUV Cars for Sale in UAE",
+                path: "/filter?bodyType=SUV"
+            },
+            {
+                name: "Used Convertible Cars for Sale in UAE",
+                path: "/filter?bodyType=Convertible"
+            },
+            {
+                name: "Used Hatchback Cars for Sale in UAE",
+                path: "/filter?bodyType=Hatchback"
+            }
+        ]
+    },
+    {
+        title: "USED CARS BY YEAR",
+        links: [
+            {
+                name: "2020 Used Cars in UAE",
+                path: "/filter?yearMin=2020&yearMax=2020"
+            },
+            {
+                name: "2019 Used Cars in UAE",
+                path: "/filter?yearMin=2019&yearMax=2019"
+            },
+            {
+                name: "2018 Used Cars in UAE",
+                path: "/filter?yearMin=2018&yearMax=2018"
+            },
+            {
+                name: "2017 Used Cars in UAE",
+                path: "/filter?yearMin=2017&yearMax=2017"
+            }
+        ]
+    },
+    {
+        title: "USED CARS BY BUDGET",
+        links: [
+            {
+                name: "Used Cars under 15K AED in UAE",
+                path: "/filter?priceMax=15000"
+            },
+            {
+                name: "Used Cars under 25K AED in UAE",
+                path: "/filter?priceMax=25000"
+            },
+            {
+                name: "Used Cars under 35K AED in UAE",
+                path: "/filter?priceMax=35000"
+            },
+            {
+                name: "Used Cars under 45K AED in UAE",
+                path: "/filter?priceMax=45000"
+            }
+        ]
+    },
+    {
+        title: "POPULAR CARS BY LOCATION",
+        links: [
+            {
+                name: "Used Toyota Cars in Dubai",
+                path: "/filter?make=Toyota&city=Dubai"
+            },
+            {
+                name: "Used Nissan Cars in Dubai",
+                path: "/filter?make=Nissan&city=Dubai"
+            },
+            {
+                name: "Used Ford Cars in Dubai",
+                path: "/filter?make=Ford&city=Dubai"
+            },
+            {
+                name: "Used BMW Cars in Dubai",
+                path: "/filter?make=BMW&city=Dubai"
+            }
+        ]
+    },
+    {
+        title: "POPULAR MODELS BY LOCATION",
+        links: [
+            {
+                name: "Used Mitsubishi Pajero for Sale in UAE",
+                path: "/filter?make=Mitsubishi&model=Pajero"
+            },
+            {
+                name: "Used Nissan X-Trail for Sale in UAE",
+                path: "/filter?make=Nissan&model=X-Trail"
+            },
+            {
+                name: "Used Ford Edge for Sale in UAE",
+                path: "/filter?make=Ford&model=Edge"
+            },
+            {
+                name: "Used Honda Accord for Sale in UAE",
+                path: "/filter?make=Honda&model=Accord"
+            }
+        ]
+    },
+    {
+        title: "SELL CARS BY MAKE",
+        links: [
+            {
+                name: "Sell your used Nissan cars",
+                path: "/create-post"
+            },
+            {
+                name: "Sell your used Mercedes cars",
+                path: "/create-post"
+            },
+            {
+                name: "Sell your used BMW cars",
+                path: "/create-post"
+            },
+            {
+                name: "Sell your used Ford cars",
+                path: "/create-post"
+            }
+        ]
+    },
+    {
+        title: "USED CARS BY SEATS",
+        links: [
+            {
+                name: "Used 2 Seater Cars in UAE",
+                path: "/filter?carDoors=2"
+            },
+            {
+                name: "Used 4 Seater Cars in UAE",
+                path: "/filter?carDoors=4"
+            },
+            {
+                name: "Used 5 Seater Cars in UAE",
+                path: "/filter?carDoors=5"
+            },
+            {
+                name: "Used 7 Seater Cars in UAE",
+                path: "/filter?carDoors=7"
+            }
+        ]
+    },
+    {
+        title: "CAR GUIDES",
+        links: [
+            {
+                name: "Car Buying Guide",
+                path: "/blog"
+            },
+            {
+                name: "Car Selling Guide",
+                path: "/blog"
+            },
+            {
+                name: "Car Financing",
+                path: "/loan-plans"
+            }
+        ]
+    },
+    {
+        title: "COMPANY",
         links: [
             {
                 name: "About Us",
@@ -183,110 +371,13 @@ export const footerData = [
                 path: "/blog"
             },
             {
-                name: "Services",
-                path: "/services"
-            },
-            {
-                name: "Terms",
-                path: "/terms-conditon"
-            },
-            {
                 name: "Contact Us",
-                path: "/contact"
-            }
-        ]
-    },
-    {
-        title: "Quick Links",
-        links: [
-            {
-                name: "Get in Touch",
                 path: "/contact"
             },
             {
                 name: "Help Center",
                 path: "/help-center"
-            },
-            {
-                name: "Live chat",
-                path: "/live-chat"
-            },
-            {
-                name: "How it works",
-                path: "/how-it-works"
             }
-        ]
-    },
-    {
-        title: "Our Brands",
-        links: [
-            {
-                name: "Toyota"
-            },
-            {
-                name: "Porsche"
-            },
-            {
-                name: "Audi"
-            },
-            {
-                name: "BMW"
-            }, {
-                name: "Ford"
-            },
-            {
-                name: "Nissan"
-            },
-            {
-                name: "Peugeot",
-            },
-            {
-                name: "Volkswagen"
-            }
-        ]
-    },
-    {
-        title: "Vehicles Type",
-        types: [
-            "Sedan", "Hatchback", "SUV", "Hybird", "Electric", "Coupe", "Truck", "Convertible"
-        ]
-    },
-    {
-        title: "Our Mobile App",
-        links: [
-            {
-                icon: apple,
-                download: "Download on",
-                name: "App Store"
-            },
-            {
-                icon: android,
-                download: "Get in on",
-                name: "Google Play"
-            }
-        ],
-        title2: "Follow Us",
-        social: [
-            {
-                image: facebook,
-                name: "Facebook",
-                link: ""
-            },
-            {
-                image: twitter,
-                name: "Twitter",
-                link: ""
-            },
-            {
-                image: instagram,
-                name: "Instagram",
-                link: ""
-            },
-            {
-                image: linkedin,
-                name: "LinkedIn",
-                link: ""
-            },
         ]
     }
 ];

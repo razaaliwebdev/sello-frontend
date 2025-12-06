@@ -11,6 +11,7 @@ import {
   useGoogleLoginMutation,
 } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
+import DealerSignup from "./DealerSignup";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +19,7 @@ const SignUp = () => {
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showDealerForm, setShowDealerForm] = useState(false);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -107,9 +109,13 @@ const SignUp = () => {
 
       toast.success("Google sign-up successful!");
       
-      // Redirect to admin dashboard if user is admin
+      // Redirect based on user role
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
+        navigate("/dealer/dashboard");
+      } else if (res.user?.role === "seller") {
+        navigate("/seller/dashboard");
       } else {
         navigate("/");
       }
@@ -136,7 +142,6 @@ const SignUp = () => {
 
   return (
     <>
-      {(loading || googleLoading) && <Spinner />}
       <div className="flex flex-col h-screen bg-gray-50">
         {/* Orange Header */}
         <HeaderLogo />
@@ -285,7 +290,7 @@ const SignUp = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4 disabled:opacity-50"
               >
                 {loading ? (
                   <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5 inline-block"></span>
@@ -338,12 +343,8 @@ const SignUp = () => {
               {/* Sign Up as a Dealer Button */}
               <button
                 type="button"
-                onClick={() => {
-                  toast.info("Dealer registration coming soon!");
-                  // You can navigate to a dealer signup page when ready
-                  // navigate("/sign-up-dealer");
-                }}
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+                onClick={() => setShowDealerForm(true)}
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4"
               >
                 Sign Up as a Dealer
               </button>
@@ -362,7 +363,10 @@ const SignUp = () => {
           </div>
         </div>
 
-       
+        {/* Dealer Registration Form Modal */}
+        {showDealerForm && (
+          <DealerSignup onBack={() => setShowDealerForm(false)} />
+        )}
       </div>
     </>
   );

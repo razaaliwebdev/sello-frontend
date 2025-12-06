@@ -34,7 +34,7 @@ export const api = createApi({
 
         return baseResult;
     },
-    tagTypes: ["User", "SupportChat", "CarChat", "Notification", "Blog", "Testimonial"],
+    tagTypes: ["User", "SupportChat", "CarChat", "Notification", "Blog", "Testimonial", "Cars"],
     endpoints: (builder) => ({
         registerUser: builder.mutation({
             query: (userData) => ({
@@ -168,6 +168,23 @@ export const api = createApi({
             transformResponse: (response) => {
                 return response?.data || response;
             },
+        }),
+        requestSeller: builder.mutation({
+            query: () => ({
+                url: "/users/request-seller",
+                method: "POST",
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        requestDealer: builder.mutation({
+            query: (dealerData) => ({
+                url: "/users/request-dealer",
+                method: "POST",
+                body: dealerData,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
         }),
         // Save/Unsave Car (Wishlist)
         saveCar: builder.mutation({
@@ -490,7 +507,7 @@ export const api = createApi({
             providesTags: ["Blog"],
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Testimonials/Reviews
         getTestimonials: builder.query({
             query: (params = {}) => {
@@ -512,7 +529,7 @@ export const api = createApi({
             invalidatesTags: ["Testimonial"],
             transformResponse: (response) => response?.data || response,
         }),
-        
+
         // Newsletter
         subscribeNewsletter: builder.mutation({
             query: (email) => ({
@@ -530,6 +547,148 @@ export const api = createApi({
             }),
             transformResponse: (response) => response?.data || response,
         }),
+        
+        // Recommendations & Similar Listings
+        getSimilarListings: builder.query({
+            query: (carId) => ({
+                url: `/recommendations/similar/${carId}`,
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Recently Viewed
+        getRecentlyViewed: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return {
+                    url: `/recommendations/viewed?${searchParams}`,
+                    method: "GET",
+                };
+            },
+            providesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Track Recently Viewed
+        trackRecentlyViewed: builder.mutation({
+            query: (carId) => ({
+                url: `/recommendations/viewed/${carId}`,
+                method: "POST",
+            }),
+        }),
+        
+        // Recommended Listings
+        getRecommendedListings: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return {
+                    url: `/recommendations?${searchParams}`,
+                    method: "GET",
+                };
+            },
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Boost endpoints
+        boostPost: builder.mutation({
+            query: ({ carId, ...data }) => ({
+                url: `/boost/${carId}`,
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["Cars", "User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getBoostStatus: builder.query({
+            query: (carId) => ({
+                url: `/boost/${carId}/status`,
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        removeBoost: builder.mutation({
+            query: (carId) => ({
+                url: `/boost/${carId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Cars"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        purchaseCredits: builder.mutation({
+            query: (data) => ({
+                url: "/boost/credits/purchase",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getBoostPricing: builder.query({
+            query: () => ({
+                url: "/boost/pricing",
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // Subscription endpoints
+        getSubscriptionPlans: builder.query({
+            query: () => ({
+                url: "/subscriptions/plans",
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        getMySubscription: builder.query({
+            query: () => ({
+                url: "/subscriptions/my-subscription",
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        purchaseSubscription: builder.mutation({
+            query: (data) => ({
+                url: "/subscriptions/purchase",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        cancelSubscription: builder.mutation({
+            query: () => ({
+                url: "/subscriptions/cancel",
+                method: "POST",
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getPaymentHistory: builder.query({
+            query: () => ({
+                url: "/subscriptions/payment-history",
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+        
+        // User Reviews (for sellers/users)
+        addUserReview: builder.mutation({
+            query: (data) => ({
+                url: "/reviews",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getUserReviews: builder.query({
+            query: (userId) => ({
+                url: `/reviews/user/${userId}`,
+                method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
     }),
 });
 
@@ -543,6 +702,8 @@ export const {
     useResetPasswordMutation,
     useGetMeQuery,
     useUpdateProfileMutation,
+    useRequestSellerMutation,
+    useRequestDealerMutation,
     useSaveCarMutation,
     useUnsaveCarMutation,
     useGetSavedCarsQuery,
@@ -575,4 +736,20 @@ export const {
     useSubmitReviewMutation,
     useSubscribeNewsletterMutation,
     useUnsubscribeNewsletterMutation,
+    useGetSimilarListingsQuery,
+    useGetRecentlyViewedQuery,
+    useTrackRecentlyViewedMutation,
+        useGetRecommendedListingsQuery,
+    useBoostPostMutation,
+    useGetBoostStatusQuery,
+    useRemoveBoostMutation,
+    usePurchaseCreditsMutation,
+    useGetBoostPricingQuery,
+    useGetSubscriptionPlansQuery,
+    useGetMySubscriptionQuery,
+    usePurchaseSubscriptionMutation,
+    useCancelSubscriptionMutation,
+    useGetPaymentHistoryQuery,
+    useAddUserReviewMutation,
+    useGetUserReviewsQuery,
 } = api;

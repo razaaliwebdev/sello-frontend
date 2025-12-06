@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import { FiZap } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   useGetCarsQuery, 
@@ -46,7 +47,6 @@ const GetAllCarsSection = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("all");
   const [page, setPage] = useState(1);
-  const [isPageChanging, setIsPageChanging] = useState(false);
 
   // Check if we're on home page or listing page
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
@@ -158,12 +158,6 @@ const GetAllCarsSection = () => {
     { id: "used", label: "Used Cars" },
   ], []);
 
-  // Reset loading state when data is loaded
-  useEffect(() => {
-    if (cars.length > 0) {
-      setIsPageChanging(false);
-    }
-  }, [cars]);
 
   // Filter cars based on active tab (client-side fallback) - memoized
   const filteredCars = useMemo(() => {
@@ -174,15 +168,7 @@ const GetAllCarsSection = () => {
   // Show skeleton loaders while loading
   if (isLoading) {
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5] relative">
-        {isPageChanging && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-3">
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-gray-700">Loading cars...</span>
-            </div>
-          </div>
-        )}
+      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
         <h1 className="md:text-4xl text-2xl font-medium mb-8">
           Explore All Vehicles
         </h1>
@@ -263,9 +249,23 @@ const GetAllCarsSection = () => {
                           // This will be handled by the LazyImage component
                         }}
                       />
+                      {/* Boost Badge */}
+                      {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && !car?.isSold && (
+                        <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold z-10 flex items-center gap-1 shadow-lg">
+                          <FiZap size={12} />
+                          BOOSTED
+                        </div>
+                      )}
+                      {/* Sold Badge */}
                       {car?.isSold && (
                         <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
                           SOLD
+                        </div>
+                      )}
+                      {/* Featured Badge */}
+                      {car?.featured && !car?.isSold && (
+                        <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
+                          FEATURED
                         </div>
                       )}
                       <button

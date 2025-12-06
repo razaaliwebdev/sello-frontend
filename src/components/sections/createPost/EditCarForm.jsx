@@ -623,7 +623,7 @@ const EditCarForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-primary-500 px-4 my-5 py-2 rounded hover:opacity-90 transition w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-50"
+            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-50"
           >
             {isLoading ? "Updating..." : "Update Car"}
           </button>

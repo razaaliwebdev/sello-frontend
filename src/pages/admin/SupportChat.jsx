@@ -380,7 +380,7 @@ const SupportChat = () => {
                     <div className="flex-1 overflow-y-auto">
                         {chatsLoading ? (
                             <div className="flex justify-center py-8">
-                                <Spinner size={40} color="text-primary-500" />
+                                <Spinner fullScreen={false} />
                             </div>
                         ) : filteredChats.length === 0 ? (
                             <div className="text-center text-gray-500 py-8">
@@ -492,7 +492,7 @@ const SupportChat = () => {
                             <div className="flex-1 overflow-y-auto p-4 space-y-2">
                                 {messagesLoading ? (
                                     <div className="flex justify-center py-8">
-                                        <Spinner size={40} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     </div>
                                 ) : messages.length === 0 ? (
                                     <div className="text-center text-gray-500 py-8">

@@ -27,7 +27,7 @@ const BlogPosts = () => {
   if (isLoading) {
     return (
       <div className="md:px-10 md:py-12 px-5 py-6 flex justify-center items-center min-h-[400px]">
-        <Spinner size={60} color="text-primary-500" />
+        <Spinner fullScreen={false} />
       </div>
     );
   }

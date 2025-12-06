@@ -56,6 +56,9 @@ const FilterForm = ({ onFilter }) => {
     technicalFeatures: "",
     country: "",
     city: "",
+    radius: "",
+    userLat: "",
+    userLng: "",
   });
 
   // Removed internal query - parent component handles it
@@ -65,23 +68,56 @@ const FilterForm = ({ onFilter }) => {
 
   // Read URL parameters on mount and apply filters
   useEffect(() => {
-    const makeParam = searchParams.get("make");
-    if (makeParam && makes.length > 0) {
-      // Check if the make exists in our categories
-      const makeExists = makes.find(m => m.name.toLowerCase() === makeParam.toLowerCase());
-      if (makeExists) {
-        setFilters(prev => {
-          // Only update if different to avoid infinite loops
-          if (prev.make !== makeExists.name) {
-            // Auto-trigger search when brand is set from URL
-            const backendFilters = { make: makeExists.name };
-            // setQueryParams(backendFilters); // Removed - parent handles it
-            if (onFilter) onFilter(backendFilters);
-            return { ...prev, make: makeExists.name };
-          }
-          return prev;
-        });
-        setSelectedMake(makeExists.name);
+    const urlFilters = {};
+    
+    // Read all URL parameters
+    const city = searchParams.get("city");
+    const bodyType = searchParams.get("bodyType");
+    const make = searchParams.get("make");
+    const model = searchParams.get("model");
+    const yearMin = searchParams.get("yearMin");
+    const yearMax = searchParams.get("yearMax");
+    const priceMin = searchParams.get("priceMin");
+    const priceMax = searchParams.get("priceMax");
+    const carDoors = searchParams.get("carDoors");
+
+    // Build filter object from URL params
+    if (city) urlFilters.city = city;
+    if (bodyType) urlFilters.bodyType = bodyType;
+    if (make) {
+      urlFilters.make = make;
+      setSelectedMake(make);
+    }
+    if (model) urlFilters.model = model;
+    if (yearMin) urlFilters.minYear = yearMin;
+    if (yearMax) urlFilters.maxYear = yearMax;
+    if (priceMin) urlFilters.minPrice = priceMin;
+    if (priceMax) urlFilters.maxPrice = priceMax;
+    if (carDoors) {
+      urlFilters.minDoors = carDoors;
+      urlFilters.maxDoors = carDoors;
+    }
+
+    // Update filters state
+    if (Object.keys(urlFilters).length > 0) {
+      setFilters(prev => ({ ...prev, ...urlFilters }));
+      
+      // Build backend filters and trigger search
+      const backendFilters = {};
+      if (urlFilters.city) backendFilters.city = urlFilters.city;
+      if (urlFilters.bodyType) backendFilters.bodyType = urlFilters.bodyType;
+      if (urlFilters.make) backendFilters.make = urlFilters.make;
+      if (urlFilters.model) backendFilters.model = urlFilters.model;
+      if (urlFilters.minYear) backendFilters.yearMin = urlFilters.minYear;
+      if (urlFilters.maxYear) backendFilters.yearMax = urlFilters.maxYear;
+      if (urlFilters.minPrice) backendFilters.priceMin = urlFilters.minPrice;
+      if (urlFilters.maxPrice) backendFilters.priceMax = urlFilters.maxPrice;
+      if (urlFilters.minDoors) backendFilters.doorsMin = urlFilters.minDoors;
+      if (urlFilters.maxDoors) backendFilters.doorsMax = urlFilters.maxDoors;
+
+      // Trigger filter
+      if (onFilter && Object.keys(backendFilters).length > 0) {
+        onFilter(backendFilters);
       }
     }
   }, [searchParams, makes, onFilter]);
@@ -324,6 +360,9 @@ const FilterForm = ({ onFilter }) => {
       backendFilters.features = filters.technicalFeatures;
     if (filters.country) backendFilters.country = filters.country;
     if (filters.city) backendFilters.city = filters.city;
+    if (filters.radius) backendFilters.radius = filters.radius;
+    if (filters.userLat) backendFilters.userLat = filters.userLat;
+    if (filters.userLng) backendFilters.userLng = filters.userLng;
 
     // Remove empty values
     const cleanFilters = {};
@@ -371,6 +410,9 @@ const FilterForm = ({ onFilter }) => {
       technicalFeatures: "",
       country: "",
       city: "",
+      radius: "",
+      userLat: "",
+      userLng: "",
     });
     // setQueryParams(null); // Removed - parent handles it
     if (onFilter) onFilter(null); // Notify parent to clear results
@@ -735,13 +777,107 @@ const FilterForm = ({ onFilter }) => {
           </div>
         </div>
         
+        {/* Location Radius Filter - Styled like reference */}
+        <div className="field space-y-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">📍 Find Cars Near Me</label>
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => {
+                if (!navigator.geolocation) {
+                  toast.error("Geolocation is not supported by your browser.");
+                  return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    handleChange("userLat", lat.toString());
+                    handleChange("userLng", lng.toString());
+                    toast.success("Location captured! Now select a radius.");
+                  },
+                  (error) => {
+                    toast.error("Failed to get your location. Please allow location access.");
+                  },
+                  {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                  }
+                );
+              }}
+              className={`w-full px-4 py-3 flex items-center justify-between transition-all ${
+                filters.userLat && filters.userLng
+                  ? "bg-green-50 border-l-4 border-green-500"
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  filters.userLat && filters.userLng ? "bg-green-100" : "bg-blue-100"
+                }`}>
+                  {filters.userLat && filters.userLng ? (
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className={`text-sm font-medium ${
+                    filters.userLat && filters.userLng ? "text-green-700" : "text-gray-700"
+                  }`}>
+                    {filters.userLat && filters.userLng
+                      ? "Location Captured"
+                      : "Where are you?"}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {filters.userLat && filters.userLng
+                      ? "Select radius below"
+                      : "Tap to use your current location"}
+                  </div>
+                </div>
+              </div>
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            {filters.userLat && filters.userLng && (
+              <div className="border-t border-gray-200 p-3 bg-gray-50">
+                <label className="block text-xs font-medium text-gray-700 mb-2">Search Radius</label>
+                <select
+                  value={filters.radius}
+                  onChange={(e) => handleChange("radius", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                >
+                  <option value="">Select distance</option>
+                  <option value="5">Within 5 km</option>
+                  <option value="10">Within 10 km</option>
+                  <option value="25">Within 25 km</option>
+                  <option value="50">Within 50 km</option>
+                  <option value="100">Within 100 km</option>
+                </select>
+                {filters.radius && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    ✓ Will show cars within {filters.radius} km of your location
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        
         <LocationButton onChange={handleLocationChange} />
 
         {/* Submit */}
         <div>
           <button
             type="submit"
-            className="bg-primary-500 px-4 py-2 rounded hover:opacity-90 transition w-full text-xl shadow-lg shadow-gray-400 font-semibold"
+            className="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold"
           >
             Apply Filters
           </button>

@@ -154,7 +154,7 @@ const ChatMonitoring = () => {
                     <div className="overflow-x-auto">
                         {chatsLoading || supportChatsLoading ? (
                             <div className="flex justify-center py-20">
-                                <Spinner size={60} color="text-yellow-500" />
+                                <Spinner fullScreen={false} />
                             </div>
                         ) : filteredChats.length === 0 ? (
                             <div className="text-center py-20">

@@ -83,7 +83,7 @@ const CustomerReview = () => {
   if (isLoading) {
     return (
       <section className="px-4 md:px-16 py-12 bg-[#F5F5F5] flex items-center justify-center min-h-[400px]">
-        <Spinner size={50} color="text-primary-500" />
+        <Spinner fullScreen={false} />
       </section>
     );
   }

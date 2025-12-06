@@ -146,7 +146,7 @@ const BlogCategories = () => {
                             {isLoading ? (
                                 <tr>
                                     <td colSpan="4" className="px-6 py-8 text-center">
-                                        <Spinner size={40} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     </td>
                                 </tr>
                             ) : categories.length === 0 ? (

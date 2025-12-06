@@ -54,7 +54,7 @@ const PopularMakes = () => {
     return (
       <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
         <div className="flex justify-center items-center min-h-[400px]">
-          <Spinner size={50} color="text-primary-500" />
+          <Spinner fullScreen={false} />
         </div>
       </div>
     );

@@ -349,7 +349,7 @@ const Categories = () => {
                 {/* Table */}
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
-                        <Spinner size={60} color="text-primary-500" />
+                        <Spinner fullScreen={false} />
                     </div>
                 ) : processedCategories.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
@@ -872,7 +872,7 @@ const Categories = () => {
                                     >
                                         {(isCreating || isUpdating) ? (
                                             <>
-                                                <Spinner size={16} color="text-white" />
+                                                <Spinner fullScreen={false} />
                                                 {editingCategory ? "Updating..." : "Creating..."}
                                             </>
                                         ) : (

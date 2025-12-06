@@ -307,7 +307,7 @@ const CustomerRequests = () => {
                     <div className="overflow-x-auto">
                         {isLoading ? (
                             <div className="flex justify-center py-12">
-                                <Spinner size={40} color="text-yellow-500" />
+                                <Spinner fullScreen={false} />
                             </div>
                         ) : requests.length === 0 ? (
                             <div className="text-center py-16 text-gray-500">

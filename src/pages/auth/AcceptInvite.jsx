@@ -111,8 +111,8 @@ const AcceptInvite = () => {
 
   if (isLoadingInvite) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Spinner size={80} color="text-primary-500" />
+      <div className="flex justify-center items-center h-screen bg-white">
+        <Spinner fullScreen={false} />
       </div>
     );
   }
@@ -143,7 +143,11 @@ const AcceptInvite = () => {
 
   return (
     <>
-      {(isAccepting) && <Spinner />}
+      {isAccepting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <Spinner fullScreen={false} />
+        </div>
+      )}
       <div className="flex h-screen flex-wrap flex-col md:flex-row">
         <div className="md:w-1/2 w-full">
           <HeaderLogo />
@@ -241,7 +245,7 @@ const AcceptInvite = () => {
 
               <button
                 type="submit"
-                className="w-full h-12 shadow-lg shadow-gray-400 bg-primary-500 font-medium hover:opacity-90 my-4"
+                className="w-full h-12 shadow-lg shadow-gray-400 bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors my-4"
                 disabled={isAccepting}
               >
                 {isAccepting ? "Creating Account..." : "Accept Invitation & Create Account"}

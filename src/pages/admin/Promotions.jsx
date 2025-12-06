@@ -175,7 +175,7 @@ const Promotions = () => {
                 {/* Content Area */}
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
-                        <Spinner size={60} color="text-primary-500" />
+                        <Spinner fullScreen={false} />
                     </div>
                 ) : promotions.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
@@ -508,7 +508,7 @@ const Promotions = () => {
                                         disabled={isCreating || isUpdating}
                                         className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                     >
-                                        {(isCreating || isUpdating) && <Spinner size={16} color="text-white" />}
+                                        {(isCreating || isUpdating) && <Spinner fullScreen={false} />}
                                         {editingPromotion ? "Update Promotion" : "Create Promotion"}
                                     </button>
                                 </div>

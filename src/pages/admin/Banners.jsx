@@ -163,7 +163,7 @@ const Banners = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {isLoading ? (
                         <div className="col-span-full flex justify-center items-center h-64">
-                            <Spinner size={60} color="text-primary-500" />
+                            <Spinner fullScreen={false} />
                         </div>
                     ) : banners.length === 0 ? (
                         <div className="col-span-full text-center text-gray-500 py-12">

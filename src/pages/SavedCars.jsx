@@ -28,7 +28,7 @@ const SavedCars = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
-        <Spinner size={60} color="text-primary-500" />
+        <Spinner fullScreen={false} />
       </div>
     );
   }

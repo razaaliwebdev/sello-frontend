@@ -401,7 +401,7 @@ const WhatsAppChatWidget = () => {
 
                         {chatsLoading ? (
                             <div className="flex justify-center py-8">
-                                <Spinner size={40} color="text-primary-500" />
+                                <Spinner fullScreen={false} />
                             </div>
                     ) : userChats.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
@@ -537,7 +537,7 @@ const WhatsAppChatWidget = () => {
                     <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
                                 {messagesLoading ? (
                                     <div className="flex justify-center py-8">
-                                        <Spinner size={40} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     </div>
                         ) : messages.length === 0 ? (
                             <div className="text-center text-gray-500 py-8">

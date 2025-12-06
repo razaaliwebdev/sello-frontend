@@ -8,9 +8,12 @@ import {
 } from "../../../assets/profilePageAssets/profileAssets";
 import { MdKeyboardArrowRight, MdEdit, MdCheck, MdClose } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaCheckCircle } from "react-icons/fa";
+import { FiAlertCircle, FiStar } from "react-icons/fi";
 import { useGetMeQuery, useLogoutMutation, useUpdateProfileMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
 import { useSupportChat } from "../../../contexts/SupportChatContext";
 import NotificationsSection from "./NotificationsSection";
+import DealerRequestForm from "../../profile/DealerRequestForm";
+import SubscriptionManagement from "../../subscriptions/SubscriptionManagement";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -18,6 +21,8 @@ const ProfileHero = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showStatsPopup, setShowStatsPopup] = useState(false);
+  const [showDealerForm, setShowDealerForm] = useState(false);
+  const [activeSection, setActiveSection] = useState("overview"); // overview, notifications, subscription
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -271,6 +276,16 @@ const ProfileHero = () => {
         </div>
       </div>
 
+      {/* Dealer Request Form Modal */}
+      <DealerRequestForm
+        isOpen={showDealerForm}
+        onClose={() => setShowDealerForm(false)}
+        onSuccess={() => {
+          refetch();
+          setShowDealerForm(false);
+        }}
+      />
+
       {/* Main Content Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -305,6 +320,37 @@ const ProfileHero = () => {
                 <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
               </button>
 
+              {/* Dashboard Links */}
+              {user?.role === "dealer" && user?.dealerInfo?.verified && (
+                <button
+                  onClick={() => navigate("/dealer/dashboard")}
+                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                      <FaCheckCircle className="text-primary-600" />
+                    </div>
+                    <span className="text-primary-700 font-semibold">Dealer Dashboard</span>
+                  </div>
+                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
+                </button>
+              )}
+
+              {user?.role === "seller" && (
+                <button
+                  onClick={() => navigate("/seller/dashboard")}
+                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                      <FaCheckCircle className="text-primary-600" />
+                    </div>
+                    <span className="text-primary-700 font-semibold">Seller Dashboard</span>
+                  </div>
+                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
+                </button>
+              )}
+
               <button
                 onClick={() => navigate("/my-chats")}
                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
@@ -314,6 +360,51 @@ const ProfileHero = () => {
                     <img src={profileAssets.chatIcon} alt="Chats" className="h-6 w-6" />
                   </div>
                   <span className="text-gray-700 font-medium">My Chats</span>
+                </div>
+                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
+              </button>
+
+              {user?.role !== "dealer" && (
+                <button
+                  onClick={() => setShowDealerForm(true)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                      <FaCheckCircle className="text-primary-600" />
+                    </div>
+                    <span className="text-primary-700 font-semibold">Become a Dealer</span>
+                  </div>
+                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
+                </button>
+              )}
+
+              {user?.role === "dealer" && !user?.dealerInfo?.verified && (
+                <button
+                  onClick={() => setShowDealerForm(true)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-yellow-50 rounded-lg transition-colors group border-2 border-yellow-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
+                      <FiAlertCircle className="text-yellow-600" />
+                    </div>
+                    <span className="text-yellow-700 font-semibold">Verification Pending</span>
+                  </div>
+                  <MdKeyboardArrowRight className="text-yellow-400 group-hover:text-yellow-500" />
+                </button>
+              )}
+
+              <button
+                onClick={() => setActiveSection("subscription")}
+                className={`w-full flex items-center justify-between p-4 rounded-lg transition-colors group ${
+                  activeSection === "subscription" ? "bg-primary-50 border-2 border-primary-200" : "hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
+                    <FiStar className="text-primary-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Subscription</span>
                 </div>
                 <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
               </button>
@@ -353,55 +444,66 @@ const ProfileHero = () => {
 
           {/* Right Content Area - Stats Cards and Notifications */}
           <div className="md:col-span-2 space-y-6">
-            {/* Overview Stats */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Overview</h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Total Posts</span>
-                    <img src={profileAssets.myListIcon} alt="Posts" className="h-6 w-6 opacity-60" />
+            {/* Overview Section */}
+            {activeSection === "overview" && (
+              <>
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Overview</h2>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600 text-sm">Total Posts</span>
+                        <img src={profileAssets.myListIcon} alt="Posts" className="h-6 w-6 opacity-60" />
+                      </div>
+                      <div className="text-3xl font-bold text-primary-600">{metrics.posts}</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600 text-sm">Total Sales</span>
+                        <img src={profileAssets.sellIcon || profileAssets.myListIcon} alt="Sales" className="h-6 w-6 opacity-60" />
+                      </div>
+                      <div className="text-3xl font-bold text-green-600">{metrics.sales}</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600 text-sm">Total Earnings</span>
+                        <span className="text-2xl">💰</span>
+                      </div>
+                      <div className="text-3xl font-bold text-blue-600">AED {metrics.earnings.toLocaleString()}</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-6 border border-yellow-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600 text-sm">Rating</span>
+                        <img src={profileAssets.starIcon} alt="Rating" className="h-6 w-6 opacity-60" />
+                      </div>
+                      <div className="text-3xl font-bold text-yellow-600">{metrics.rating} ⭐</div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-primary-600">{metrics.posts}</div>
+
+                  <button
+                    onClick={() => setShowStatsPopup(true)}
+                    className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    View Detailed Statistics
+                    <MdKeyboardArrowRight className="text-xl" />
+                  </button>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Total Sales</span>
-                    <img src={profileAssets.sellIcon || profileAssets.myListIcon} alt="Sales" className="h-6 w-6 opacity-60" />
-                  </div>
-                  <div className="text-3xl font-bold text-green-600">{metrics.sales}</div>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Total Earnings</span>
-                    <span className="text-2xl">💰</span>
-                  </div>
-                  <div className="text-3xl font-bold text-blue-600">AED {metrics.earnings.toLocaleString()}</div>
-                </div>
-
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-6 border border-yellow-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Rating</span>
-                    <img src={profileAssets.starIcon} alt="Rating" className="h-6 w-6 opacity-60" />
-                  </div>
-                  <div className="text-3xl font-bold text-yellow-600">{metrics.rating} ⭐</div>
-                </div>
+                {/* Notifications Section */}
+                <NotificationsSection />
+              </>
+            )}
+            
+            {/* Subscription Management Section */}
+            {activeSection === "subscription" && (
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <SubscriptionManagement />
               </div>
-
-              <button
-                onClick={() => setShowStatsPopup(true)}
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                View Detailed Statistics
-                <MdKeyboardArrowRight className="text-xl" />
-              </button>
-            </div>
-
-            {/* Notifications Section */}
-            <NotificationsSection />
+            )}
           </div>
         </div>
       </div>

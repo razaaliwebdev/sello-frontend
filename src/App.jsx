@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
@@ -38,6 +38,9 @@ import AllBlog from "./pages/blog/AllBlog.jsx";
 import BlogDetails from "./pages/blog/BlogDetails.jsx";
 import MyChats from "./pages/chats/MyChats.jsx";
 import SellerChats from "./pages/seller/SellerChats.jsx";
+import DealerDashboard from "./pages/dashboards/DealerDashboard.jsx";
+import SellerDashboard from "./pages/dashboards/SellerDashboard.jsx";
+import HelpCenter from "./pages/help/HelpCenter.jsx";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard.jsx";
@@ -45,10 +48,7 @@ import AdminUsers from "./pages/admin/Users.jsx";
 import AdminListings from "./pages/admin/Listings.jsx";
 import AdminDealers from "./pages/admin/Dealers.jsx";
 import AdminCategories from "./pages/admin/Categories.jsx";
-import AdminBlogs from "./pages/admin/Blogs.jsx";
-import BlogCreate from "./pages/admin/BlogCreate.jsx";
 import BlogEdit from "./pages/admin/BlogEdit.jsx";
-import AdminAnalytics from "./pages/admin/Analytics.jsx";
 import AdminReports from "./pages/admin/Reports.jsx";
 import AdminChatMonitoring from "./pages/admin/ChatMonitoring.jsx";
 import AdminChatbot from "./pages/admin/Chatbot.jsx";
@@ -75,39 +75,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import AdminRoute from "./components/common/AdminRoute.jsx";
 
 const App = () => {
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [pageLoading, setPageLoading] = useState(false);
   const location = useLocation();
-
-  // Initial app load
-  useEffect(() => {
-    const handleLoad = () => setInitialLoading(false);
-
-    if (document.readyState === "complete") {
-      handleLoad();
-    } else {
-      window.addEventListener("load", handleLoad);
-    }
-
-    return () => window.removeEventListener("load", handleLoad);
-  }, []);
-
-  // Page transition loading
-  useEffect(() => {
-    setPageLoading(true);
-    const timeout = setTimeout(() => {
-      setPageLoading(false);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [location.pathname]);
-
-  if (initialLoading || pageLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Spinner size={80} color="text-purple-500" thickness={5} speed="fast" />
-      </div>
-    );
-  }
 
   const hideNavbarFooter = [
     "/login",
@@ -160,6 +128,7 @@ const App = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/all" element={<AllBlog />} />
         <Route path="/blog/:id" element={<BlogDetails />} />
+        <Route path="/help-center" element={<HelpCenter />} />
 
         {/* Protected User Routes */}
         <Route
@@ -215,6 +184,24 @@ const App = () => {
           element={
             <ProtectedRoute>
               <SellerChats />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dashboard Routes */}
+        <Route
+          path="/dealer/dashboard"
+          element={
+            <ProtectedRoute>
+              <DealerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/dashboard"
+          element={
+            <ProtectedRoute>
+              <SellerDashboard />
             </ProtectedRoute>
           }
         />

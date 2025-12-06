@@ -131,7 +131,7 @@ const BlogComments = () => {
                             {isLoading ? (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-8 text-center">
-                                        <Spinner size={40} color="text-orange-500" />
+                                        <Spinner fullScreen={false} />
                                     </td>
                                 </tr>
                             ) : filteredComments.length === 0 ? (

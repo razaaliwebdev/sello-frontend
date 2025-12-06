@@ -37,9 +37,13 @@ const Login = () => {
 
       toast.success("Login successful");
       
-      // Redirect to admin dashboard if user is admin
+      // Redirect based on user role
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
+        navigate("/dealer/dashboard");
+      } else if (res.user?.role === "seller") {
+        navigate("/seller/dashboard");
       } else {
         navigate("/");
       }
@@ -68,9 +72,13 @@ const Login = () => {
 
       toast.success("Google login successful");
       
-      // Redirect to admin dashboard if user is admin
+      // Redirect based on user role
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
+        navigate("/dealer/dashboard");
+      } else if (res.user?.role === "seller") {
+        navigate("/seller/dashboard");
       } else {
         navigate("/");
       }
@@ -98,7 +106,6 @@ const Login = () => {
 
   return (
     <>
-      {(isLoading || googleLoading) && <Spinner />}
       <div className="flex flex-col h-screen bg-gray-50">
         {/* Orange Header */}
         <HeaderLogo />
@@ -185,7 +192,7 @@ const Login = () => {
               {/* Sign In Button */}
               <button
                 type="submit"
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:opacity-90 transition-opacity mb-4"
+                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing In..." : "Sign In"}

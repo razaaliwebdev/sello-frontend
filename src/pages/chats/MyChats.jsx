@@ -255,7 +255,7 @@ const MyChats = () => {
                             <div className="flex-1 overflow-y-auto">
                                 {chatsLoading ? (
                                     <div className="flex justify-center py-8">
-                                        <Spinner size={40} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     </div>
                                 ) : chatsError ? (
                                     <div className="text-center text-red-500 py-8 px-4">
@@ -394,7 +394,7 @@ const MyChats = () => {
                                     <div className="flex-1 overflow-y-auto p-4 bg-[#ECE5DD] space-y-3">
                                         {messagesLoading ? (
                                             <div className="flex justify-center py-8">
-                                                <Spinner size={40} color="text-primary-500" />
+                                                <Spinner fullScreen={false} />
                                             </div>
                                         ) : messagesError ? (
                                             <div className="text-center text-red-500 py-8">

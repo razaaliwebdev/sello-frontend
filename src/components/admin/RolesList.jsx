@@ -48,7 +48,7 @@ const RolesList = ({ onCreateRole }) => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <Spinner size={40} color="text-primary-500" />
+                <Spinner fullScreen={false} />
             </div>
         );
     }

@@ -303,7 +303,7 @@ const BlogCreateEnhanced = () => {
                                         Category
                                     </label>
                                     {categoriesLoading ? (
-                                        <Spinner size={20} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     ) : (
                                         <select
                                             name="category"
@@ -376,7 +376,7 @@ const BlogCreateEnhanced = () => {
                             disabled={isLoading}
                             className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 flex items-center gap-2"
                         >
-                            {isLoading && <Spinner size={16} color="text-white" />}
+                            {isLoading && <Spinner fullScreen={false} />}
                             <FiSave size={18} />
                             Save Draft
                         </button>
@@ -386,7 +386,7 @@ const BlogCreateEnhanced = () => {
                             disabled={isLoading}
                             className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
                         >
-                            {isLoading && <Spinner size={16} color="text-white" />}
+                            {isLoading && <Spinner fullScreen={false} />}
                             <FiSend size={18} />
                             Publish
                         </button>

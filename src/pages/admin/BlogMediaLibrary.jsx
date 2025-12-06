@@ -181,7 +181,7 @@ const BlogMediaLibrary = () => {
                                     disabled={selectedFiles.length === 0 || isLoading}
                                     className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center"
                                 >
-                                    {isLoading ? <Spinner size={20} /> : "Upload"}
+                                    {isLoading ? <Spinner fullScreen={false} /> : "Upload"}
                                 </button>
                             </div>
                         </div>

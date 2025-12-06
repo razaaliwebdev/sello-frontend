@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { images } from "../../../assets/assets";
 import LazyImage from "../../common/LazyImage";
@@ -141,9 +142,23 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
                         width={208}
                         height={160}
                       />
+                      {/* Boost Badge */}
+                      {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && !car?.isSold && (
+                        <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10 flex items-center gap-1 shadow-lg">
+                          <FiZap size={10} />
+                          BOOSTED
+                        </div>
+                      )}
+                      {/* Sold Badge */}
                       {car?.isSold && (
                         <div className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
                           SOLD
+                        </div>
+                      )}
+                      {/* Featured Badge */}
+                      {car?.featured && !car?.isSold && (
+                        <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
+                          FEATURED
                         </div>
                       )}
                       <button

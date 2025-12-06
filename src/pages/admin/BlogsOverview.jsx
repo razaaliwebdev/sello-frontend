@@ -346,7 +346,7 @@ const BlogsOverview = () => {
                             {blogsLoading ? (
                                 <tr>
                                     <td colSpan="7" className="px-6 py-8 text-center">
-                                        <Spinner size={40} color="text-primary-500" />
+                                        <Spinner fullScreen={false} />
                                     </td>
                                 </tr>
                             ) : filteredBlogs.length === 0 ? (

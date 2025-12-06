@@ -168,7 +168,7 @@ const Users = () => {
                 {/* User Table */}
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64 bg-white rounded-lg border border-gray-200">
-                        <Spinner size={60} color="text-primary-500" />
+                        <Spinner fullScreen={false} />
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">

@@ -122,7 +122,7 @@ const ContactFormManagement = () => {
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     {isLoading ? (
                         <div className="flex justify-center py-12">
-                            <Spinner size={50} color="text-primary-500" />
+                            <Spinner fullScreen={false} />
                         </div>
                     ) : contactForms.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">

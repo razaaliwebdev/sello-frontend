@@ -4,6 +4,7 @@ import { useGetSingleCarQuery, useGetMeQuery, useMarkCarAsSoldMutation } from ".
 import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
 import CarChatWidget from "../../carChat/CarChatWidget";
+import Spinner from "../../Spinner";
 import toast from "react-hot-toast";
 
 const CarDetailsEtc = () => {
@@ -19,7 +20,11 @@ const CarDetailsEtc = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   if (isLoading) {
-    return <p className="px-4 py-10">Loading details...</p>;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Spinner fullScreen={false} />
+      </div>
+    );
   }
 
   if (error || !car) {
@@ -136,10 +141,37 @@ const CarDetailsEtc = () => {
           <div className="flex gap-2 items-center w-full sm:w-auto">
             <div>
               <h4 className="text-sm font-medium">Horsepower</h4>
-              <p className="text-sm">{car.horsepower}</p>
+              <p className="text-sm">{car.horsepower} HP</p>
             </div>
             <img src={images.hp} alt="" className="h-5 w-5" />
           </div>
+        </div>
+
+        {/* Seller Info Section */}
+        <div className="py-5 border-b border-gray-400">
+            <h3 className="text-lg font-semibold mb-3">Seller Information</h3>
+            <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 uppercase">
+                    {car.postedBy?.name?.[0] || "U"}
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <p className="font-medium text-lg">{car.postedBy?.name || "Unknown Seller"}</p>
+                        {car.postedBy?.isVerified && (
+                            <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                Verified
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <span className="text-yellow-500 font-bold">★ {car.postedBy?.sellerRating?.toFixed(1) || "0.0"}</span>
+                        <span>({car.postedBy?.reviewCount || 0} reviews)</span>
+                        <span className="mx-1">•</span>
+                        <span>Member since {new Date(car.postedBy?.createdAt || Date.now()).getFullYear()}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {/* Owner Actions (for seller) */}
@@ -209,7 +241,7 @@ const CarDetailsEtc = () => {
               ) : (
                 <button 
                   onClick={() => setShowChat(true)}
-                  className="bg-primary-500 text-white px-6 py-2 rounded hover:opacity-90 transition font-medium"
+                  className="bg-primary-500 text-white px-6 py-2 rounded hover:bg-primary-600 transition-colors font-medium"
                 >
                   Buy Now / Chat with Seller
                 </button>
@@ -281,7 +313,7 @@ const CarDetailsEtc = () => {
       <div>
         <h2 className="md:text-4xl text-2xl font-semibold my-4">Location</h2>
         <div className="map">
-          <MapView coordinates={coordinates} />
+          <MapView coordinates={coordinates} carLocation={car.geoLocation} />
         </div>
       </div>
 

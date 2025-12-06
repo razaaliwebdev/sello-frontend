@@ -16,7 +16,7 @@ const BlogDetails = () => {
       <div>
         <BlogsHeroSection />
         <div className="flex justify-center items-center min-h-[400px]">
-          <Spinner size={60} color="text-primary-500" />
+          <Spinner fullScreen={false} />
         </div>
       </div>
     );

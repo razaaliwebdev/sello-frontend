@@ -19,14 +19,14 @@ const UserListingHero = () => {
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 my-5 md:my-7">
             <button
               onClick={() => navigate("/create-post")}
-              className="flex items-center justify-center space-x-3 bg-black text-white px-5 py-2.5 rounded text-base md:text-lg hover:bg-white hover:text-black font-medium w-full sm:w-auto"
+              className="flex items-center justify-center space-x-3 bg-primary-500 text-white px-5 py-2.5 rounded text-base md:text-lg hover:bg-primary-600 font-medium w-full sm:w-auto transition-colors"
             >
               <span>ADD Posts</span>
               <GoArrowUpRight />
             </button>
             <button
               onClick={() => navigate("/contact")}
-              className="flex items-center justify-center space-x-3 bg-white px-5 py-2.5 rounded text-base md:text-lg hover:bg-black hover:text-white font-medium border-[1px] border-black w-full sm:w-auto"
+              className="flex items-center justify-center space-x-3 bg-white text-primary-600 px-5 py-2.5 rounded text-base md:text-lg hover:bg-primary-500 hover:text-white font-medium border-[1px] border-primary-500 w-full sm:w-auto transition-colors"
             >
               <span>Contact Us</span>
               <GoArrowUpRight />

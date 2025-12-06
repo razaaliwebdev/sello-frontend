@@ -275,7 +275,7 @@ const Chatbot = () => {
                         <div className="flex-1 overflow-y-auto p-2">
                             {chatsLoading ? (
                                 <div className="flex justify-center items-center h-32">
-                                    <Spinner size={40} color="text-yellow-500" />
+                                    <Spinner fullScreen={false} />
                                 </div>
                             ) : tabFilteredChats.length === 0 ? (
                                 <div className="text-center text-gray-500 py-8">
@@ -353,7 +353,7 @@ const Chatbot = () => {
                                     <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
                                         {messagesLoading ? (
                                             <div className="flex justify-center items-center h-32">
-                                                <Spinner size={40} color="text-yellow-500" />
+                                                <Spinner fullScreen={false} />
                                             </div>
                                         ) : messages.length === 0 ? (
                                             <div className="text-center text-gray-500 py-8">No messages yet</div>

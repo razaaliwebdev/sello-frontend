@@ -16,8 +16,8 @@ const AdminRoute = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <Spinner size={80} color="text-primary-500" thickness={5} speed="fast" />
+            <div className="flex justify-center items-center h-screen bg-white">
+                <Spinner fullScreen={false} />
             </div>
         );
     }

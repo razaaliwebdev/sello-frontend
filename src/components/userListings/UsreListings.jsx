@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useGetMyCarsQuery } from "../../redux/services/api"; // adjust path
+import { useGetMyCarsQuery } from "../../redux/services/api";
 import LazyImage from "../../components/common/LazyImage";
 import { images } from "../../assets/assets";
 import toast from "react-hot-toast";
+import BoostModal from "../listings/BoostModal";
 
 const UserListings = () => {
   const navigate = useNavigate();
   const { data, isLoading, error, refetch } = useGetMyCarsQuery();
   const [savedCars, setSavedCars] = useState([]);
   const [updatingCars, setUpdatingCars] = useState(new Set());
+  const [boostModalOpen, setBoostModalOpen] = useState(false);
+  const [selectedCar, setSelectedCar] = useState(null);
 
   const toggleSave = (id) => {
     setSavedCars((prev) =>
@@ -176,33 +180,56 @@ const UserListings = () => {
                         <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
                       </button>
                     </div>
-                    <div className="flex items-center gap-5 justify-center">
-                      <button 
-                        onClick={() => navigate(`/edit-car/${car._id}`)}
-                        disabled={car?.isSold}
-                        className={`px-6 w-[45%] py-2 text-lg font-medium rounded-md transition-colors ${
-                          car?.isSold
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-primary-500 hover:bg-primary-600 text-white"
-                        }`}
-                      >
-                        {car?.isSold ? "Edit Disabled" : "Edit"}
-                      </button>
-                      <button 
-                        onClick={() => handleMarkAsSold(car, car?.isSold)}
-                        disabled={updatingCars.has(car._id)}
-                        className={`px-6 w-[45%] py-2 text-lg font-medium rounded-md transition-colors ${
-                          car?.isSold 
-                            ? 'bg-green-500 hover:bg-green-600 text-white' 
-                            : 'bg-orange-500 hover:bg-orange-600 text-white'
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                      >
-                        {updatingCars.has(car._id) 
-                          ? 'Updating...' 
-                          : car?.isSold 
-                            ? 'Mark as Available' 
-                            : 'Mark as Sold'}
-                      </button>
+                    <div className="space-y-2">
+                      {/* Boost Button */}
+                      {!car?.isSold && (
+                        <button
+                          onClick={() => {
+                            setSelectedCar(car);
+                            setBoostModalOpen(true);
+                          }}
+                          className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
+                            car?.isBoosted && new Date(car?.boostExpiry) > new Date()
+                              ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300"
+                              : "bg-primary-100 text-primary-700 hover:bg-primary-200 border border-primary-300"
+                          }`}
+                        >
+                          <FiZap size={16} />
+                          {car?.isBoosted && new Date(car?.boostExpiry) > new Date()
+                            ? `Boosted (${Math.ceil((new Date(car.boostExpiry) - new Date()) / (1000 * 60 * 60 * 24))}d left)`
+                            : "Boost Listing"}
+                        </button>
+                      )}
+                      
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => navigate(`/edit-car/${car._id}`)}
+                          disabled={car?.isSold}
+                          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                            car?.isSold
+                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              : "bg-primary-500 hover:bg-primary-600 text-white"
+                          }`}
+                        >
+                          {car?.isSold ? "Edit Disabled" : "Edit"}
+                        </button>
+                        <button 
+                          onClick={() => handleMarkAsSold(car, car?.isSold)}
+                          disabled={updatingCars.has(car._id)}
+                          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                            car?.isSold 
+                              ? 'bg-primary-500 hover:bg-primary-600 text-white' 
+                              : 'bg-primary-500 hover:bg-primary-600 text-white'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {updatingCars.has(car._id) 
+                            ? 'Updating...' 
+                            : car?.isSold 
+                              ? 'Available' 
+                              : 'Sold'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -211,6 +238,19 @@ const UserListings = () => {
           })}
         </div>
       )}
+
+      {/* Boost Modal */}
+      <BoostModal
+        isOpen={boostModalOpen}
+        onClose={() => {
+          setBoostModalOpen(false);
+          setSelectedCar(null);
+        }}
+        car={selectedCar}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </section>
   );
 };
