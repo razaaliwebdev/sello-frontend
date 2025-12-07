@@ -21,8 +21,30 @@ export default defineConfig({
     strictPort: true,
     cors: true
   },
+  build: {
+    // Production build optimizations
+    target: 'es2015',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+      },
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'redux-vendor': ['@reduxjs/toolkit', 'react-redux'],
+          'ui-vendor': ['react-hot-toast', 'react-icons'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Warn if chunk exceeds 1MB
+    sourcemap: false, // Disable source maps in production for smaller builds
+  },
   optimizeDeps: {
-    exclude: ['js-big-decimal'],
     include: [
       '@tiptap/react',
       '@tiptap/starter-kit',

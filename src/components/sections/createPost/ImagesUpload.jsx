@@ -32,9 +32,39 @@ const ImagesUpload = ({ onImagesChange }) => {
     if (files.length > 0) processFiles(files);
   };
 
-  // Process selected files
+  // Process selected files - optimized with validation
   const processFiles = (files) => {
-    const newUploads = files.map((file) => ({
+    // Validate file types and sizes
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxFiles = 20;
+
+    const validFiles = files.filter((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        return false;
+      }
+      if (file.size > maxSize) {
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    // Check total file count
+    const currentCount = uploads.length;
+    if (currentCount + validFiles.length > maxFiles) {
+      const remainingSlots = maxFiles - currentCount;
+      if (remainingSlots > 0) {
+        validFiles.splice(remainingSlots);
+      } else {
+        return;
+      }
+    }
+
+    const newUploads = validFiles.map((file) => ({
       id: Date.now() + Math.random(),
       file,
       preview: URL.createObjectURL(file),
@@ -42,13 +72,14 @@ const ImagesUpload = ({ onImagesChange }) => {
       status: "uploading",
     }));
 
-    setUploads((prev) => [...prev, ...newUploads]);
-
-    // Pass files to parent component
-    if (onImagesChange) {
-      const allFiles = [...uploads.map((u) => u.file), ...files];
-      onImagesChange(allFiles);
-    }
+    setUploads((prev) => {
+      const updated = [...prev, ...newUploads];
+      // Pass all files to parent component
+      if (onImagesChange) {
+        onImagesChange(updated.map((u) => u.file));
+      }
+      return updated;
+    });
 
     newUploads.forEach((upload) => simulateUpload(upload));
   };

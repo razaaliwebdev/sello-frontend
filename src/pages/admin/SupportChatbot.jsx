@@ -32,7 +32,7 @@ const SupportChatbot = () => {
     const typingTimeoutRef = useRef(null);
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
     const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
 
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery({

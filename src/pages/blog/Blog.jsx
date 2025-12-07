@@ -1,6 +1,5 @@
 import React from "react";
 import BlogsHeroSection from "../../components/sections/blogs/BlogsHeroSection";
-import brands from "../../assets/carLogos/brands";
 import { GoArrowUpRight } from "react-icons/go";
 import BrandMarquee from "../../components/BrandMarquee";
 import { Link } from "react-router-dom";
@@ -27,13 +26,13 @@ const Blog = () => {
             Show All Brands <GoArrowUpRight />{" "}
           </Link>
         </div>
-        <BrandMarquee brands={brands} />
+        {/* BrandMarquee will fetch brands from admin categories automatically */}
+        <BrandMarquee />
       </div>
       <LatestBlogsSection />
       <NewTechnology />
       <BlogsCates />
       <ReviewSliderBanner />
-      <NewTechnology />
       <BottomReviews />
       <NewsLatter />
     </div>

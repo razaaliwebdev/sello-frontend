@@ -6,7 +6,8 @@ import {
   useSaveCarMutation,
   useUnsaveCarMutation,
   useGetSavedCarsQuery,
-  useTrackRecentlyViewedMutation
+  useTrackRecentlyViewedMutation,
+  useCreateReportMutation
 } from "../../../redux/services/api";
 import CarChatWidget from "../../carChat/CarChatWidget";
 import toast from "react-hot-toast";
@@ -21,7 +22,11 @@ const Btns = () => {
   const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
   const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
   const [trackRecentlyViewed] = useTrackRecentlyViewedMutation();
+  const [createReport, { isLoading: isReporting }] = useCreateReportMutation();
   const [showChat, setShowChat] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
   
   const savedCars = savedCarsData || [];
   const isSaved = savedCars.some(savedCar => savedCar._id === id);
@@ -175,15 +180,12 @@ const Btns = () => {
                   navigate("/login");
                   return;
                 }
-                const reason = prompt("Please enter reason for reporting:");
-                if (reason) {
-                  // TODO: Implement report API call
-                  toast.success("Report submitted for review");
-                }
+                setShowReportModal(true);
               }}
-              className="px-4 py-2 text-red-600 hover:text-red-700 text-sm font-medium border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+              disabled={isReporting}
+              className="px-4 py-2 text-red-600 hover:text-red-700 text-sm font-medium border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Report
+              {isReporting ? "Submitting..." : "Report"}
             </button>
           </div>
         </div>
@@ -197,6 +199,88 @@ const Btns = () => {
           carTitle={`${car.make} ${car.model} - ${car.year}`}
           onClose={() => setShowChat(false)}
         />
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => {
+          if (!isReporting) {
+            setShowReportModal(false);
+            setReportReason("");
+            setReportDescription("");
+          }
+        }}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold mb-4">Report Listing</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Please select a reason for reporting this listing:
+            </p>
+            
+            <select
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+            >
+              <option value="">Select a reason</option>
+              <option value="Spam">Spam</option>
+              <option value="Inappropriate Content">Inappropriate Content</option>
+              <option value="Misleading Information">Misleading Information</option>
+              <option value="Fake Listing">Fake Listing</option>
+              <option value="Harassment">Harassment</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <textarea
+              value={reportDescription}
+              onChange={(e) => setReportDescription(e.target.value)}
+              placeholder="Additional details (optional)"
+              className="w-full p-2 border border-gray-300 rounded-lg mb-4 h-24 resize-none"
+              maxLength={1000}
+            />
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason("");
+                  setReportDescription("");
+                }}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isReporting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!reportReason) {
+                    toast.error("Please select a reason");
+                    return;
+                  }
+                  
+                  try {
+                    await createReport({
+                      targetType: "Car",
+                      targetId: car._id,
+                      reason: reportReason,
+                      description: reportDescription
+                    }).unwrap();
+                    
+                    toast.success("Report submitted successfully. Our team will review it shortly.");
+                    setShowReportModal(false);
+                    setReportReason("");
+                    setReportDescription("");
+                  } catch (error) {
+                    toast.error(error?.data?.message || "Failed to submit report. Please try again.");
+                  }
+                }}
+                disabled={isReporting || !reportReason}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isReporting ? "Submitting..." : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

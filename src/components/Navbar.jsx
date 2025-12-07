@@ -94,7 +94,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Search Bar */}
-        <div className="hidden lg:block w-full max-w-md">
+        <div className="hidden lg:block w-full max-w-xs">
           <SearchBar />
         </div>
 
@@ -119,10 +119,28 @@ const Navbar = () => {
           ))}
         </div>
 
+       
+
         {/* User Avatar / Login + Actions */}
-        <div className="flex items-center gap-4 text-white text-3xl">
+        <div className="flex items-center gap-4 text-white">
+           {/* Create Post Button (Desktop) */}
+          <button
+            onClick={() => navigate("/create-post")}
+            className={`hover:placeholder-opacity-85 hidden md:flex gap-2 items-center ml-2 ${
+              location.pathname === "/cars" ||
+              location.pathname === "/users" ||
+              location.pathname === "/blog"
+                ? "text-gray-600  "
+                : "text-white"
+            }`}
+            title="Create Post"
+          >
+            <FaCirclePlus />
+          <span className="">Sale Your Car</span>
+          </button>
           {!isLoading && currentUser ? (
             <div className="flex items-center gap-4">
+              
               {/* Dashboard Links */}
               {currentUser.role === "admin" && (
                 <Link
@@ -140,12 +158,20 @@ const Navbar = () => {
                   Dealer Dashboard
                 </Link>
               )}
-              {currentUser.role === "seller" && (
+              {currentUser.role === "individual" && (
                 <Link
                   to="/seller/dashboard"
                   className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
                 >
-                  Seller Dashboard
+                  My Dashboard
+                </Link>
+              )}
+              {currentUser.role === "dealer" && (
+                <Link
+                  to="/dealer/dashboard"
+                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
+                >
+                  Dealer Dashboard
                 </Link>
               )}
               {/* Notification Bell */}
@@ -172,26 +198,13 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Create Post Button (Desktop) */}
-          <button
-            onClick={() => navigate("/create-post")}
-            className={`hover:placeholder-opacity-85 hidden md:block ${
-              location.pathname === "/cars" ||
-              location.pathname === "/users" ||
-              location.pathname === "/blog"
-                ? "text-gray-600 "
-                : "text-white"
-            }`}
-            title="Create Post"
-          >
-            <FaCirclePlus />
-          </button>
+          
 
           {/* Mobile Menu */}
           <button
             onClick={openDrawer}
             title="Menu"
-            className={`${
+            className={` md:hidden ${
               location.pathname === "/cars" ||
               location.pathname === "/users" ||
               location.pathname === "/blog"
@@ -199,7 +212,7 @@ const Navbar = () => {
                 : "text-white"
             }`}
           >
-            <FaBars />
+            <FaBars size={28} />
           </button>
         </div>
       </nav>
@@ -269,13 +282,13 @@ const Navbar = () => {
                 <span>Dealer Dashboard</span>
               </Link>
             )}
-            {!isLoading && currentUser?.role === "seller" && (
+            {!isLoading && currentUser?.role === "individual" && (
               <Link
                 to="/seller/dashboard"
                 onClick={closeDrawer}
                 className="mt-4 flex items-center gap-2 text-primary-700 border-t border-primary-300 pt-4"
               >
-                <span>Seller Dashboard</span>
+                <span>My Dashboard</span>
               </Link>
             )}
           </div>

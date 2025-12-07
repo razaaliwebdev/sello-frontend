@@ -53,7 +53,7 @@ const GeneralSettingsTab = () => {
   const fetchSettings = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/settings`,
         { withCredentials: true }
       );
 
@@ -113,7 +113,7 @@ const GeneralSettingsTab = () => {
     setUploading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/upload`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/upload`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -166,7 +166,7 @@ const GeneralSettingsTab = () => {
 
       const promises = settingsToSave.map(setting => 
         axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/settings`,
           setting,
           { withCredentials: true }
         )

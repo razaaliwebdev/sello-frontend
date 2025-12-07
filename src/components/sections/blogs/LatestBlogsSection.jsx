@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../redux/services/api";
-import Spinner from "../../Spinner";
 import { formatDate } from "../../../utils/format";
 
 const LatestBlogsSection = () => {
@@ -15,10 +14,27 @@ const LatestBlogsSection = () => {
   const trendingBlogs = blogs.slice(1, 4);
   const highlightedBlog = blogs[4] || blogs[3];
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
-      <div className="w-full p-4 flex justify-center items-center min-h-[400px]">
-        <Spinner fullScreen={false} />
+      <div className="w-full p-4 min-h-[400px] animate-pulse">
+        <div className="flex flex-col md:flex-row w-full h-full p-3 gap-10">
+          <div className="w-full md:w-1/2">
+            <div className="h-6 bg-gray-200 rounded w-1/4 mb-5"></div>
+            <div className="w-full h-64 bg-gray-200 rounded-lg"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3 mt-3"></div>
+            <div className="h-8 bg-gray-200 rounded w-3/4 mt-3"></div>
+          </div>
+          <div className="w-full md:w-1/2">
+            <div className="h-6 bg-gray-200 rounded w-1/3 mb-5"></div>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="mb-10">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
+                <div className="h-8 bg-gray-200 rounded w-full"></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

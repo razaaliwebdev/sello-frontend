@@ -17,28 +17,33 @@ const FilterPage = () => {
     skip: !queryParams 
   });
 
-  // Read URL parameters on mount and convert to filter object
+  // Read URL parameters on mount and convert to filter object - optimized
   useEffect(() => {
-    const urlFilters = {};
+    // Build backend filters directly from URL params (more efficient)
+    const backendFilters = {};
     
-    // Get all URL parameters
+    // Map URL params to backend filter format in single pass
+    const paramMap = {
+      city: 'city',
+      bodyType: 'bodyType',
+      make: 'make',
+      model: 'model',
+      yearMin: 'yearMin',
+      yearMax: 'yearMax',
+      priceMin: 'priceMin',
+      priceMax: 'priceMax',
+      carDoors: 'doorsMin'
+    };
+
     searchParams.forEach((value, key) => {
-      if (value) {
-        urlFilters[key] = value;
+      if (value && paramMap[key]) {
+        backendFilters[paramMap[key]] = value;
+        // Handle carDoors special case
+        if (key === 'carDoors') {
+          backendFilters.doorsMax = value;
+        }
       }
     });
-
-    // Convert URL params to backend filter format
-    const backendFilters = {};
-    if (urlFilters.city) backendFilters.city = urlFilters.city;
-    if (urlFilters.bodyType) backendFilters.bodyType = urlFilters.bodyType;
-    if (urlFilters.make) backendFilters.make = urlFilters.make;
-    if (urlFilters.model) backendFilters.model = urlFilters.model;
-    if (urlFilters.yearMin) backendFilters.yearMin = urlFilters.yearMin;
-    if (urlFilters.yearMax) backendFilters.yearMax = urlFilters.yearMax;
-    if (urlFilters.priceMax) backendFilters.priceMax = urlFilters.priceMax;
-    if (urlFilters.priceMin) backendFilters.priceMin = urlFilters.priceMin;
-    if (urlFilters.carDoors) backendFilters.doorsMin = urlFilters.carDoors;
 
     // Apply filters if any exist
     if (Object.keys(backendFilters).length > 0) {
@@ -47,33 +52,52 @@ const FilterPage = () => {
     }
   }, [searchParams]);
 
-  // Navigate to results page when filtered cars are received
+  // Navigate to results page when filtered cars are received - optimized
   useEffect(() => {
-    if (filteredCars && !isLoading && !isFetching && queryParams && !hasNavigated.current) {
-      // Format the data to match what FilteredResults expects
-      // Backend returns: { success: true, data: { cars: [], total: 0, ... } }
-      const carsData = filteredCars?.data || {};
-      const formattedData = {
-        cars: Array.isArray(carsData.cars) ? carsData.cars : [],
-        total: carsData.total || 0,
-        data: Array.isArray(carsData.cars) ? carsData.cars : []
-      };
+    // Only navigate if we have valid data and haven't navigated yet
+    if (!queryParams || hasNavigated.current || isLoading || isFetching) {
+      return;
+    }
 
-      navigate("/search-results", {
-        state: { 
-          filteredCars: formattedData, 
-          isLoading: false,
-          filters: currentFilters
-        },
-      });
-      hasNavigated.current = true;
+    if (filteredCars?.data) {
+      const carsData = filteredCars.data;
+      const cars = Array.isArray(carsData.cars) ? carsData.cars : [];
+      const total = carsData.total || 0;
+
+      // Only navigate if we have results or explicit empty result
+      if (cars.length > 0 || total === 0) {
+        const formattedData = {
+          cars,
+          total,
+          data: cars
+        };
+
+        navigate("/search-results", {
+          state: { 
+            filteredCars: formattedData, 
+            isLoading: false,
+            filters: currentFilters
+          },
+          replace: true // Use replace to avoid back button issues
+        });
+        hasNavigated.current = true;
+      }
     }
   }, [filteredCars, isLoading, isFetching, queryParams, navigate, currentFilters]);
 
   const handleFilter = (filters) => {
-    hasNavigated.current = false; // Reset navigation flag when new filters are applied
-    setQueryParams(filters);
-    setCurrentFilters(filters);
+    // Reset navigation flag when new filters are applied
+    hasNavigated.current = false;
+    
+    // Only set query params if filters exist
+    if (filters && Object.keys(filters).length > 0) {
+      setQueryParams(filters);
+      setCurrentFilters(filters);
+    } else {
+      // Clear filters if empty
+      setQueryParams(null);
+      setCurrentFilters(null);
+    }
   };
 
   return (

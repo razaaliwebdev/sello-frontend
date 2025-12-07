@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../../redux/services/api";
-import Spinner from "../../../Spinner";
 
 const BlogPosts = () => {
   const [page, setPage] = useState(1);
@@ -24,10 +23,25 @@ const BlogPosts = () => {
     });
   };
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
-      <div className="md:px-10 md:py-12 px-5 py-6 flex justify-center items-center min-h-[400px]">
-        <Spinner fullScreen={false} />
+      <div className="md:px-10 md:py-12 px-5 py-6">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-5 animate-pulse"></div>
+        <div className="border border-gray-200 my-5"></div>
+        <div className="flex flex-col gap-10">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 animate-pulse">
+              <div className="w-full md:w-1/3 h-[220px] md:h-[360px] bg-gray-200 rounded-tr-[40px] rounded-bl-[40px]"></div>
+              <div className="w-full md:w-1/2">
+                <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

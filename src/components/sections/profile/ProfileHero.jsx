@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  profileOptions,
-  sellingOptions,
-  sellingOverview,
-  profileAssets,
-} from "../../../assets/profilePageAssets/profileAssets";
-import { MdKeyboardArrowRight, MdEdit, MdCheck, MdClose } from "react-icons/md";
-import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaCheckCircle } from "react-icons/fa";
-import { FiAlertCircle, FiStar } from "react-icons/fi";
-import { useGetMeQuery, useLogoutMutation, useUpdateProfileMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
+  MdKeyboardArrowRight,
+  MdEdit,
+  MdCheck,
+  MdClose,
+  MdSettings,
+  MdLogout,
+} from "react-icons/md";
+import {
+  FiUser,
+  FiMail,
+  FiCheckCircle,
+  FiStar,
+  FiMessageSquare,
+  FiHeart,
+  FiFileText,
+  FiHelpCircle,
+} from "react-icons/fi";
+import {
+  useGetMeQuery,
+  useLogoutMutation,
+  useUpdateProfileMutation,
+  useGetSavedCarsQuery,
+} from "../../../redux/services/api";
 import { useSupportChat } from "../../../contexts/SupportChatContext";
 import NotificationsSection from "./NotificationsSection";
 import DealerRequestForm from "../../profile/DealerRequestForm";
@@ -18,11 +32,9 @@ import SubscriptionManagement from "../../subscriptions/SubscriptionManagement";
 const ProfileHero = () => {
   const navigate = useNavigate();
   const { openSupportChat } = useSupportChat();
-  const [showPassword, setShowPassword] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
-  const [showStatsPopup, setShowStatsPopup] = useState(false);
   const [showDealerForm, setShowDealerForm] = useState(false);
-  const [activeSection, setActiveSection] = useState("overview"); // overview, notifications, subscription
+  const [activeSection, setActiveSection] = useState("overview");
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -30,27 +42,29 @@ const ProfileHero = () => {
     avatar: null,
     avatarPreview: null,
   });
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  
-  const { data: user, isLoading, isError, error, refetch } = useGetMeQuery(undefined, {
-    skip: !localStorage.getItem("token"), // Skip if no token
-  });
+
+  const { data: user, isLoading, isError, error, refetch } = useGetMeQuery(
+    undefined,
+    {
+      skip: !localStorage.getItem("token"),
+    }
+  );
   const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
-    skip: !user || isLoading, // Only fetch if user is logged in
+    skip: !user || isLoading,
+  });
+  const { data: subscriptionData } = useGetMySubscriptionQuery(undefined, {
+    skip: !user || isLoading,
   });
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
-  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-  
+  const [updateProfile, { isLoading: isUpdating }] =
+    useUpdateProfileMutation();
+
   const [metrics, setMetrics] = useState({
     posts: 0,
     activeListings: 0,
     sales: 0,
     earnings: 0,
-    clicks: 0,
+    savedCount: 0,
     rating: 0,
     ratingCount: 0,
   });
@@ -67,19 +81,17 @@ const ProfileHero = () => {
       const sales = user.carsPurchased?.length || 0;
       const savedCount = user.savedCars?.length || savedCarsData?.length || 0;
       const earnings =
-        user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) || 0;
-      const clicks = 1000; // Sample; replace with real data
-      const rating = 4.5; // Sample; replace with real data
-      const ratingCount = 10;
+        user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) ||
+        0;
       setMetrics({
         posts,
         activeListings: posts,
         sales,
         earnings,
-        clicks,
-        rating,
-        ratingCount,
         savedCount,
+        clicks: 0,
+        rating: user.sellerRating || 0,
+        ratingCount: user.reviewCount || 0,
       });
     }
   }, [user, savedCarsData]);
@@ -159,30 +171,12 @@ const ProfileHero = () => {
     }
   };
 
-  useEffect(() => {
-    if (!showProfilePopup && !showStatsPopup) return;
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") {
-        setShowProfilePopup(false);
-        setShowStatsPopup(false);
-        setIsEditing(false);
-      }
-    };
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [showProfilePopup, showStatsPopup]);
-
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <div className="text-xl text-gray-600">Loading profile...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-primary-500 mx-auto mb-4"></div>
+          <div className="text-gray-500 text-sm">Loading profile...</div>
         </div>
       </div>
     );
@@ -190,88 +184,315 @@ const ProfileHero = () => {
 
   if (isError && error?.status !== 401) {
     return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">Error loading profile</div>
-          <div className="text-gray-600">{error?.data?.message || "Failed to load profile"}</div>
+          <div className="text-red-500 text-lg mb-2">Error loading profile</div>
+          <div className="text-gray-500 text-sm">
+            {error?.data?.message || "Failed to load profile"}
+          </div>
         </div>
       </div>
     );
   }
 
+  const menuItems = [
+    {
+      id: "overview",
+      label: "Overview",
+      icon: FiFileText,
+      onClick: () => setActiveSection("overview"),
+    },
+    {
+      id: "listings",
+      label: "My Posts",
+      icon: FiFileText,
+      count: metrics.posts,
+      onClick: () => navigate("/my-listings"),
+    },
+    {
+      id: "saved",
+      label: "Saved Cars",
+      icon: FiHeart,
+      count: metrics.savedCount,
+      onClick: () => navigate("/saved-cars"),
+    },
+    {
+      id: "chats",
+      label: "My Chats",
+      icon: FiMessageSquare,
+      onClick: () => navigate("/my-chats"),
+    },
+    ...(user?.role === "dealer" && user?.dealerInfo?.verified
+      ? [
+          {
+            id: "dealer-dashboard",
+            label: "Dealer Dashboard",
+            icon: FiCheckCircle,
+            onClick: () => navigate("/dealer/dashboard"),
+            highlight: true,
+          },
+        ]
+      : []),
+    ...((user?.role === "individual" || user?.role === "dealer")
+      ? [
+          {
+            id: "seller-dashboard",
+            label: "My Dashboard",
+            icon: FiCheckCircle,
+            onClick: () => navigate("/seller/dashboard"),
+            highlight: true,
+          },
+        ]
+      : []),
+    ...(user?.role !== "dealer"
+      ? [
+          {
+            id: "become-dealer",
+            label: user?.role === "dealer" && !user?.dealerInfo?.verified
+              ? "Verification Pending"
+              : "Become a Dealer",
+            icon: FiStar,
+            onClick: () => setShowDealerForm(true),
+            highlight: !(user?.role === "dealer" && !user?.dealerInfo?.verified),
+          },
+        ]
+      : []),
+    // Only show subscription tab if user doesn't have active premium subscription
+    ...(subscriptionData?.subscription?.isActive && 
+        subscriptionData?.subscription?.endDate && 
+        new Date(subscriptionData.subscription.endDate) > new Date() &&
+        subscriptionData?.subscription?.plan !== 'free' ? [] : [{
+      id: "subscription",
+      label: "Subscription",
+      icon: FiStar,
+      onClick: () => setActiveSection("subscription"),
+    }]),
+    {
+      id: "support",
+      label: "Support",
+      icon: FiHelpCircle,
+      onClick: () => openSupportChat(),
+    },
+  ];
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Profile Header Section */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
-            {/* Avatar Section */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Header Section */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            {/* Avatar */}
             <div className="relative group">
-              <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden ring-2 ring-gray-100 ring-offset-2">
                 <img
-                  className="h-full w-full object-cover"
                   src={
                     user?.avatar ||
-                    "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || "User") + "&background=random&size=200"
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.name || "User"
+                    )}&background=FFA602&color=fff&size=200`
                   }
-                  alt="User Avatar"
+                  alt="Profile"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <button
                 onClick={handleProfilePopup}
-                className="absolute bottom-0 right-0 bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                className="absolute -bottom-1 -right-1 bg-white hover:bg-gray-50 text-gray-700 p-2 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-105"
                 title="Edit Profile"
               >
-                <MdEdit className="text-xl" />
+                <MdEdit className="text-lg" />
               </button>
             </div>
 
-            {/* User Info Section */}
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-white">
+            {/* User Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 truncate">
                   {user?.name || "User"}
                 </h1>
                 {user?.verified && (
-                  <FaCheckCircle className="text-white text-xl" title="Verified Account" />
+                  <FiCheckCircle className="text-primary-500 flex-shrink-0" size={20} />
                 )}
               </div>
-              <p className="text-white/90 text-lg mb-4">{user?.email || ""}</p>
-              
+              <p className="text-gray-500 text-sm mb-4">{user?.email || ""}</p>
+
               {/* Quick Stats */}
-              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                  <div className="text-white text-sm opacity-90">Posts</div>
-                  <div className="text-white text-xl font-bold">{metrics.posts}</div>
+              <div className="flex flex-wrap gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {metrics.posts}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">Posts</div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                  <div className="text-white text-sm opacity-90">Sales</div>
-                  <div className="text-white text-xl font-bold">{metrics.sales}</div>
+                <div className="text-center">
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {metrics.sales}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">Sales</div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                  <div className="text-white text-sm opacity-90">Earnings</div>
-                  <div className="text-white text-xl font-bold">AED {metrics.earnings.toLocaleString()}</div>
+                <div className="text-center">
+                  <div className="text-2xl font-semibold text-gray-900">
+                    AED {metrics.earnings.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">Earnings</div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3 w-full md:w-auto">
-              <button
-                onClick={() => setShowStatsPopup(true)}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                View Statistics
-                <MdKeyboardArrowRight className="text-xl" />
-              </button>
-              <button
-                onClick={() => navigate("/create-post")}
-                className="bg-white text-primary-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                Create Post
-                <MdKeyboardArrowRight className="text-xl" />
-              </button>
+            {/* Action Button */}
+            <button
+              onClick={() => navigate("/create-post")}
+              className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium text-sm transition-colors shadow-sm hover:shadow-md"
+            >
+              Create Post
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Menu */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-gray-200 p-2 shadow-sm">
+              <nav className="space-y-1">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={item.onClick}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-primary-50 text-primary-700"
+                          : item.highlight
+                          ? "text-primary-600 hover:bg-primary-50"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon
+                          className={isActive ? "text-primary-600" : ""}
+                          size={18}
+                        />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.count !== undefined && (
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                          {item.count}
+                        </span>
+                      )}
+                      <MdKeyboardArrowRight
+                        className={`text-gray-400 transition-transform ${
+                          isActive ? "rotate-90" : ""
+                        }`}
+                        size={18}
+                      />
+                    </button>
+                  );
+                })}
+                <div className="border-t border-gray-200 my-2"></div>
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  <MdLogout size={18} />
+                  <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                </button>
+              </nav>
             </div>
+          </div>
+
+          {/* Content Area */}
+          <div className="lg:col-span-3 space-y-6">
+            {activeSection === "overview" && (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-gray-500">Total Posts</span>
+                      <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                        <FiFileText className="text-primary-600" size={20} />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-semibold text-gray-900">
+                      {metrics.posts}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-gray-500">Active Listings</span>
+                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                        <FiCheckCircle className="text-green-600" size={20} />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-semibold text-gray-900">
+                      {metrics.activeListings}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-gray-500">Total Sales</span>
+                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <FiStar className="text-blue-600" size={20} />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-semibold text-gray-900">
+                      {metrics.sales}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-gray-500">Earnings</span>
+                      <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
+                        <span className="text-yellow-600 text-xl">💰</span>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-semibold text-gray-900">
+                      AED {metrics.earnings.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notifications */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <NotificationsSection />
+                </div>
+              </>
+            )}
+
+            {activeSection === "subscription" && (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                {subscriptionData?.subscription?.isActive && 
+                 subscriptionData?.subscription?.endDate && 
+                 new Date(subscriptionData.subscription.endDate) > new Date() &&
+                 subscriptionData?.subscription?.plan !== 'free' ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiCheckCircle className="text-green-500 text-4xl" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      Active Subscription: {subscriptionData?.planDetails?.name || 'Premium'}
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Your subscription is active until {new Date(subscriptionData.subscription.endDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      You have unlimited listings and all premium features enabled.
+                    </p>
+                  </div>
+                ) : (
+                  <SubscriptionManagement />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -286,382 +507,10 @@ const ProfileHero = () => {
         }}
       />
 
-      {/* Main Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Sidebar - Menu Options */}
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-xl shadow-md p-6 space-y-2">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Menu</h2>
-              
-              <button
-                onClick={handleProfilePopup}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                    <FaUser className="text-primary-600" />
-                  </div>
-                  <span className="text-gray-700 font-medium">Edit Profile</span>
-                </div>
-                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
-              </button>
-
-              <button
-                onClick={() => navigate("/my-listings")}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                    <img src={profileAssets.myListIcon} alt="My Listings" className="h-6 w-6" />
-                  </div>
-                  <span className="text-gray-700 font-medium">My Posts ({metrics.posts})</span>
-                </div>
-                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
-              </button>
-
-              {/* Dashboard Links */}
-              {user?.role === "dealer" && user?.dealerInfo?.verified && (
-                <button
-                  onClick={() => navigate("/dealer/dashboard")}
-                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                      <FaCheckCircle className="text-primary-600" />
-                    </div>
-                    <span className="text-primary-700 font-semibold">Dealer Dashboard</span>
-                  </div>
-                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
-                </button>
-              )}
-
-              {user?.role === "seller" && (
-                <button
-                  onClick={() => navigate("/seller/dashboard")}
-                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                      <FaCheckCircle className="text-primary-600" />
-                    </div>
-                    <span className="text-primary-700 font-semibold">Seller Dashboard</span>
-                  </div>
-                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
-                </button>
-              )}
-
-              <button
-                onClick={() => navigate("/my-chats")}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                    <img src={profileAssets.chatIcon} alt="Chats" className="h-6 w-6" />
-                  </div>
-                  <span className="text-gray-700 font-medium">My Chats</span>
-                </div>
-                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
-              </button>
-
-              {user?.role !== "dealer" && (
-                <button
-                  onClick={() => setShowDealerForm(true)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-primary-50 rounded-lg transition-colors group border-2 border-primary-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                      <FaCheckCircle className="text-primary-600" />
-                    </div>
-                    <span className="text-primary-700 font-semibold">Become a Dealer</span>
-                  </div>
-                  <MdKeyboardArrowRight className="text-primary-400 group-hover:text-primary-500" />
-                </button>
-              )}
-
-              {user?.role === "dealer" && !user?.dealerInfo?.verified && (
-                <button
-                  onClick={() => setShowDealerForm(true)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-yellow-50 rounded-lg transition-colors group border-2 border-yellow-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 flex items-center justify-center bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
-                      <FiAlertCircle className="text-yellow-600" />
-                    </div>
-                    <span className="text-yellow-700 font-semibold">Verification Pending</span>
-                  </div>
-                  <MdKeyboardArrowRight className="text-yellow-400 group-hover:text-yellow-500" />
-                </button>
-              )}
-
-              <button
-                onClick={() => setActiveSection("subscription")}
-                className={`w-full flex items-center justify-between p-4 rounded-lg transition-colors group ${
-                  activeSection === "subscription" ? "bg-primary-50 border-2 border-primary-200" : "hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                    <FiStar className="text-primary-600" />
-                  </div>
-                  <span className="text-gray-700 font-medium">Subscription</span>
-                </div>
-                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
-              </button>
-
-              <div className="border-t my-2"></div>
-
-              <button
-                onClick={() => openSupportChat()}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-primary-100 rounded-lg group-hover:bg-primary-200 transition-colors">
-                    <img src={profileAssets.supportIcon} alt="Support" className="h-6 w-6" />
-                  </div>
-                  <span className="text-gray-700 font-medium">Support</span>
-                </div>
-                <MdKeyboardArrowRight className="text-gray-400 group-hover:text-primary-500" />
-              </button>
-
-              <div className="border-t my-2"></div>
-
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center justify-between p-4 hover:bg-red-50 rounded-lg transition-colors group text-red-600"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 flex items-center justify-center bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
-                    <img src={profileAssets.logoutIcon} alt="Logout" className="h-6 w-6" />
-                  </div>
-                  <span className="font-medium">
-                    {isLoggingOut ? "Logging out..." : "Logout"}
-                  </span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Right Content Area - Stats Cards and Notifications */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Overview Section */}
-            {activeSection === "overview" && (
-              <>
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Overview</h2>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-600 text-sm">Total Posts</span>
-                        <img src={profileAssets.myListIcon} alt="Posts" className="h-6 w-6 opacity-60" />
-                      </div>
-                      <div className="text-3xl font-bold text-primary-600">{metrics.posts}</div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-600 text-sm">Total Sales</span>
-                        <img src={profileAssets.sellIcon || profileAssets.myListIcon} alt="Sales" className="h-6 w-6 opacity-60" />
-                      </div>
-                      <div className="text-3xl font-bold text-green-600">{metrics.sales}</div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-600 text-sm">Total Earnings</span>
-                        <span className="text-2xl">💰</span>
-                      </div>
-                      <div className="text-3xl font-bold text-blue-600">AED {metrics.earnings.toLocaleString()}</div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-6 border border-yellow-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-600 text-sm">Rating</span>
-                        <img src={profileAssets.starIcon} alt="Rating" className="h-6 w-6 opacity-60" />
-                      </div>
-                      <div className="text-3xl font-bold text-yellow-600">{metrics.rating} ⭐</div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setShowStatsPopup(true)}
-                    className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-                  >
-                    View Detailed Statistics
-                    <MdKeyboardArrowRight className="text-xl" />
-                  </button>
-                </div>
-
-                {/* Notifications Section */}
-                <NotificationsSection />
-              </>
-            )}
-            
-            {/* Subscription Management Section */}
-            {activeSection === "subscription" && (
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <SubscriptionManagement />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Popup Modal */}
-      {showStatsPopup && (
-        <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
-          onClick={() => setShowStatsPopup(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-fadeIn"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowStatsPopup(false)}
-              className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-500 transition z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:scale-110"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-            <div className="p-6">
-              <h2 className="text-center pb-4 text-2xl font-semibold text-primary-500 border-b mb-4">
-                My Posts & Statistics
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
-                {profileOptions.map((op) => {
-                  let dynamicValue = op.values;
-                  if (op.title === "Posts") dynamicValue = metrics.posts;
-                  if (op.title === "Saved") dynamicValue = metrics.savedCount || 0;
-                  if (op.title === "Verified")
-                    dynamicValue = user?.verified ? "Yes" : "No";
-                  
-                  const handleClick = () => {
-                    if (op.title === "Saved") {
-                      navigate("/saved-cars");
-                    }
-                  };
-                  
-                  return (
-                    <div
-                      key={op.id}
-                      onClick={handleClick}
-                      className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 cursor-pointer hover:bg-primary-50 transition-colors"
-                    >
-                      <div className="h-8 w-8">
-                        <img
-                          src={op.icon}
-                          className="h-full w-full object-cover"
-                          alt={op.title}
-                        />
-                      </div>
-                      <div className="text-primary-500 text-sm md:text-base font-semibold">
-                        {dynamicValue}
-                      </div>
-                      <div className="text-sm md:text-base">{op.title}</div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-6">
-                <h2 className="text-lg font-medium my-2">Selling</h2>
-                <div className="w-full">
-                  {sellingOptions.map((op) => {
-                    let dynamicValue = op.values;
-                    if (op.title === "Active Listings")
-                      dynamicValue = metrics.activeListings;
-                    if (op.title === "Sales") dynamicValue = metrics.sales;
-                    return (
-                      <div
-                        className="flex items-center cursor-pointer py-2 px-3 hover:bg-gray-100 justify-between my-2 rounded-md transition-colors"
-                        key={op.id}
-                      >
-                        <img
-                          src={op.icon}
-                          className="h-7 w-7 md:h-8 md:w-8 object-cover"
-                          alt={op.title}
-                        />
-                        <h4 className="text-sm md:text-base flex-1 ml-3">
-                          {op.title}
-                          {dynamicValue ? ` (${dynamicValue})` : ""}
-                        </h4>
-                        <MdKeyboardArrowRight className="text-xl md:text-2xl text-primary-500" />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mt-6">
-                <h2 className="text-lg font-medium my-2">Overview</h2>
-                <div className="grid grid-cols-2 gap-3 md:gap-5">
-                  {sellingOverview.map((op) => {
-                    return (
-                      <div
-                        className="border-[1px] border-primary-500 rounded flex items-center justify-between p-2 md:p-3 cursor-pointer hover:bg-primary-50 transition-colors"
-                        key={op.id}
-                      >
-                        <img
-                          src={op.icon}
-                          className="h-6 w-6 md:h-7 md:w-7 object-cover"
-                          alt={op.title}
-                        />
-                        <h4 className="text-sm md:text-base">{op.title}</h4>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mt-6">
-                <h2 className="text-lg font-medium my-2">Performance</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
-                    <h4 className="font-medium text-sm md:text-base">
-                      AED{" "}
-                      <span className="font-semibold">
-                        {metrics.earnings.toLocaleString()}
-                      </span>
-                    </h4>
-                    <p className="text-sm mt-1">
-                      {metrics.sales > 0
-                        ? `${metrics.sales} Sales History`
-                        : "No Pay History"}
-                    </p>
-                  </div>
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
-                    <h4 className="font-semibold text-base md:text-lg">
-                      {metrics.clicks.toLocaleString()}
-                    </h4>
-                    <p className="text-xs md:text-sm mt-1">Clicks On Listings</p>
-                    <span className="text-xs">Last 7 Days</span>
-                  </div>
-                  <div className="border-[1px] border-primary-500 rounded flex flex-col p-3 cursor-pointer hover:bg-primary-50 transition-colors">
-                    <div className="flex items-center gap-2 md:gap-5">
-                      <h4 className="text-sm md:text-base">{metrics.rating}</h4>
-                      <img
-                        src={profileAssets.starIcon}
-                        alt="star"
-                        className="w-5 h-5 md:w-6 md:h-6 object-cover"
-                      />
-                    </div>
-                    <div className="mt-1">
-                      <p className="text-xs md:text-sm">Click On Listings</p>
-                      <span className="text-xs">
-                        {metrics.ratingCount} Ratings
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Profile Edit Popup Modal */}
+      {/* Profile Edit Modal */}
       {showProfilePopup && (
         <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => {
             if (!isEditing) {
               setShowProfilePopup(false);
@@ -669,7 +518,7 @@ const ProfileHero = () => {
           }}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-fadeIn max-h-[85vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -677,26 +526,28 @@ const ProfileHero = () => {
                 setShowProfilePopup(false);
                 setIsEditing(false);
               }}
-              className="absolute top-3 right-3 text-xl text-gray-500 hover:text-red-500 transition z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ✕
+              <MdClose size={24} />
             </button>
 
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center mb-6 pt-4">
               <div className="relative group mb-4">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-primary-500 shadow-lg">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-gray-200">
                   <img
                     src={
                       formData.avatarPreview ||
                       user?.avatar ||
-                      "https://ui-avatars.com/api/?name=" + encodeURIComponent(user?.name || "User") + "&background=random&size=200"
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        user?.name || "User"
+                      )}&background=FFA602&color=fff&size=200`
                     }
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm opacity-0 group-hover:opacity-100 cursor-pointer transition rounded-full">
-                  <MdEdit className="text-2xl" />
+                <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity rounded-full">
+                  <MdEdit size={24} />
                   <input
                     type="file"
                     accept="image/*"
@@ -705,7 +556,7 @@ const ProfileHero = () => {
                   />
                 </label>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800">
+              <h3 className="text-xl font-semibold text-gray-900">
                 {user?.name || "User"}
               </h3>
               <p className="text-gray-500 text-sm mt-1">{user?.email || ""}</p>
@@ -714,7 +565,7 @@ const ProfileHero = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <FaUser className="inline mr-2" />
+                  <FiUser className="inline mr-2" size={16} />
                   Full Name
                 </label>
                 <input
@@ -722,7 +573,7 @@ const ProfileHero = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none transition"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition"
                   placeholder="Enter your name"
                   disabled={!isEditing}
                 />
@@ -730,23 +581,25 @@ const ProfileHero = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <FaEnvelope className="inline mr-2" />
+                  <FiMail className="inline mr-2" size={16} />
                   Email
                 </label>
                 <input
                   type="email"
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-gray-50 cursor-not-allowed"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-gray-50 cursor-not-allowed"
                   value={user?.email || ""}
                   disabled
                 />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Email cannot be changed
+                </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Profile Picture
                 </label>
-                <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary-400 transition-colors">
+                <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary-400 transition-colors">
                   <input
                     type="file"
                     accept="image/*"
@@ -755,9 +608,11 @@ const ProfileHero = () => {
                     disabled={!isEditing}
                   />
                   <div className="text-sm text-gray-600">
-                    {formData.avatar ? "Change Image" : "Click to upload new image"}
+                    {formData.avatar ? "Change Image" : "Click to upload"}
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">JPG, PNG up to 5MB</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    JPG, PNG up to 5MB
+                  </div>
                 </label>
               </div>
             </div>
@@ -766,9 +621,9 @@ const ProfileHero = () => {
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
-                  <MdEdit className="text-xl" />
+                  <MdEdit size={18} />
                   Edit Profile
                 </button>
               ) : (
@@ -783,24 +638,23 @@ const ProfileHero = () => {
                         avatarPreview: user?.avatar || null,
                       });
                     }}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
                   >
-                    <MdClose className="text-xl" />
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveProfile}
                     disabled={isUpdating}
-                    className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     {isUpdating ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                         Saving...
                       </>
                     ) : (
                       <>
-                        <MdCheck className="text-xl" />
+                        <MdCheck size={18} />
                         Save Changes
                       </>
                     )}

@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useCallback, memo } from "react";
+import  { useState, useMemo, useCallback, memo } from "react";
 import { images } from "../../../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { useGetCarsQuery } from "../../../redux/services/api";
-import Spinner from "../../Spinner";
 
 const PopularMakes = () => {
   const [selectBrand, setSelectBrand] = useState(null);
@@ -50,11 +49,23 @@ const PopularMakes = () => {
     setSelectBrand((prev) => (prev === brand ? null : brand));
   }, []);
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
       <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <Spinner fullScreen={false} />
+        <h2 className="md:text-3xl text-2xl font-semibold mb-6 text-gray-900">
+          Popular Makes
+        </h2>
+        <div className="flex gap-6 md:gap-10 lg:gap-14 overflow-x-auto">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex flex-col sm:flex-row bg-white rounded-lg shadow-md p-4 md:p-5 min-w-[90vw] sm:min-w-[80vw] md:min-w-[60vw] lg:min-w-[50vw] animate-pulse">
+              <div className="h-[200px] sm:h-[250px] md:h-[280px] w-full sm:w-[250px] md:w-[280px] bg-gray-200 rounded-md"></div>
+              <div className="flex-1 sm:ml-6 mt-4">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

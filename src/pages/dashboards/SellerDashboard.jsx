@@ -61,16 +61,14 @@ const SellerDashboard = () => {
     }
   };
 
+  // Don't show full-page loader - let page render normally
   if (userLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Spinner fullScreen={false} />
-      </div>
-    );
+    return null;
   }
 
-  // Only sellers can access seller dashboard (dealers have their own dashboard)
-  if (!user || user.role !== "seller") {
+  // Individual users and dealers can access this dashboard (dealers can also use dealer dashboard)
+  // Admins are redirected to admin dashboard, so they shouldn't reach here
+  if (!user || (user.role !== "individual" && user.role !== "dealer")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
@@ -81,7 +79,9 @@ const SellerDashboard = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
           <p className="text-gray-600 mb-6">
-            This dashboard is only accessible to sellers. {user?.role === "dealer" ? "Dealers should use the dealer dashboard." : "Please login with a seller account."}
+            {user?.role === "admin" 
+              ? "Admins should use the admin dashboard." 
+              : "This dashboard is only accessible to individual users and dealers. Please login with an appropriate account."}
           </p>
           <button
             onClick={() => navigate("/")}
@@ -100,7 +100,9 @@ const SellerDashboard = () => {
       <div className="w-64 bg-white shadow-lg flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-primary-500">SELLO</h1>
-          <p className="text-xs text-gray-500 mt-1">Seller Dashboard</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {user?.role === "dealer" ? "Dealer Dashboard" : "My Dashboard"}
+          </p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -173,7 +175,9 @@ const SellerDashboard = () => {
       <div className="flex-1 flex flex-col">
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">Seller Dashboard</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {user.role === 'dealer' ? 'Dealer Dashboard' : 'My Dashboard'}
+            </h2>
             <div className="flex items-center gap-4">
               <button className="relative p-2 hover:bg-gray-100 rounded-lg">
                 <FiBell size={20} className="text-gray-600" />
@@ -193,7 +197,9 @@ const SellerDashboard = () => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">Seller</p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {user.role === 'dealer' ? 'Dealer' : 'Individual User'}
+                  </p>
                 </div>
               </div>
             </div>

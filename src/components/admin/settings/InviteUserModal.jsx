@@ -69,7 +69,7 @@ const InviteUserModal = ({ isOpen, onClose, onInviteSuccess, roles }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/invite`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles/invite`,
         formData,
         { withCredentials: true }
       );

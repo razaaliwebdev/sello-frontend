@@ -1,12 +1,14 @@
-import { StrictMode } from "react";
+import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { BrowserRouter, HashRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { store } from "./redux/store.js";
 import { Provider } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SupportChatProvider } from "./contexts/SupportChatContext.jsx";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
+import AppLoader from "./components/common/AppLoader.jsx";
 import "leaflet/dist/leaflet.css";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "90770038046-jpumef82nch1o3amujieujs2m1hr73rt.apps.googleusercontent.com";
@@ -20,16 +22,35 @@ if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
   console.warn("   - Your production domain (if applicable)");
 }
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <SupportChatProvider>
-            <App />
-          </SupportChatProvider>
-        </GoogleOAuthProvider>
-      </BrowserRouter>
-    </Provider>
-  </StrictMode>
-);
+// App Root Component with Initial Loader
+const AppRoot = () => {
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    // Hide loader after app initializes
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 500); // Small delay to ensure smooth transition
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <StrictMode>
+      <ErrorBoundary>
+        {isInitialLoad && <AppLoader />}
+        <Provider store={store}>
+          <BrowserRouter>
+            <GoogleOAuthProvider clientId={googleClientId}>
+              <SupportChatProvider>
+                <App />
+              </SupportChatProvider>
+            </GoogleOAuthProvider>
+          </BrowserRouter>
+        </Provider>
+      </ErrorBoundary>
+    </StrictMode>
+  );
+};
+
+createRoot(document.getElementById("root")).render(<AppRoot />);

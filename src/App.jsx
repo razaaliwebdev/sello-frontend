@@ -1,9 +1,8 @@
 import React from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // Components
-import Spinner from "./components/Spinner.jsx";
 import Navbar from "./components/Navbar.jsx";
 import BottomHeader from "./components/BottomHeader.jsx";
 import Footer from "./components/Footer.jsx";
@@ -41,6 +40,8 @@ import SellerChats from "./pages/seller/SellerChats.jsx";
 import DealerDashboard from "./pages/dashboards/DealerDashboard.jsx";
 import SellerDashboard from "./pages/dashboards/SellerDashboard.jsx";
 import HelpCenter from "./pages/help/HelpCenter.jsx";
+import SubscriptionSuccess from "./pages/payments/SubscriptionSuccess.jsx";
+import BoostSuccess from "./pages/payments/BoostSuccess.jsx";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard.jsx";
@@ -52,8 +53,8 @@ import BlogEdit from "./pages/admin/BlogEdit.jsx";
 import AdminReports from "./pages/admin/Reports.jsx";
 import AdminChatMonitoring from "./pages/admin/ChatMonitoring.jsx";
 import AdminChatbot from "./pages/admin/Chatbot.jsx";
-import AdminCustomers from "./pages/admin/CustomerRequests.jsx";
 import AdminPromotions from "./pages/admin/Promotions.jsx";
+import AdminPayments from "./pages/admin/Payments.jsx";
 import AdminNotifications from "./pages/admin/Notifications.jsx";
 import SupportChat from "./pages/admin/SupportChat.jsx";
 import SupportChatbot from "./pages/admin/SupportChatbot.jsx";
@@ -73,6 +74,7 @@ import BlogMediaLibrary from "./pages/admin/BlogMediaLibrary.jsx";
 // Protected Routes
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import AdminRoute from "./components/common/AdminRoute.jsx";
+import { ErrorPage } from "./components/common/ErrorBoundary.jsx";
 
 const App = () => {
   const location = useLocation();
@@ -129,6 +131,10 @@ const App = () => {
         <Route path="/blog/all" element={<AllBlog />} />
         <Route path="/blog/:id" element={<BlogDetails />} />
         <Route path="/help-center" element={<HelpCenter />} />
+
+        {/* Payment Success Pages */}
+        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+        <Route path="/boost/success" element={<BoostSuccess />} />
 
         {/* Protected User Routes */}
         <Route
@@ -223,13 +229,14 @@ const App = () => {
           <Route path="/admin/analytics" element={<AdminReports />} />
           <Route path="/admin/chat" element={<AdminChatMonitoring />} />
           <Route path="/admin/chatbot" element={<AdminChatbot />} />
-          <Route path="/admin/customers" element={<CustomerRequests />} />
           <Route path="/admin/promotions" element={<AdminPromotions />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/support-chat" element={<SupportChat />} />
           <Route path="/admin/support-chatbot" element={<SupportChatbot />} />
           <Route path="/admin/contact-forms" element={<ContactFormManagement />} />
           <Route path="/admin/customer-requests" element={<CustomerRequests />} />
+          <Route path="/admin/customers" element={<Navigate to="/admin/customer-requests" replace />} />
           <Route path="/admin/banners" element={<Banners />} />
           <Route path="/admin/testimonials" element={<Testimonials />} />
           <Route path="/admin/settings" element={<Settings />} />

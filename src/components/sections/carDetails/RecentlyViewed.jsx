@@ -3,7 +3,6 @@ import { useGetRecentlyViewedQuery } from '../../../redux/services/api';
 import { Link } from 'react-router-dom';
 import { FaCar, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import LazyImage from '../../common/LazyImage';
-import Spinner from '../../Spinner';
 
 const RecentlyViewed = () => {
     const { data, isLoading, error } = useGetRecentlyViewedQuery(
@@ -18,18 +17,31 @@ const RecentlyViewed = () => {
         return null;
     }
 
+    // Don't show anything while loading or on error
+    if (error || (!isLoading && (!recentlyViewed || recentlyViewed.length === 0))) {
+        return null;
+    }
+
+    // Show skeleton while loading
     if (isLoading) {
         return (
             <div className="px-4 md:px-20 py-12 bg-white">
-                <div className="flex justify-center">
-                    <Spinner fullScreen={false} />
+                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900">
+                    Recently Viewed
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-gray-50 rounded-lg shadow-sm animate-pulse">
+                            <div className="h-32 bg-gray-200"></div>
+                            <div className="p-3">
+                                <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
-    }
-
-    if (error || !recentlyViewed || recentlyViewed.length === 0) {
-        return null;
     }
 
     return (

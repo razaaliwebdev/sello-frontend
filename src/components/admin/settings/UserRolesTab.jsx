@@ -23,13 +23,13 @@ const UserRolesTab = () => {
     try {
       // Fetch all admin users (including team members) - fetch with high limit to get all
       const usersRes = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/admin/users?role=admin&limit=1000`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/admin/users?role=admin&limit=1000`,
         { withCredentials: true }
       );
       
       const [rolesRes, invitesRes] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles`, { withCredentials: true }),
-        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/invites/all`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles`, { withCredentials: true }),
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles/invites/all`, { withCredentials: true })
       ]);
 
       if (usersRes.data.success) {
@@ -92,7 +92,7 @@ const UserRolesTab = () => {
 
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/${roleId}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles/${roleId}`,
         { withCredentials: true }
       );
 

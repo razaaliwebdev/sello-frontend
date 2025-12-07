@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import BrandMarquee from "../../BrandMarquee";
 import { Link } from "react-router-dom";
 import { brandsCategory } from "../../../assets/assets";
-import brands from "../../../assets/carLogos/brands";
+// import brands from "../../../assets/carLogos/brands";
 
 const BrandsSection = () => {
   return (
@@ -18,7 +18,8 @@ const BrandsSection = () => {
           Show All Brands
         </Link>
       </div>
-      <BrandMarquee brands={brands} />
+      {/* BrandMarquee will fetch brands from admin categories automatically */}
+      <BrandMarquee />
       <div className="maiBrandsLogos  py-5 flex md:flex-row flex-col items-center justify-between">
         {/* <div className="nav flex md:gap-10 gap-7 my-2">
           <button className="">In Stock</button>
@@ -33,7 +34,7 @@ const BrandsSection = () => {
             return (
               <div
                 className={`
-          bg-[#DADADA] flex items-center justify-center rounded-2xl
+          bg-[#DADADA] flex flex-col items-center justify-center rounded-2xl
           ${isLastItem && isOddNumberOfItems ? "md:col-span-2 col-span-2" : ""}
         `}
                 key={index}
@@ -44,6 +45,7 @@ const BrandsSection = () => {
                   alt="brand"
                   loading="lazy"
                 />
+                <span className="pb-4 text-xl">{brand.title}</span>
               </div>
             );
           })}

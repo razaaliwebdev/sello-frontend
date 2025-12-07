@@ -1,6 +1,5 @@
 import { Navigate } from "react-router-dom";
 import { useGetMeQuery } from "../../redux/services/api";
-import Spinner from "../Spinner";
 
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem("token");
@@ -12,12 +11,9 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
 
+    // Show nothing while loading - let the page render normally
     if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-white">
-                <Spinner fullScreen={false} />
-            </div>
-        );
+        return null;
     }
 
     if (isError || !user) {

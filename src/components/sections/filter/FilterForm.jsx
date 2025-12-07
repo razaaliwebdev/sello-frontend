@@ -372,12 +372,13 @@ const FilterForm = ({ onFilter }) => {
       }
     });
 
-    console.log("Frontend Filters:", filters);
-    console.log("Backend Query Parameters:", cleanFilters);
-
-    // setQueryParams(cleanFilters); // Let parent handle query
-    if (onFilter) onFilter(cleanFilters);
-    toast.success("Filters applied successfully!");
+    // Trigger filter callback
+    if (onFilter && Object.keys(cleanFilters).length > 0) {
+      onFilter(cleanFilters);
+      toast.success("Filters applied successfully!");
+    } else if (Object.keys(cleanFilters).length === 0) {
+      toast.error("Please select at least one filter");
+    }
   };
 
   const handleClearFilters = () => {

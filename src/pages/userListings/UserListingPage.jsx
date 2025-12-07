@@ -1,7 +1,6 @@
 import React from "react";
 import UserListingHero from "../../components/userListings/UserListingHero";
 import BrandMarquee from "../../components/BrandMarquee";
-import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
 import UserListings from "../../components/userListings/UsreListings";
@@ -27,7 +26,8 @@ const UserListingPage = () => {
             Show All Brands <GoArrowUpRight />{" "}
           </Link>
         </div>
-        <BrandMarquee brands={brands} />
+        {/* BrandMarquee will fetch brands from admin categories automatically */}
+        <BrandMarquee />
       </div>
       <UserListings />
       <BannerInUesrListings />

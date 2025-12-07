@@ -6,6 +6,7 @@ import {
   usePurchaseSubscriptionMutation,
   useCancelSubscriptionMutation,
   useGetPaymentHistoryQuery,
+  useCreateSubscriptionCheckoutMutation,
 } from "../../redux/services/api";
 import toast from "react-hot-toast";
 import Spinner from "../Spinner";
@@ -21,6 +22,7 @@ const SubscriptionManagement = () => {
   const { data: mySubscription, isLoading: subLoading, refetch: refetchSubscription } = useGetMySubscriptionQuery();
   const { data: paymentHistory, isLoading: historyLoading } = useGetPaymentHistoryQuery();
   const [purchaseSubscription, { isLoading: isPurchasing }] = usePurchaseSubscriptionMutation();
+  const [createSubscriptionCheckout, { isLoading: isCreatingCheckout }] = useCreateSubscriptionCheckoutMutation();
   const [cancelSubscription, { isLoading: isCancelling }] = useCancelSubscriptionMutation();
 
   const subscriptionPlans = plans || {};
@@ -35,23 +37,20 @@ const SubscriptionManagement = () => {
     if (!selectedPlan) return;
 
     try {
-      // For now, we'll use a mock transaction ID
-      // In production, integrate with actual payment gateway
-      const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-      await purchaseSubscription({
+      // Create Stripe checkout session
+      const checkout = await createSubscriptionCheckout({
         plan: selectedPlan,
-        paymentMethod: paymentMethod,
-        transactionId: transactionId,
         autoRenew: autoRenew,
       }).unwrap();
 
-      toast.success(`Successfully subscribed to ${subscriptionPlans[selectedPlan]?.name} plan!`);
-      setShowPaymentModal(false);
-      setSelectedPlan(null);
-      refetchSubscription();
+      // Redirect to Stripe checkout
+      if (checkout.url) {
+        window.location.href = checkout.url;
+      } else {
+        toast.error("Failed to create checkout session");
+      }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to purchase subscription. Please try again.");
+      toast.error(error?.data?.message || "Failed to create checkout session. Please try again.");
     }
   };
 
@@ -292,27 +291,13 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Payment Method
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {["card", "bank", "wallet"].map((method) => (
-                    <button
-                      key={method}
-                      onClick={() => setPaymentMethod(method)}
-                      className={`p-3 rounded-lg border-2 transition-all capitalize ${
-                        paymentMethod === method
-                          ? "border-primary-500 bg-primary-50 text-primary-700"
-                          : "border-gray-200 hover:border-primary-300 text-gray-700"
-                      }`}
-                    >
-                      {method}
-                    </button>
-                  ))}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <FiCreditCard className="text-blue-600" size={16} />
+                  <span className="font-semibold text-gray-900">Secure Payment</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Note: Payment integration will be completed in production
+                <p className="text-sm text-gray-600">
+                  You will be redirected to Stripe for secure payment processing. Your subscription will be activated immediately after payment confirmation.
                 </p>
               </div>
 
@@ -347,10 +332,10 @@ const SubscriptionManagement = () => {
                 </button>
                 <button
                   onClick={handlePurchase}
-                  disabled={isPurchasing}
+                  disabled={isPurchasing || isCreatingCheckout}
                   className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {isPurchasing ? (
+                  {(isPurchasing || isCreatingCheckout) ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing...

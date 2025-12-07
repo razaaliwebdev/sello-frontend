@@ -3,7 +3,6 @@ import { images } from "../../../assets/assets";
 import { useGetTestimonialsQuery, useSubmitReviewMutation } from "../../../redux/services/api";
 import { useGetMeQuery } from "../../../redux/services/api";
 import toast from "react-hot-toast";
-import Spinner from "../../Spinner";
 
 const CustomerReview = () => {
   const [currentReview, setCurrentReview] = useState(0);
@@ -80,10 +79,24 @@ const CustomerReview = () => {
 
   const totalReviews = testimonials.length || 28370;
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5] flex items-center justify-center min-h-[400px]">
-        <Spinner fullScreen={false} />
+      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+        <div className="flex items-center gap-10 md:flex-row flex-col animate-pulse">
+          <div className="md:w-[70%] w-full">
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-6"></div>
+            <div className="flex flex-col md:flex-row md:gap-16 gap-6">
+              <div className="w-[340px] h-[340px] bg-gray-200 rounded-lg"></div>
+              <div className="flex-1">
+                <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     );
   }

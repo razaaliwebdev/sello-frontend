@@ -6,7 +6,6 @@ import CarDetailsGallerySection from "../../components/sections/carDetails/CarDe
 import Btns from "../../components/sections/carDetails/Btns";
 import CarDetailsEtc from "../../components/sections/carDetails/CarDetailsEtc";
 import BrandMarquee from "../../components/BrandMarquee";
-import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import Ads from "../../components/utils/Ads";
 import BlogSection from "../../components/sections/home/BlogSection";
@@ -15,7 +14,7 @@ import Breadcrumb from "../../components/common/Breadcrumb";
 import SimilarListings from "../../components/sections/carDetails/SimilarListings";
 import RecentlyViewed from "../../components/sections/carDetails/RecentlyViewed";
 import UserReviewSection from "../../components/reviews/UserReviewSection";
-import Spinner from "../../components/Spinner";
+import SEO from "../../components/common/SEO";
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -29,15 +28,7 @@ const CarDetails = () => {
     { label: car ? `${car.make} ${car.model}` : 'Car Details', path: `/cars/${id}` }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Spinner fullScreen={false} />
-      </div>
-    );
-  }
-
-  if (!car) {
+  if (!car && !isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -47,8 +38,21 @@ const CarDetails = () => {
     );
   }
 
+  const carTitle = car ? `${car.year} ${car.make} ${car.model} - ${car.condition} - AED ${car.price?.toLocaleString()}` : 'Car Details';
+  const carDescription = car 
+    ? `View details for ${car.year} ${car.make} ${car.model} in ${car.city}. ${car.condition} car with ${car.mileage?.toLocaleString() || 'N/A'} km. Price: AED ${car.price?.toLocaleString()}. ${car.description || ''}`
+    : 'View car details on Sello';
+  const carImage = car?.images?.[0] || '/logo.png';
+
   return (
     <div>
+      <SEO
+        title={carTitle}
+        description={carDescription}
+        image={carImage}
+        type="product"
+        keywords={`${car?.make} ${car?.model}, ${car?.year}, ${car?.condition} car, ${car?.city}, car for sale`}
+      />
       <Breadcrumb items={breadcrumbItems} />
       <CarDetailsHeroSection />
       <CarDetailsGallerySection />
@@ -80,7 +84,8 @@ const CarDetails = () => {
             <Link to="/view-all-brands">Show All Brands</Link>
           </button>
         </div>
-        <BrandMarquee brands={brands} />
+        {/* BrandMarquee will fetch brands from admin categories automatically */}
+        <BrandMarquee />
       </div>
       <Ads />
       <BlogSection />

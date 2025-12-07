@@ -66,56 +66,57 @@ const CreatePostForm = () => {
 
   const [createCar, { isLoading }] = useCreateCarMutation();
 
-  // Initialize available models - show all if no make selected, filtered if make selected
+  // Initialize available models - optimized with useMemo-like logic
   useEffect(() => {
-    if (formData.make && makes.length > 0) {
-      const selectedMakeObj = makes.find(m => m.name === formData.make);
-      if (selectedMakeObj) {
-        const makeModels = getModelsByMake[selectedMakeObj._id] || [];
-        setAvailableModels(makeModels);
-      } else {
-        // If make not found, show all models
-        setAvailableModels(models);
-      }
+    if (!formData.make || makes.length === 0) {
+      setAvailableModels(models);
+      return;
+    }
+
+    const selectedMakeObj = makes.find(m => m.name === formData.make);
+    if (selectedMakeObj && getModelsByMake[selectedMakeObj._id]) {
+      const makeModels = getModelsByMake[selectedMakeObj._id];
+      setAvailableModels(makeModels.length > 0 ? makeModels : models);
     } else {
-      // Show all models when no make is selected
       setAvailableModels(models);
     }
   }, [formData.make, makes, models, getModelsByMake]);
 
-  // Initialize available years when model is selected or data loads
+  // Initialize available years - optimized
+  // Years can be independent or tied to models
   useEffect(() => {
-    if (formData.model && availableModels.length > 0) {
-      const selectedModelObj = availableModels.find(m => m.name === formData.model);
-      if (selectedModelObj) {
-        const modelYears = years.filter(y => {
-          const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
-          return parentId === selectedModelObj._id;
-        });
-        setAvailableYears(modelYears);
-      } else {
-        // If no model selected, show all years
-        setAvailableYears(years);
-      }
+    if (!formData.model || availableModels.length === 0) {
+      // Show all years when no model is selected
+      setAvailableYears(years);
+      return;
+    }
+
+    const selectedModelObj = availableModels.find(m => m.name === formData.model);
+    if (selectedModelObj) {
+      // Filter years by model if they have parentCategory
+      const modelYears = years.filter(y => {
+        if (!y.parentCategory) return true; // Include independent years
+        const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
+        return parentId === selectedModelObj._id;
+      });
+      setAvailableYears(modelYears.length > 0 ? modelYears : years);
     } else {
-      // Show all years if no model selected
       setAvailableYears(years);
     }
   }, [formData.model, availableModels, years]);
 
-  // Initialize available cities - show all if no country selected, filtered if country selected
+  // Initialize available cities - optimized
   useEffect(() => {
-    if (formData.country && countries.length > 0) {
-      const selectedCountryObj = countries.find(c => c.name === formData.country);
-      if (selectedCountryObj) {
-        const countryCities = getCitiesByCountry[selectedCountryObj._id] || [];
-        setAvailableCities(countryCities.length > 0 ? countryCities : cities);
-      } else {
-        // If country not found, show all cities
-        setAvailableCities(cities);
-      }
+    if (!formData.country || countries.length === 0) {
+      setAvailableCities(cities);
+      return;
+    }
+
+    const selectedCountryObj = countries.find(c => c.name === formData.country);
+    if (selectedCountryObj && getCitiesByCountry[selectedCountryObj._id]) {
+      const countryCities = getCitiesByCountry[selectedCountryObj._id];
+      setAvailableCities(countryCities.length > 0 ? countryCities : cities);
     } else {
-      // Show all cities when no country is selected
       setAvailableCities(cities);
     }
   }, [formData.country, countries, cities, getCitiesByCountry]);
@@ -157,15 +158,19 @@ const CreatePostForm = () => {
       if (field === "model") {
         const selectedModelObj = availableModels.find(m => m.name === value);
         if (selectedModelObj) {
+          // Filter years by model if they have parentCategory, include independent years
           const modelYears = years.filter(y => {
+            if (!y.parentCategory) return true; // Include independent years
             const parentId = typeof y.parentCategory === "object" ? y.parentCategory._id : y.parentCategory;
             return parentId === selectedModelObj._id;
           });
-          setAvailableYears(modelYears);
+          setAvailableYears(modelYears.length > 0 ? modelYears : years);
           // Reset year if it's not available for the new model
-          if (formData.year && !modelYears.find(y => y.name === formData.year.toString())) {
+          if (formData.year && modelYears.length > 0 && !modelYears.find(y => y.name === formData.year.toString())) {
             setFormData((prev) => ({ ...prev, year: "" }));
           }
+        } else {
+          setAvailableYears(years);
         }
       }
       
@@ -194,6 +199,14 @@ const CreatePostForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Early validation - check images first (most common issue)
+    if (!formData.images || formData.images.length === 0) {
+      toast.error("Please upload at least one car image");
+      return;
+    }
+
+    // Validate required fields
     const requiredFields = [
       "title",
       "make",
@@ -213,11 +226,33 @@ const CreatePostForm = () => {
       "ownerType",
       "geoLocation",
     ];
-    const missing = requiredFields.filter((key) => !formData[key]);
+    
+    const missing = requiredFields.filter((key) => {
+      const value = formData[key];
+      return !value || (typeof value === 'string' && value.trim() === '');
+    });
+    
     if (missing.length) {
       toast.error(`Missing required fields: ${missing.join(", ")}`);
       return;
     }
+
+    // Validate price
+    const priceNum = parseFloat(formData.price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      toast.error("Please enter a valid price (must be greater than 0)");
+      return;
+    }
+
+    // Validate year
+    const currentYear = new Date().getFullYear();
+    const yearNum = parseInt(formData.year);
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear + 1) {
+      toast.error(`Year must be between 1900 and ${currentYear + 1}`);
+      return;
+    }
+
+    // Validate contact number
     if (!/^\+?\d{9,15}$/.test(formData.contactNumber)) {
       toast.error("Invalid contact number. Must be 9-15 digits.");
       return;
@@ -256,21 +291,38 @@ const CreatePostForm = () => {
       features: formData.features.length ? formData.features : [],
     };
 
-    console.log("formData.features before submission:", formData.features);
+    // Optimize FormData construction - build in single pass
+    // Add images first
+    if (formData.images && formData.images.length > 0) {
+      formData.images.forEach((img) => {
+        if (img instanceof File) {
+          data.append("images", img);
+        }
+      });
+    }
 
-    Object.keys(formData).forEach((key) => {
-      if (key === "images") {
-        formData.images.forEach((img) => data.append("images", img));
-      } else if (key === "features") {
-        // Append each feature individually to FormData
-        defaults.features.forEach((feature) =>
-          data.append("features[]", feature)
-        );
-      } else {
-        data.append(
-          key,
-          defaults[key] !== undefined ? defaults[key] : formData[key]
-        );
+    // Add features array
+    if (defaults.features && defaults.features.length > 0) {
+      defaults.features.forEach((feature) => {
+        if (feature && typeof feature === 'string' && feature.trim()) {
+          data.append("features[]", feature.trim());
+        }
+      });
+    }
+
+    // Add all other fields efficiently
+    const fieldsToAppend = [
+      'title', 'description', 'make', 'model', 'variant', 'year', 'condition',
+      'price', 'colorExterior', 'colorInterior', 'fuelType', 'engineCapacity',
+      'transmission', 'mileage', 'regionalSpec', 'bodyType', 'country', 'city',
+      'location', 'sellerType', 'carDoors', 'contactNumber', 'geoLocation',
+      'horsepower', 'warranty', 'numberOfCylinders', 'ownerType'
+    ];
+
+    fieldsToAppend.forEach((key) => {
+      const value = defaults[key] !== undefined ? defaults[key] : formData[key];
+      if (value !== null && value !== undefined && value !== '') {
+        data.append(key, String(value));
       }
     });
 
@@ -331,8 +383,20 @@ const CreatePostForm = () => {
       setAvailableCities([]);
       navigate(`/my-listings`);
     } catch (err) {
-      console.error("Create Car Error:", err);
-      toast.error(err?.data?.message || "Failed to create car post");
+      // Better error handling with specific messages
+      const errorMessage = err?.data?.message || err?.message || "Failed to create car post";
+      
+      // Provide more specific error messages
+      if (errorMessage.includes('validation')) {
+        toast.error("Please check all required fields and try again");
+      } else if (errorMessage.includes('image') || errorMessage.includes('file')) {
+        toast.error("Image upload failed. Please try again with valid images");
+      } else if (errorMessage.includes('unauthorized') || errorMessage.includes('auth')) {
+        toast.error("Session expired. Please login again");
+        setTimeout(() => navigate('/login'), 2000);
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -663,8 +727,14 @@ const CreatePostForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-50"
+            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:bg-primary-600 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
+            {isLoading && (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
             {isLoading ? "Posting..." : "Post"}
           </button>
         </div>

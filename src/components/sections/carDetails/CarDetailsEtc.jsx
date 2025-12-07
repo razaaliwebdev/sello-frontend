@@ -4,7 +4,6 @@ import { useGetSingleCarQuery, useGetMeQuery, useMarkCarAsSoldMutation } from ".
 import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
 import CarChatWidget from "../../carChat/CarChatWidget";
-import Spinner from "../../Spinner";
 import toast from "react-hot-toast";
 
 const CarDetailsEtc = () => {
@@ -19,10 +18,19 @@ const CarDetailsEtc = () => {
   const [showChat, setShowChat] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Spinner fullScreen={false} />
+      <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
+        <div className="border-[1px] border-gray-400 border-t-0 md:px-5 md:py-6 p-4 rounded-bl-xl rounded-br-xl animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -213,8 +221,14 @@ const CarDetailsEtc = () => {
                   }
                 }}
                 disabled={isUpdatingStatus}
-                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                {isUpdatingStatus && (
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
                 {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
               </button>
             </div>

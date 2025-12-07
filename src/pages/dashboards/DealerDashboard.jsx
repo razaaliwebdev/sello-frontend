@@ -68,12 +68,9 @@ const DealerDashboard = () => {
     }
   };
 
+  // Don't show full-page loader - let page render normally
   if (userLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Spinner fullScreen={false} />
-      </div>
-    );
+    return null;
   }
 
   // Check if user is a verified dealer

@@ -5,7 +5,6 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import LazyImage from "../components/common/LazyImage";
 import { images } from "../assets/assets";
-import Spinner from "../components/Spinner";
 import toast from "react-hot-toast";
 
 const SavedCars = () => {
@@ -25,14 +24,6 @@ const SavedCars = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
-        <Spinner fullScreen={false} />
-      </div>
-    );
-  }
-
   const cars = savedCars || [];
 
   return (
@@ -40,7 +31,19 @@ const SavedCars = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-semibold mb-8">Saved Cars</h1>
         
-        {cars.length === 0 ? (
+        {isLoading ? (
+          <div className="grid md:grid-cols-3 grid-cols-1 md:gap-10 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="md:px-6 md:py-8 bg-white rounded-lg shadow-sm animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                <div className="p-5">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : cars.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <BsBookmark className="text-6xl text-gray-300 mx-auto mb-4" />
             <h2 className="text-2xl font-semibold text-gray-700 mb-2">No Saved Cars</h2>

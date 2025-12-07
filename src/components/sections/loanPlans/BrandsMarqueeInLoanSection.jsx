@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { LuArrowUpRight } from "react-icons/lu";
 import BrandMarquee from "../../BrandMarquee";
-import brands from "../../../assets/carLogos/brands";
 
 const BrandsMarqueeInLoanSection = () => {
   return (
@@ -15,7 +14,8 @@ const BrandsMarqueeInLoanSection = () => {
           Show All Brands <LuArrowUpRight />
         </Link>
       </div>
-      <BrandMarquee brands={brands} />
+      {/* BrandMarquee will fetch brands from admin categories automatically */}
+      <BrandMarquee />
     </div>
   );
 };

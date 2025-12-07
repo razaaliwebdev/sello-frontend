@@ -177,7 +177,7 @@ const HeroFilter = () => {
     }
   }, [searchError]);
 
-  // Year options from categories (fallback to a static list)
+  // Year options from categories - only use dynamic data from admin
   const yearOptions = useMemo(() => {
     if (years && years.length > 0) {
       return years
@@ -185,10 +185,11 @@ const HeroFilter = () => {
         .filter(Boolean)
         .sort((a, b) => parseInt(b) - parseInt(a));
     }
-    return ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
+    // Return empty array if no categories - no fallback dummy data
+    return [];
   }, [years]);
 
-  // Make options from categories (fallback to a static list)
+  // Make options from categories - only use dynamic data from admin
   const makeOptions = useMemo(() => {
     if (makes && makes.length > 0) {
       return makes
@@ -196,25 +197,34 @@ const HeroFilter = () => {
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b));
     }
-    return ["Audi", "BMW", "Mercedes", "Toyota", "Honda"];
+    // Return empty array if no categories - no fallback dummy data
+    return [];
   }, [makes]);
 
-  // Model options from categories, filtered by selected make when present
+  // Model options from categories, filtered by selected make when present - only use dynamic data
   const modelOptions = useMemo(() => {
     if (models && models.length > 0) {
+      let modelList = [];
       if (filters.make && makes && makes.length > 0 && getModelsByMake) {
         const selectedMake = makes.find((m) => m.name === filters.make);
         if (selectedMake) {
           const listForMake = getModelsByMake[selectedMake._id] || [];
-          const byMake = listForMake.length ? listForMake : models;
-          return byMake.map((m) => m.name).filter(Boolean);
+          modelList = listForMake.length > 0 ? listForMake : models;
+        } else {
+          modelList = models;
         }
+      } else {
+        // No make selected → show all models
+        modelList = models;
       }
-      // No make selected → show all models
-      return models.map((m) => m.name).filter(Boolean);
+      // Sort models alphabetically
+      return modelList
+        .map((m) => m.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
     }
-    // Fallback static models if no categories yet
-    return ["A7 Sportback", "A4", "A6", "Q5", "Q7"];
+    // Return empty array if no categories - no fallback dummy data
+    return [];
   }, [models, makes, getModelsByMake, filters.make]);
 
   const mileageOptions = [
@@ -233,14 +243,14 @@ const HeroFilter = () => {
   ];
 
   return (
-    <div className=" p-4 md:p-8 flex items-center justify-center">
+    <div className=" flex items-center md:w-[96%] justify-center">
       <div className="w-full max-w-[95rem] mx-auto">
         {/* Main Filter Container */}
         <div className=" rounded-xl shadow-2xl overflow-hidden border-4  bg-primary-500">
           {/* Header Section */}
           <div className="bg-[#050B20] px-6 py-2 border-b border-[#050B20]">
             <h2 className="text-xl font-bold text-white">
-              Find Your Perfect Car
+              Find the Best Cars for Sale in Pakistan
             </h2>
           </div>
 
@@ -274,6 +284,7 @@ const HeroFilter = () => {
                   onChange={(v) => handleChange("year", v)}
                   options={["", ...yearOptions]}
                   disabled={categoriesLoading}
+                  emptyMessage={categoriesLoading ? "Loading..." : yearOptions.length === 0 ? "No years available" : ""}
                 />
 
                 {/* Make Filter */}
@@ -287,6 +298,7 @@ const HeroFilter = () => {
                   }}
                   options={["", ...makeOptions]}
                   disabled={categoriesLoading}
+                  emptyMessage={categoriesLoading ? "Loading..." : makeOptions.length === 0 ? "No makes available" : ""}
                 />
 
                 {/* Model Filter */}
@@ -296,6 +308,13 @@ const HeroFilter = () => {
                   onChange={(v) => handleChange("model", v)}
                   options={["", ...modelOptions]}
                   disabled={categoriesLoading}
+                  emptyMessage={
+                    categoriesLoading 
+                      ? "Loading..." 
+                      : modelOptions.length === 0
+                        ? "No models available"
+                        : ""
+                  }
                 />
 
                 {/* Mileage Filter */}
@@ -394,7 +413,7 @@ const HeroFilter = () => {
 
 /* Reusable Components */
 
-const FilterSelect = ({ label, value, onChange, options, disabled }) => (
+const FilterSelect = ({ label, value, onChange, options, disabled, emptyMessage }) => (
   <div className="flex flex-col">
     <label className="text-gray-900 text-xs font-bold mb-1 uppercase">
       {label}
@@ -405,11 +424,15 @@ const FilterSelect = ({ label, value, onChange, options, disabled }) => (
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
     >
-      {options.map((opt, idx) => (
-        <option key={idx} value={opt}>
-          {opt || `Select ${label}`}
-        </option>
-      ))}
+      {options.length === 0 && emptyMessage ? (
+        <option value="">{emptyMessage}</option>
+      ) : (
+        options.map((opt, idx) => (
+          <option key={idx} value={opt}>
+            {opt || `Select ${label}`}
+          </option>
+        ))
+      )}
     </select>
   </div>
 );

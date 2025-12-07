@@ -42,7 +42,7 @@ const Login = () => {
         navigate("/admin/dashboard");
       } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
         navigate("/dealer/dashboard");
-      } else if (res.user?.role === "seller") {
+      } else if (res.user?.role === "individual" || res.user?.role === "dealer") {
         navigate("/seller/dashboard");
       } else {
         navigate("/");
@@ -82,7 +82,7 @@ const Login = () => {
         navigate("/admin/dashboard");
       } else if (responseUser?.role === "dealer" && responseUser?.dealerInfo?.verified) {
         navigate("/dealer/dashboard");
-      } else if (responseUser?.role === "seller") {
+      } else if (responseUser?.role === "individual" || responseUser?.role === "dealer") {
         navigate("/seller/dashboard");
       } else {
         navigate("/");
@@ -98,19 +98,25 @@ const Login = () => {
       
       let errorMessage = "Google login failed. Please try again.";
       
-      // Handle RTK Query errors
-      if (err?.data?.message) {
-        errorMessage = err.data.message;
-      } else if (err?.data?.error) {
-        errorMessage = err.data.error;
+      // Handle RTK Query errors - check nested data structure
+      const errorData = err?.data || err;
+      
+      if (errorData?.message) {
+        errorMessage = errorData.message;
+      } else if (errorData?.error) {
+        errorMessage = errorData.error;
       } else if (err?.message) {
         errorMessage = err.message;
       } else if (err?.status === 401 || err?.originalStatus === 401) {
-        errorMessage = "Authentication failed. Please check your Google account and try again.";
+        errorMessage = "Authentication failed. Please try logging in again.";
       } else if (err?.status === 403 || err?.originalStatus === 403) {
         errorMessage = "Access denied. Please contact support.";
       } else if (err?.status === 500 || err?.originalStatus === 500) {
-        errorMessage = "Server error. Google authentication may not be configured. Please contact support.";
+        errorMessage = "Server error. Please try again later or contact support.";
+      } else if (err?.status === 'FETCH_ERROR' || err?.status === 'PARSING_ERROR' || err?.message?.includes('Failed to fetch')) {
+        errorMessage = "Unable to connect to server. Please ensure the backend server is running and try again.";
+      } else if (err?.error === 'TypeError: Failed to fetch' || err?.data?.error === 'TypeError: Failed to fetch') {
+        errorMessage = "Server connection failed. Please check if the backend server is running on port 4000.";
       }
       
       toast.error(errorMessage);

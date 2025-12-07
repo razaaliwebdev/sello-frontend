@@ -56,7 +56,14 @@ const FilteredResults = () => {
     // Navigate to filter page with updated filters
     const newFilters = { ...filters };
     delete newFilters[key];
-    navigate("/filter", { state: { filters: newFilters } });
+    
+    // Build URL params from remaining filters
+    const params = new URLSearchParams();
+    Object.entries(newFilters).forEach(([k, v]) => {
+      if (v) params.set(k, v);
+    });
+    
+    navigate(`/filter?${params.toString()}`, { replace: true });
   };
 
   return (
@@ -85,7 +92,7 @@ const FilteredResults = () => {
                 Active Filters
               </h3>
               <button
-                onClick={() => navigate("/filter")}
+                onClick={() => navigate("/filter", { replace: true })}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium"
               >
                 Clear All

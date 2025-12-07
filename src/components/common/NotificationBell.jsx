@@ -18,7 +18,7 @@ const NotificationBell = () => {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
   const { data: notificationsData, refetch } = useGetUserNotificationsQuery(
@@ -169,7 +169,7 @@ const NotificationBell = () => {
       {/* Notification Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-700 hover:text-primary-500 transition-colors rounded-full hover:bg-gray-100"
+        className="relative p-2 text-gray-100 hover:text-primary-500 transition-colors rounded-full hover:bg-gray-100"
         aria-label="Notifications"
       >
         {unreadCount > 0 ? (

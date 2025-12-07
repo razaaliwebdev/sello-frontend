@@ -6,14 +6,14 @@ const JoinUsSection = () => {
     <div className="w-full bg-[#272525] rounded-tr-[50px] md:rounded-tr-[70px]">
       {/* Header Facts */}
       <div className="w-full">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 py-5 px-6 md:px-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 py-8 px-6 md:px-8">
           <h5 className="text-base md:text-xl font-medium text-gray-100">
             Quick Facts 11M+
           </h5>
           <h5 className="text-base md:text-xl font-medium text-gray-100">
             YouTube Subscriber 4.5 ★
           </h5>
-          <h5 className="text-base md:text-xl font-medium text-gray-100">
+          <h5 className="text-base md:text-xl font-medium text-gray-100 mr-12">
             Excellent Trustpilot Rating 5,500+
           </h5>
         </div>

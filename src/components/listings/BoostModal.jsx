@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { FiX, FiZap, FiCheckCircle, FiCreditCard, FiClock } from "react-icons/fi";
-import { useBoostPostMutation, useGetBoostPricingQuery, useGetMeQuery } from "../../redux/services/api";
+import { 
+  useBoostPostMutation, 
+  useGetBoostOptionsQuery, 
+  useGetMeQuery,
+  useCreateBoostCheckoutMutation 
+} from "../../redux/services/api";
 import toast from "react-hot-toast";
 import Spinner from "../Spinner";
 
 const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
   const [selectedDuration, setSelectedDuration] = useState(7);
   const [useCredits, setUseCredits] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("card");
-  const { data: pricing, isLoading: pricingLoading } = useGetBoostPricingQuery();
+  const { data: boostOptions, isLoading: optionsLoading } = useGetBoostOptionsQuery();
   const { data: user } = useGetMeQuery();
   const [boostPost, { isLoading: isBoosting }] = useBoostPostMutation();
+  const [createBoostCheckout, { isLoading: isCreatingCheckout }] = useCreateBoostCheckoutMutation();
 
-  const durations = [1, 3, 7, 14, 30];
-  const pricePerDay = pricing?.pricePerDay || 5;
+  const durations = boostOptions?.availableDurations || [3, 7, 14, 30];
+  const pricePerDay = boostOptions?.costPerDay || 5;
   const totalCost = selectedDuration * pricePerDay;
-  const hasEnoughCredits = user?.boostCredits >= totalCost;
+  const hasEnoughCredits = (user?.boostCredits || 0) >= totalCost;
 
   useEffect(() => {
     if (user?.boostCredits >= totalCost) {
@@ -29,31 +34,50 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
       return;
     }
 
-    if (useCredits && !hasEnoughCredits) {
-      toast.error("Insufficient credits. Please purchase credits or use payment.");
-      return;
-    }
-
     try {
-      // For now, we'll use a mock transaction ID
-      // In production, integrate with actual payment gateway
-      const transactionId = useCredits 
-        ? `CREDIT-${Date.now()}` 
-        : `TXN-${Date.now()}`;
+      if (useCredits && hasEnoughCredits) {
+        // Use credits
+        const result = await boostPost({
+          carId: car._id,
+          duration: selectedDuration,
+          useCredits: true
+        }).unwrap();
 
-      const result = await boostPost({
-        carId: car._id,
-        duration: selectedDuration,
-        paymentMethod: paymentMethod,
-        transactionId: transactionId,
-        useCredits: useCredits
-      }).unwrap();
+        toast.success(`Listing boosted successfully for ${selectedDuration} day(s)!`);
+        if (onSuccess) onSuccess();
+        onClose();
+      } else {
+        // Create Stripe checkout
+        const checkout = await createBoostCheckout({
+          carId: car._id,
+          duration: selectedDuration
+        }).unwrap();
 
-      toast.success(`Listing boosted successfully for ${selectedDuration} day(s)!`);
-      if (onSuccess) onSuccess();
-      onClose();
+        // Redirect to Stripe checkout
+        if (checkout.url) {
+          window.location.href = checkout.url;
+        } else {
+          toast.error("Failed to create checkout session");
+        }
+      }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to boost listing. Please try again.");
+      const errorMessage = error?.data?.message || error?.message || "Failed to boost listing. Please try again.";
+      if (error?.data?.requiresPayment) {
+        // If payment is required, create checkout
+        try {
+          const checkout = await createBoostCheckout({
+            carId: car._id,
+            duration: selectedDuration
+          }).unwrap();
+          if (checkout.url) {
+            window.location.href = checkout.url;
+          }
+        } catch (checkoutError) {
+          toast.error("Failed to create payment session");
+        }
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -176,28 +200,13 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
           )}
 
           {!useCredits && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                <FiCreditCard className="inline mr-2" size={16} />
-                Payment Method
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {["card", "bank", "wallet"].map((method) => (
-                  <button
-                    key={method}
-                    onClick={() => setPaymentMethod(method)}
-                    className={`p-3 rounded-lg border-2 transition-all capitalize ${
-                      paymentMethod === method
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
-                        : "border-gray-200 hover:border-primary-300 text-gray-700"
-                    }`}
-                  >
-                    {method}
-                  </button>
-                ))}
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <FiCreditCard className="text-blue-600" size={16} />
+                <span className="font-semibold text-gray-900">Secure Payment</span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Note: Payment integration will be completed in production
+              <p className="text-sm text-gray-600">
+                You will be redirected to Stripe for secure payment processing. Your listing will be boosted immediately after payment confirmation.
               </p>
             </div>
           )}
@@ -225,10 +234,10 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
             </button>
             <button
               onClick={handleBoost}
-              disabled={isBoosting || pricingLoading}
+              disabled={isBoosting || isCreatingCheckout || optionsLoading}
               className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transform active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isBoosting ? (
+              {(isBoosting || isCreatingCheckout) ? (
                 <>
                   <Spinner fullScreen={false} />
                   Processing...
@@ -236,7 +245,7 @@ const BoostModal = ({ isOpen, onClose, car, onSuccess }) => {
               ) : (
                 <>
                   <FiZap size={16} />
-                  Boost Now - AED {totalCost}
+                  {useCredits && hasEnoughCredits ? `Boost Now - ${totalCost} Credits` : `Boost Now - $${totalCost}`}
                 </>
               )}
             </button>

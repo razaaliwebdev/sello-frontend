@@ -97,6 +97,15 @@ import searchSvg from './images/searchSvg.svg';
 import comma from './images/comma.svg';
 import loanPlanHeroImg from './images/loanPlanHeroImg.png';
 import mailbox from './images/mailbox.svg';
+import electricSvg3 from './images/electricSvg3.png';
+
+// Partener Logos
+import servicoLogo from './images/servico.png';
+import amingarageLogo from "./images/amingarage.png";
+import wbDigitalLogo from './images/wbDigital.svg';
+
+// SELLO VIDEO
+import selloVido from './selloVideo.mp4';
 
 
 export const images = {
@@ -139,7 +148,13 @@ export const images = {
     searchSvg,
     comma,
     loanPlanHeroImg,
-    mailbox
+    mailbox,
+    selloVido,
+    electricSvg3,
+    // Partener Logos
+    servicoLogo,
+    amingarageLogo,
+    wbDigitalLogo
 };
 
 // Export app and social media icons for footer
@@ -164,11 +179,11 @@ export const menuLinks = [
     },
     {
         path: "/about",
-        name: "About"
+        name: "About Us"
     },
     {
         path: "/contact",
-        name: "Contact"
+        name: "Contact Us"
     },
 ]
 
@@ -395,24 +410,31 @@ export const heroSlides = [
 export const brandsCategory = [
     {
         image: br1,
+        title: "Car"
     },
     {
         image: br2,
+        title: "Bus"
     },
     {
         image: br3,
+        title: "Truck"
     },
     {
         image: br4,
+        title: "Van"
     },
     {
         image: br5,
+        title: "Bike"
     },
     {
         image: br6,
+        title: "E-Bike"
     },
     {
         image: br7,
+        title: "Recently Looked Cars"
     }
 ];
 
@@ -627,9 +649,9 @@ export const blogPosts = [
 // Go them buy or sell
 export const goThemBuyOrSell = [
     {
-        title: "Are You Looking For a Car?",
+        title: "Are You Looking for a Car? ",
         image: electricSvg,
-        description: "Discover your perfect car with our advanced search filters and expert customer support."
+        description: "We help you find the best cars for sale in Pakistan, with verified listings, competitive prices, and trusted sellers across Karachi, Islamabad, Lahore, and more."
     },
     {
         title: "Do You Want to Sell a Car?",

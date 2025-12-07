@@ -5,10 +5,11 @@ import {
     useApproveCarMutation,
     useFeatureCarMutation,
     useDeleteCarMutation,
+    usePromoteCarMutation,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiEdit2, FiTrash2, FiEye, FiGrid } from "react-icons/fi";
+import { FiSearch, FiEdit2, FiTrash2, FiEye, FiGrid, FiZap } from "react-icons/fi";
 
 const Listings = () => {
     const [page, setPage] = useState(1);
@@ -28,6 +29,7 @@ const Listings = () => {
     const [approveCar] = useApproveCarMutation();
     const [featureCar] = useFeatureCarMutation();
     const [deleteCar] = useDeleteCarMutation();
+    const [promoteCar, { isLoading: isPromoting }] = usePromoteCarMutation();
 
     const cars = data?.cars || [];
     const pagination = data?.pagination || {};
@@ -72,6 +74,27 @@ const Listings = () => {
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete car");
+        }
+    };
+
+    const handlePromote = async (carId) => {
+        const duration = prompt("Enter promotion duration in days (default: 7):", "7");
+        if (!duration) return;
+        
+        const days = parseInt(duration) || 7;
+        const chargeUser = window.confirm("Charge the user for this promotion? (OK = Yes, Cancel = No)");
+        
+        try {
+            await promoteCar({
+                carId,
+                duration: days,
+                chargeUser: chargeUser,
+                priority: 100
+            }).unwrap();
+            toast.success(`Car promoted for ${days} days${chargeUser ? ' (user will be charged)' : ' (free promotion)'}`);
+            refetch();
+        } catch (error) {
+            toast.error(error?.data?.message || "Failed to promote car");
         }
     };
 
@@ -291,6 +314,16 @@ const Listings = () => {
                                                             title={car.featured ? "Unfeature" : "Feature"}
                                                         >
                                                             <FiEye size={18} />
+                                                        </button>
+                                                    )}
+                                                    {!car.isSold && car.isApproved === true && (
+                                                        <button
+                                                            onClick={() => handlePromote(car._id)}
+                                                            disabled={isPromoting}
+                                                            className={`${car.isBoosted ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-gray-600'} transition-colors disabled:opacity-50`}
+                                                            title={car.isBoosted ? "Already Promoted" : "Promote Post"}
+                                                        >
+                                                            <FiZap size={18} />
                                                         </button>
                                                     )}
                                                     <button

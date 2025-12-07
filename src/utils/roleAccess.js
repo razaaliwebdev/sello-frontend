@@ -48,7 +48,7 @@ const ROLE_MENU_ACCESS = {
         "/admin/analytics",
         "/admin/chat",
         "/admin/chatbot",
-        "/admin/customers",
+        "/admin/customer-requests",
         "/admin/promotions",
         "/admin/notifications",
         "/admin/settings",
@@ -64,7 +64,7 @@ const ROLE_MENU_ACCESS = {
         "/admin/dashboard",
         "/admin/chat",            // Chat monitoring
         "/admin/chatbot",         // Support chatbot
-        "/admin/customers",       // Customer request forms
+        "/admin/customer-requests",       // Customer request forms
     ],
     "Content Manager": [
         "/admin/dashboard",

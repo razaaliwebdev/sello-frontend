@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { images } from "../assets/assets";
 
 const BottomHeader = () => {
   const location = useLocation();
@@ -24,13 +23,6 @@ const BottomHeader = () => {
       </Link>
       <Link to={"/"} className="hover:underline">
         Shot
-      </Link>
-      <Link to={"/"}>
-        <img
-          src={images.bell}
-          alt="notification"
-          className="h-5 w-5 md:h-6 md:w-6 object-contain"
-        />
       </Link>
     </div>
   );

@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../redux/services/api";
 import { MdArrowRightAlt } from "react-icons/md";
-import Spinner from "../../Spinner";
 
 const BlogSection = () => {
   const { data, isLoading } = useGetBlogsQuery({ 
@@ -43,8 +42,16 @@ const BlogSection = () => {
 
       {/* Blog Cards - Horizontal Scroll */}
       {isLoading ? (
-        <div className="flex justify-center items-center min-h-[300px]">
-          <Spinner fullScreen={false} />
+        <div className="flex gap-6 md:gap-8 overflow-x-auto scrollbar-hide pb-8">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="md:w-[390px] w-full min-w-[85vw] md:min-w-[390px] bg-white rounded-lg px-6 py-6 flex-shrink-0 shadow-md animate-pulse">
+              <div className="w-full h-64 bg-gray-200 rounded-lg mb-5"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
         </div>
       ) : blogs.length === 0 ? (
         <div className="text-center py-12">

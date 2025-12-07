@@ -16,7 +16,8 @@ import {
     FiX,
     FiFileText,
     FiSettings,
-    FiGrid 
+    FiGrid,
+    FiDollarSign
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
@@ -39,8 +40,9 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/analytics", icon: FiBarChart2, label: "Reports & Analytics" },
         { path: "/admin/chat", icon: FiMessageSquare, label: "Chat Monitoring" },
         { path: "/admin/chatbot", icon: FiCpu, label: "Support Chatbot" },
-        { path: "/admin/customers", icon: FiUser, label: "Customer Request" },
+        { path: "/admin/customer-requests", icon: FiUser, label: "Customer Request" },
         { path: "/admin/promotions", icon: FiHeart, label: "Promotions" },
+        { path: "/admin/payments", icon: FiDollarSign, label: "Payments" },
         { path: "/admin/notifications", icon: FiBell, label: "Notifications" },
         { path: "/admin/settings", icon: FiSettings, label: "Settings" },
     ];

@@ -4,7 +4,6 @@ import WhyChooseUsUtility from "../../components/utils/WhyChooseUsUtility";
 import InpirationSectoin from "../../components/sections/createPost/InpirationSectoin";
 import BannerInFilter from "../../components/sections/filter/BannerInFilter";
 import BrandMarquee from "../../components/BrandMarquee";
-import brands from "../../assets/carLogos/brands";
 import { Link } from "react-router-dom";
 import { MdArrowOutward } from "react-icons/md";
 import FindOutMore from "../../components/sections/createPost/FindOutMore";
@@ -28,7 +27,8 @@ const CreatePost = () => {
             Show All Brands <MdArrowOutward />
           </Link>
         </div>
-        <BrandMarquee brands={brands} />
+        {/* BrandMarquee will fetch brands from admin categories automatically */}
+        <BrandMarquee />
       </div>
       <FindOutMore />
     </div>

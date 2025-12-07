@@ -13,7 +13,7 @@ const ContactForm = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   // Ensure API_URL correctly points to the /api endpoint
   const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
   
@@ -66,7 +66,7 @@ const ContactForm = () => {
 
   return (
     <section className="md:pt-10 py-14 md:px-16 px-4">
-      <h1 className="text-center md:text-4xl text-2xll font-semibold">
+      <h1 className="text-center md:text-4xl text-2xll font-bold bg-[#050B20] text-white py-2 rounded shadow-lg">
         Contact Us
       </h1>
       <div className="md:w-full md:flex md:gap-10">

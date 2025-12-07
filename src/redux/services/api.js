@@ -1,39 +1,69 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Use environment variable or default to port 3000 (matching server)
+// Use environment variable or default to port 3000 (matching server .env)
+// Note: Server defaults to 4000 if PORT not set, but .env has PORT=3000
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-// const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const api = createApi({
     reducerPath: "api",
     baseQuery: async (args, api, extraOptions) => {
-        const baseResult = await fetchBaseQuery({
-            baseUrl: BASE_URL,
-            credentials: "include",
-            prepareHeaders: (headers) => {
-                const token = localStorage.getItem("token");
-                if (token) {
-                    headers.set("Authorization", `Bearer ${token}`);
+        try {
+            const baseResult = await fetchBaseQuery({
+                baseUrl: BASE_URL,
+                credentials: "include",
+                prepareHeaders: (headers) => {
+                    const token = localStorage.getItem("token");
+                    if (token) {
+                        headers.set("Authorization", `Bearer ${token}`);
+                    }
+                    headers.set("Content-Type", "application/json");
+                    return headers;
+                },
+            })(args, api, extraOptions);
+
+            // Handle 401 errors - token expired or invalid
+            // Only clear token for certain endpoints, not for all 401s
+            if (baseResult.error && baseResult.error.status === 401) {
+                const url = args?.url || '';
+                // Only clear token for auth-related endpoints, not for save/unsave operations
+                // Let the component handle the error for save operations
+                if (url.includes('/users/me') || url.includes('/auth/')) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
                 }
-                return headers;
-            },
-        })(args, api, extraOptions);
-
-        // Handle 401 errors - token expired or invalid
-        // Only clear token for certain endpoints, not for all 401s
-        if (baseResult.error && baseResult.error.status === 401) {
-            const url = args?.url || '';
-            // Only clear token for auth-related endpoints, not for save/unsave operations
-            // Let the component handle the error for save operations
-            if (url.includes('/users/me') || url.includes('/auth/')) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
+                // Don't redirect automatically - let components handle it
             }
-            // Don't redirect automatically - let components handle it
-        }
 
-        return baseResult;
+            // Handle network errors (Failed to fetch)
+            if (baseResult.error && (baseResult.error.status === 'FETCH_ERROR' || baseResult.error.error === 'TypeError: Failed to fetch')) {
+                return {
+                    error: {
+                        status: 'FETCH_ERROR',
+                        data: {
+                            message: "Unable to connect to server. Please check if the server is running and try again.",
+                            error: "Network error - Failed to fetch"
+                        },
+                        originalStatus: 'FETCH_ERROR'
+                    }
+                };
+            }
+
+            return baseResult;
+        } catch (error) {
+            // Catch any unexpected errors
+            console.error("API request error:", error);
+            return {
+                error: {
+                    status: 'FETCH_ERROR',
+                    data: {
+                        message: error.message || "Network error. Please check your connection and try again.",
+                        error: "Failed to fetch"
+                    },
+                    originalStatus: 'FETCH_ERROR'
+                }
+            };
+        }
     },
     tagTypes: ["User", "SupportChat", "CarChat", "Notification", "Blog", "Testimonial", "Cars"],
     endpoints: (builder) => ({
@@ -114,12 +144,21 @@ export const api = createApi({
                 console.warn("Unexpected Google login response structure:", response);
                 return response;
             },
-            transformErrorResponse: (response) => {
-                // Ensure error responses are properly formatted
-                if (response?.data) {
-                    return response.data;
-                }
-                return response;
+            transformErrorResponse: (response, meta, arg) => {
+                // Backend error format: { success: false, message: "...", error: "..." }
+                // RTK Query wraps it in response.data
+                const errorData = response?.data || response;
+                
+                // Return a consistent error structure
+                return {
+                    status: response?.status || 'FETCH_ERROR',
+                    data: {
+                        message: errorData?.message || errorData?.error || "Google login failed. Please try again.",
+                        error: errorData?.error,
+                        success: false
+                    },
+                    originalStatus: response?.status
+                };
             },
         }),
         forgotPassword: builder.mutation({
@@ -167,7 +206,24 @@ export const api = createApi({
             }),
             providesTags: ["User"],
             transformResponse: (response) => {
-                return response?.data || response;
+                // Backend format: { success: true, data: { user object } }
+                if (response?.data) {
+                    return response.data;
+                }
+                // Fallback if response is already the user object
+                return response;
+            },
+            transformErrorResponse: (response, meta, arg) => {
+                // Handle error responses
+                const errorData = response?.data || response;
+                return {
+                    status: response?.status || 'FETCH_ERROR',
+                    data: {
+                        message: errorData?.message || "Failed to fetch user data",
+                        error: errorData?.error
+                    },
+                    originalStatus: response?.status
+                };
             },
         }),
         updateProfile: builder.mutation({
@@ -520,6 +576,20 @@ export const api = createApi({
             transformResponse: (response) => response?.data || response,
         }),
 
+        // Banners (Public)
+        getBanners: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams();
+                if (params.type) searchParams.append('type', params.type);
+                if (params.position) searchParams.append('position', params.position);
+                if (params.isActive !== undefined) searchParams.append('isActive', params.isActive);
+                const queryString = searchParams.toString();
+                return `/banners${queryString ? `?${queryString}` : ''}`;
+            },
+            providesTags: ["Banners"],
+            transformResponse: (response) => response?.data || response,
+        }),
+
         // Testimonials/Reviews
         getTestimonials: builder.query({
             query: (params = {}) => {
@@ -604,12 +674,12 @@ export const api = createApi({
 
         // Boost endpoints
         boostPost: builder.mutation({
-            query: ({ carId, ...data }) => ({
-                url: `/boost/${carId}`,
+            query: ({ carId, duration, useCredits = true }) => ({
+                url: `/cars/${carId}/boost`,
                 method: "POST",
-                body: data,
+                body: { duration, useCredits },
             }),
-            invalidatesTags: ["Cars", "User"],
+            invalidatesTags: ["Cars", "Car", "User"],
             transformResponse: (response) => response?.data || response,
         }),
         getBoostStatus: builder.query({
@@ -668,6 +738,14 @@ export const api = createApi({
             invalidatesTags: ["User"],
             transformResponse: (response) => response?.data || response,
         }),
+        createSubscriptionCheckout: builder.mutation({
+            query: ({ plan, autoRenew = true }) => ({
+                url: "/subscriptions/checkout",
+                method: "POST",
+                body: { plan, autoRenew },
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
         cancelSubscription: builder.mutation({
             query: () => ({
                 url: "/subscriptions/cancel",
@@ -698,6 +776,16 @@ export const api = createApi({
             query: (userId) => ({
                 url: `/reviews/user/${userId}`,
                 method: "GET",
+            }),
+            transformResponse: (response) => response?.data || response,
+        }),
+
+        // Report endpoints
+        createReport: builder.mutation({
+            query: (data) => ({
+                url: "/users/report",
+                method: "POST",
+                body: data,
             }),
             transformResponse: (response) => response?.data || response,
         }),
@@ -744,6 +832,7 @@ export const {
     useMarkAllNotificationsAsReadMutation,
     useGetBlogsQuery,
     useGetBlogByIdQuery,
+    useGetBannersQuery,
     useGetTestimonialsQuery,
     useSubmitReviewMutation,
     useSubscribeNewsletterMutation,
@@ -757,6 +846,9 @@ export const {
     useRemoveBoostMutation,
     usePurchaseCreditsMutation,
     useGetBoostPricingQuery,
+    useGetBoostOptionsQuery,
+    useCreateBoostCheckoutMutation,
+    useCreateSubscriptionCheckoutMutation,
     useGetSubscriptionPlansQuery,
     useGetMySubscriptionQuery,
     usePurchaseSubscriptionMutation,
@@ -764,4 +856,5 @@ export const {
     useGetPaymentHistoryQuery,
     useAddUserReviewMutation,
     useGetUserReviewsQuery,
+    useCreateReportMutation,
 } = api;

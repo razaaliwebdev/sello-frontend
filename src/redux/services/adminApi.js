@@ -1,34 +1,68 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+// Use environment variable or default to port 3000 (matching server .env)
+// Note: Server defaults to 4000 if PORT not set, but .env has PORT=3000
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
     baseQuery: async (args, api, extraOptions) => {
-        const baseResult = await fetchBaseQuery({
-            baseUrl: BASE_URL,
-            credentials: "include",
-            prepareHeaders: (headers, { extra, endpoint }) => {
-                const token = localStorage.getItem("token");
-                if (token) {
-                    headers.set("Authorization", `Bearer ${token}`);
+        try {
+            const baseResult = await fetchBaseQuery({
+                baseUrl: BASE_URL,
+                credentials: "include",
+                prepareHeaders: (headers, { extra, endpoint }) => {
+                    const token = localStorage.getItem("token");
+                    if (token) {
+                        headers.set("Authorization", `Bearer ${token}`);
+                    }
+                    headers.set("Content-Type", "application/json");
+                    // Don't set Content-Type for FormData - browser will set it with boundary
+                    // RTK Query will handle this automatically
+                    return headers;
+                },
+            })(args, api, extraOptions);
+
+            // Handle 401 errors - token expired or invalid
+            if (baseResult.error && baseResult.error.status === 401) {
+                const url = args?.url || '';
+                // Only clear token for auth-related endpoints
+                if (url.includes('/admin/') || url.includes('/auth/')) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
                 }
-                // Don't set Content-Type for FormData - browser will set it with boundary
-                // RTK Query will handle this automatically
-                return headers;
-            },
-        })(args, api, extraOptions);
+                // Don't redirect automatically - let components handle it
+            }
 
-        // Handle 401 errors - token expired or invalid
-        if (baseResult.error && baseResult.error.status === 401) {
-            // Clear invalid token
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            // Don't redirect automatically - let components handle it
+            // Handle network errors (Failed to fetch)
+            if (baseResult.error && (baseResult.error.status === 'FETCH_ERROR' || baseResult.error.error === 'TypeError: Failed to fetch')) {
+                return {
+                    error: {
+                        status: 'FETCH_ERROR',
+                        data: {
+                            message: "Unable to connect to server. Please check if the server is running and try again.",
+                            error: "Network error - Failed to fetch"
+                        },
+                        originalStatus: 'FETCH_ERROR'
+                    }
+                };
+            }
+
+            return baseResult;
+        } catch (error) {
+            // Catch any unexpected errors
+            console.error("Admin API request error:", error);
+            return {
+                error: {
+                    status: 'FETCH_ERROR',
+                    data: {
+                        message: error.message || "Network error. Please check your connection and try again.",
+                        error: "Failed to fetch"
+                    },
+                    originalStatus: 'FETCH_ERROR'
+                }
+            };
         }
-
-        return baseResult;
     },
     tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials", "Roles", "Invites"],
     endpoints: (builder) => ({
@@ -100,6 +134,15 @@ export const adminApi = createApi({
                 method: "DELETE",
             }),
             invalidatesTags: ["Cars"],
+        }),
+        promoteCar: builder.mutation({
+            query: ({ carId, duration = 7, chargeUser = true, priority = 100 }) => ({
+                url: `/cars/${carId}/admin-promote`,
+                method: "POST",
+                body: { duration, chargeUser, priority },
+            }),
+            invalidatesTags: ["Cars"],
+            transformResponse: (response) => response?.data || response,
         }),
         getListingHistory: builder.query({
             query: (params = {}) => {
@@ -186,7 +229,7 @@ export const adminApi = createApi({
                 method: "POST",
                 body: formData,
             }),
-            invalidatesTags: ["Blogs"],
+            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
         }),
         updateBlog: builder.mutation({
             query: ({ blogId, formData }) => ({
@@ -194,14 +237,14 @@ export const adminApi = createApi({
                 method: "PUT",
                 body: formData,
             }),
-            invalidatesTags: ["Blogs"],
+            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
         }),
         deleteBlog: builder.mutation({
             query: (blogId) => ({
                 url: `/blogs/${blogId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Blogs"],
+            invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
         }),
 
         // Notifications
@@ -287,7 +330,7 @@ export const adminApi = createApi({
         getAnalytics: builder.query({
             query: (params = {}) => {
                 const searchParams = new URLSearchParams(params).toString();
-                return `/analytics?${searchParams}`;
+                return `/analytics/summary${searchParams ? `?${searchParams}` : ''}`;
             },
             providesTags: ["Analytics"],
             transformResponse: (response) => response?.data || response,
@@ -538,7 +581,7 @@ export const adminApi = createApi({
                 method: "POST",
                 body: formData,
             }),
-            invalidatesTags: ["Banners"],
+            invalidatesTags: ["Banners"], // Will also invalidate public API cache
         }),
         updateBanner: builder.mutation({
             query: ({ bannerId, formData }) => ({
@@ -546,14 +589,14 @@ export const adminApi = createApi({
                 method: "PUT",
                 body: formData,
             }),
-            invalidatesTags: ["Banners"],
+            invalidatesTags: ["Banners"], // Will also invalidate public API cache
         }),
         deleteBanner: builder.mutation({
             query: (bannerId) => ({
                 url: `/banners/${bannerId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Banners"],
+            invalidatesTags: ["Banners"], // Will also invalidate public API cache
         }),
 
         // Testimonials
@@ -576,7 +619,7 @@ export const adminApi = createApi({
                 method: "POST",
                 body: formData,
             }),
-            invalidatesTags: ["Testimonials"],
+            invalidatesTags: ["Testimonials", "Testimonial"], // Invalidate both admin and public cache
         }),
         updateTestimonial: builder.mutation({
             query: ({ testimonialId, formData }) => ({
@@ -584,14 +627,14 @@ export const adminApi = createApi({
                 method: "PUT",
                 body: formData,
             }),
-            invalidatesTags: ["Testimonials"],
+            invalidatesTags: ["Testimonials", "Testimonial"], // Invalidate both admin and public cache
         }),
         deleteTestimonial: builder.mutation({
             query: (testimonialId) => ({
                 url: `/testimonials/${testimonialId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Testimonials"],
+            invalidatesTags: ["Testimonials", "Testimonial"], // Invalidate both admin and public cache
         }),
 
         // Roles & Permissions
@@ -666,6 +709,41 @@ export const adminApi = createApi({
                 return response;
             },
         }),
+
+        // Payment Management
+        getAllPayments: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/admin/payments?${searchParams}`;
+            },
+            providesTags: ["Payments"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getAllSubscriptions: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/admin/subscriptions?${searchParams}`;
+            },
+            providesTags: ["Subscriptions"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        adminUpdateSubscription: builder.mutation({
+            query: ({ userId, ...data }) => ({
+                url: `/admin/subscriptions/${userId}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["Subscriptions", "Users"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        adminCancelSubscription: builder.mutation({
+            query: (userId) => ({
+                url: `/admin/subscriptions/${userId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Subscriptions", "Users"],
+            transformResponse: (response) => response?.data || response,
+        }),
     }),
 });
 
@@ -679,6 +757,7 @@ export const {
     useApproveCarMutation,
     useFeatureCarMutation,
     useDeleteCarMutation,
+    usePromoteCarMutation,
     useGetAllDealersQuery,
     useVerifyDealerMutation,
     useGetAllCategoriesQuery,
@@ -750,6 +829,10 @@ export const {
     useGetAllInvitesQuery,
     useGetInviteByTokenQuery,
     useAcceptInviteMutation,
+    useGetAllPaymentsQuery,
+    useGetAllSubscriptionsQuery,
+    useAdminUpdateSubscriptionMutation,
+    useAdminCancelSubscriptionMutation,
 } = adminApi;
 
 

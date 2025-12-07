@@ -78,7 +78,7 @@ const Users = () => {
                 <div className="mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Manage regular users (buyers, sellers, dealers). Admin users are managed in Settings.
+                        Manage regular users (individuals, dealers). Admin users are managed in Settings.
                     </p>
                 </div>
 
@@ -99,24 +99,14 @@ const Users = () => {
                                     All Users
                                 </button>
                                 <button
-                                    onClick={() => setRoleFilter("buyer")}
+                                    onClick={() => setRoleFilter("individual")}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        roleFilter === "buyer" 
+                                        roleFilter === "individual" 
                                             ? "bg-primary-500 text-white" 
                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                                 >
-                                    Buyer
-                                </button>
-                                <button
-                                    onClick={() => setRoleFilter("seller")}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        roleFilter === "seller" 
-                                            ? "bg-primary-500 text-white" 
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
-                                >
-                                    Seller
+                                    Individual
                                 </button>
                                 <button
                                     onClick={() => setRoleFilter("dealer")}
@@ -222,10 +212,10 @@ const Users = () => {
                                                 <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
                                                     user.role === 'dealer' ? 'bg-primary-500 text-white' :
                                                     user.role === 'admin' ? 'bg-purple-500 text-white' :
-                                                    user.role === 'seller' ? 'bg-green-500 text-white' :
+                                                    user.role === 'individual' ? 'bg-green-500 text-white' :
                                                     'bg-blue-500 text-white'
                                                 }`}>
-                                                    {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Buyer'}
+                                                    {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Individual'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -327,7 +317,7 @@ const Users = () => {
 const EditUserModal = ({ user, onClose, onUpdate }) => {
     const [formData, setFormData] = useState({
         name: user.name || "",
-        role: user.role || "buyer",
+        role: user.role || "individual",
         status: user.status || "active",
         boostCredits: user.boostCredits || 0,
     });
@@ -344,10 +334,8 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
                 return 'bg-yellow-500 text-white'; // Primary color
             case 'dealer':
                 return 'bg-purple-500 text-white';
-            case 'seller':
+            case 'individual':
                 return 'bg-green-500 text-white';
-            case 'buyer':
-                return 'bg-blue-500 text-white';
             default:
                 return 'bg-gray-500 text-white';
         }
@@ -408,8 +396,7 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
                             >
-                                <option value="buyer">Buyer</option>
-                                <option value="seller">Seller</option>
+                                <option value="individual">Individual</option>
                                 <option value="dealer">Dealer</option>
                                 <option value="admin">Admin</option>
                             </select>

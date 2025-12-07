@@ -1,7 +1,6 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetBlogByIdQuery } from "../../redux/services/api";
-import Spinner from "../../components/Spinner";
 import { formatDate } from "../../utils/format";
 import BlogsHeroSection from "../../components/sections/blogs/BlogsHeroSection";
 
@@ -11,12 +10,22 @@ const BlogDetails = () => {
 
   const blog = data;
 
+  // Show skeleton while loading
   if (isLoading) {
     return (
       <div>
         <BlogsHeroSection />
-        <div className="flex justify-center items-center min-h-[400px]">
-          <Spinner fullScreen={false} />
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-12 bg-gray-200 rounded w-3/4 mb-6"></div>
+            <div className="h-64 bg-gray-200 rounded mb-8"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+          </div>
         </div>
       </div>
     );

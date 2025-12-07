@@ -26,26 +26,53 @@ export const useCarCategories = () => {
     const isLoading = carLoading || locationLoading;
 
     const makes = useMemo(() => {
-        return carCategories.filter(
-            (cat) => cat.subType === "make" && cat.isActive
-        );
+        return carCategories
+            .filter((cat) => cat.subType === "make" && cat.isActive)
+            .sort((a, b) => {
+                // Sort by order field first, then alphabetically
+                const orderA = a.order || 0;
+                const orderB = b.order || 0;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || "").localeCompare(b.name || "");
+            });
     }, [carCategories]);
 
     const models = useMemo(() => {
-        return carCategories.filter(
-            (cat) => cat.subType === "model" && cat.isActive
-        );
+        return carCategories
+            .filter((cat) => cat.subType === "model" && cat.isActive)
+            .sort((a, b) => {
+                const orderA = a.order || 0;
+                const orderB = b.order || 0;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || "").localeCompare(b.name || "");
+            });
     }, [carCategories]);
 
     const years = useMemo(() => {
-        return carCategories.filter(
-            (cat) => cat.subType === "year" && cat.isActive
-        );
+        return carCategories
+            .filter((cat) => cat.subType === "year" && cat.isActive)
+            .sort((a, b) => {
+                // Sort years in descending order (newest first)
+                const yearA = parseInt(a.name) || 0;
+                const yearB = parseInt(b.name) || 0;
+                return yearB - yearA;
+            });
     }, [carCategories]);
 
     const countries = useMemo(() => {
+        return locationCategories
+            .filter((cat) => cat.subType === "country" && cat.isActive)
+            .sort((a, b) => {
+                const orderA = a.order || 0;
+                const orderB = b.order || 0;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || "").localeCompare(b.name || "");
+            });
+    }, [locationCategories]);
+
+    const states = useMemo(() => {
         return locationCategories.filter(
-            (cat) => cat.subType === "country" && cat.isActive
+            (cat) => cat.subType === "state" && cat.isActive
         );
     }, [locationCategories]);
 
@@ -97,6 +124,24 @@ export const useCarCategories = () => {
         return map;
     }, [years]);
 
+    const getStatesByCountry = useMemo(() => {
+        const map = {};
+        states.forEach((state) => {
+            if (!state.parentCategory) return;
+            const countryId =
+                typeof state.parentCategory === "object" && state.parentCategory !== null
+                    ? state.parentCategory._id
+                    : state.parentCategory;
+            if (countryId) {
+                if (!map[countryId]) {
+                    map[countryId] = [];
+                }
+                map[countryId].push(state);
+            }
+        });
+        return map;
+    }, [states]);
+
     const getCitiesByCountry = useMemo(() => {
         const map = {};
         cities.forEach((city) => {
@@ -115,8 +160,50 @@ export const useCarCategories = () => {
                 map[countryId].push(city);
             }
         });
+        // Sort cities within each country
+        Object.keys(map).forEach(countryId => {
+            map[countryId].sort((a, b) => {
+                const orderA = a.order || 0;
+                const orderB = b.order || 0;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || "").localeCompare(b.name || "");
+            });
+        });
         return map;
     }, [cities]);
+
+    const getCitiesByState = useMemo(() => {
+        const map = {};
+        cities.forEach((city) => {
+            if (!city.parentCategory) return;
+            // Check if parent is a state (not country)
+            const parentId =
+                typeof city.parentCategory === "object" && city.parentCategory !== null
+                    ? city.parentCategory._id
+                    : city.parentCategory;
+            // Check if parent is a state by checking if it exists in states
+            const isStateParent = states.some(s => 
+                (typeof s._id === 'string' ? s._id : s._id?.toString()) === 
+                (typeof parentId === 'string' ? parentId : parentId?.toString())
+            );
+            if (isStateParent && parentId) {
+                if (!map[parentId]) {
+                    map[parentId] = [];
+                }
+                map[parentId].push(city);
+            }
+        });
+        // Sort cities within each state
+        Object.keys(map).forEach(stateId => {
+            map[stateId].sort((a, b) => {
+                const orderA = a.order || 0;
+                const orderB = b.order || 0;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || "").localeCompare(b.name || "");
+            });
+        });
+        return map;
+    }, [cities, states]);
 
     // Debug logging (remove in production)
     useEffect(() => {
@@ -139,10 +226,13 @@ export const useCarCategories = () => {
         models,
         years,
         countries,
+        states,
         cities,
         getModelsByMake,
         getYearsByModel,
+        getStatesByCountry,
         getCitiesByCountry,
+        getCitiesByState,
         isLoading,
     };
 };

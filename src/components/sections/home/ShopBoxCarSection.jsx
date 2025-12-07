@@ -17,7 +17,7 @@ const ShopBoxCar = () => {
     <section className="px-4 md:px-20 py-12 bg-[#F9FAFB] w-full flex items-center gap-10 md:flex-row flex-col">
       <div className=" md:w-[70%] w-full">
       <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
-        Shop BoxCar Your Way
+        Shop Sello Your Way
       </h2>
 
       {/* Tabs */}

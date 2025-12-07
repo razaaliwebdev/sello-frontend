@@ -6,13 +6,22 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
   const sliderRef = useRef(null);
   const navigate = useNavigate();
   
-  // Fetch brands from admin categories
+  // Fetch brands from admin categories - always prioritize admin data
   const { makes, isLoading } = useCarCategories();
   
-  // Use categories if available, otherwise fall back to prop brands
-  const brands = makes && makes.length > 0 
-    ? makes.filter(brand => brand.isActive && brand.image) // Only show active brands with images
-    : propBrands;
+  // Always use admin categories if available (even if empty), only fall back to prop brands if no makes at all
+  const brands = useMemo(() => {
+    // If we have makes from admin, use them (filter for active ones with images)
+    if (makes && makes.length > 0) {
+      // Filter for active brands with images, then sort by order field
+      return makes
+        .filter(brand => brand.isActive && brand.image)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+    // Only use prop brands if admin categories haven't loaded yet or are empty
+    // This ensures admin-uploaded logos always take precedence
+    return propBrands || [];
+  }, [makes, propBrands]);
 
   // For infinite scroll marquee, we need duplicates for seamless loop
   // Only duplicate if we have multiple brands (for single brand, no need to duplicate)
@@ -120,10 +129,11 @@ const BrandMarquee = ({ brands: propBrands = [] }) => {
                         src={brandImage}
                         alt={brandName}
                         className="object-contain w-full h-full max-h-16 md:max-h-20"
+                        loading="lazy"
                         onError={(e) => {
-                          e.target.src = "/fallback-logo.png";
-                          e.target.className =
-                            "object-contain w-full h-full max-h-16 md:max-h-20 opacity-50";
+                          // Hide broken images instead of showing fallback
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = '<div class="text-gray-400 text-xs">No Image</div>';
                         }}
                       />
                     </div>
