@@ -1,9 +1,9 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Use environment variable or default to port 3000 (matching server .env)
-// Note: Server defaults to 4000 if PORT not set, but .env has PORT=3000
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Use environment variable or default to port 3000 (matching server)
+// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const api = createApi({
     reducerPath: "api",
@@ -148,7 +148,7 @@ export const api = createApi({
                 // Backend error format: { success: false, message: "...", error: "..." }
                 // RTK Query wraps it in response.data
                 const errorData = response?.data || response;
-                
+
                 // Return a consistent error structure
                 return {
                     status: response?.status || 'FETCH_ERROR',
