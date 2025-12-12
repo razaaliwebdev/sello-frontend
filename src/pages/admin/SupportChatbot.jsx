@@ -32,7 +32,7 @@ const SupportChatbot = () => {
     const typingTimeoutRef = useRef(null);
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
     const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
 
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery({
@@ -162,7 +162,7 @@ const SupportChatbot = () => {
             const messagesArray = Array.isArray(messagesData) 
                 ? messagesData 
                 : (messagesData?.data || []);
-            console.log('Loading support messages:', messagesArray.length);
+            // Load messages
             // Filter out temporary messages when loading new data
             setMessages(prev => {
                 const filteredPrev = prev.filter(msg => !msg._id?.startsWith('temp-'));
@@ -257,7 +257,7 @@ const SupportChatbot = () => {
                 toast.success("Message sent");
             }
         } catch (error) {
-            console.error('Error sending message:', error);
+            // Error handled by toast
             toast.error(error?.data?.message || "Failed to send message");
         }
     };

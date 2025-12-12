@@ -259,10 +259,14 @@ const RoleForm = ({ role, onSuccess, onCancel }) => {
 
     setLoading(true);
     try {
-      const url = `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles${role ? `/${role._id}` : ""}`;
+      const token = localStorage.getItem("token");
+      const url = `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles${role ? `/${role._id}` : ""}`;
       const method = role ? "put" : "post";
 
-      const response = await axios[method](url, submitData, { withCredentials: true });
+      const response = await axios[method](url, submitData, { 
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       if (response.data.success) {
         toast.success(`Role ${role ? "updated" : "created"} successfully!`);

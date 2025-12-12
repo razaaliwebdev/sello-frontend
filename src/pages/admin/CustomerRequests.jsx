@@ -11,6 +11,7 @@ import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiSearch, FiEdit2, FiTrash2, FiMessageSquare, FiClock, FiCheckCircle, FiEye, FiUser, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const CustomerRequests = () => {
     const [activeTab, setActiveTab] = useState("all");
@@ -19,6 +20,8 @@ const CustomerRequests = () => {
     const [showResponseModal, setShowResponseModal] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [requestToDelete, setRequestToDelete] = useState(null);
 
     const { data: stats } = useGetCustomerRequestStatisticsQuery();
     const { data: requestsData, isLoading, refetch: refetchRequests } = useGetAllCustomerRequestsQuery(
@@ -76,15 +79,22 @@ const CustomerRequests = () => {
         }
     };
 
-    const handleDelete = async (requestId) => {
-        if (!window.confirm("Are you sure you want to delete this request?")) return;
+    const handleDelete = (requestId) => {
+        setRequestToDelete(requestId);
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!requestToDelete) return;
         try {
-            await deleteRequest(requestId).unwrap();
+            await deleteRequest(requestToDelete).unwrap();
             toast.success("Request deleted successfully");
             refetchRequests();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete request");
+        } finally {
+            setShowDeleteModal(false);
+            setRequestToDelete(null);
         }
     };
 
@@ -626,6 +636,20 @@ const CustomerRequests = () => {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setRequestToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Customer Request"
+                message="Are you sure you want to delete this customer request? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

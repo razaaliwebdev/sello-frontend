@@ -4,7 +4,7 @@ import { images } from '../../../assets/assets';
 
 const Video = () =>{
     return (
-        <div className='bg-gray-100 w-full px-4 flex flex-col md:flex-row gap-10 md:px-16 py-8 md:py-24'>
+        <div className='bg-gray-100 w-full px-4 flex flex-col md:flex-row gap-10 md:px-16 my-14 py-8 md:py-24'>
             <div className="vido md:w-1/2 border-2 border-primary/70 rounded">
                 <video src={images.selloVido} muted loop className='' autoPlay></video>
             </div>
@@ -19,8 +19,8 @@ const Video = () =>{
                             " List your car for sale in Karachi, Islamabad, and other major cities",
                             "Reach thousands of buyers searching for cars for sale in Pakistan",
                             "Fast inspections and fair, transparent valuations"
-                        ].map((list) => (
-                            <li className='flex items-center gap-2 my-2'> <FaCheck className='md:w-7 w-5 md:h-7 h-5 rounded-full bg-white text-green-400 p-1 shadow-md '/> {list}</li>
+                        ].map((list, index) => (
+                            <li key={index} className='flex items-center gap-2 my-2'> <FaCheck className='md:w-7 w-5 md:h-7 h-5 rounded-full bg-white text-green-400 p-1 shadow-md '/> {list}</li>
                         ))
                     }
                 </ul>

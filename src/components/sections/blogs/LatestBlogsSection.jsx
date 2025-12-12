@@ -75,7 +75,7 @@ const LatestBlogsSection = () => {
                 {latestBlog.excerpt || latestBlog.content?.replace(/<[^>]*>/g, '').substring(0, 200) + "..."}
               </p>
               <Link
-                to={`/blog/${latestBlog._id}`}
+                to={`/blog/${latestBlog.slug || latestBlog._id}`}
                 className="inline-block px-5 md:px-6 py-2 text-base md:text-lg font-medium bg-primary-500 text-white rounded-lg my-5 hover:opacity-90"
               >
                 Read more
@@ -105,7 +105,7 @@ const LatestBlogsSection = () => {
                 </span>{" "}
                 | {formatDate(blog.publishedAt || blog.createdAt)}
               </div>
-              <Link to={`/blog/${blog._id}`}>
+              <Link to={`/blog/${blog.slug || blog._id}`}>
                 <h3 className="text-2xl md:text-3xl font-semibold pr-0 md:pr-7 hover:text-primary-500 transition-colors">
                   {blog.title}
                 </h3>
@@ -115,7 +115,7 @@ const LatestBlogsSection = () => {
 
           {/* Highlighted blog */}
           {highlightedBlog && (
-            <Link to={`/blog/${highlightedBlog._id}`}>
+            <Link to={`/blog/${highlightedBlog.slug || highlightedBlog._id}`}>
               <div className="bg-primary-500 flex items-start justify-center flex-col my-10 rounded-tr-[40px] rounded-bl-[40px] px-5 py-3 hover:opacity-90 transition-opacity">
                 <div className="py-3 text-gray-50 text-sm md:text-base">
                   By{" "}

@@ -17,6 +17,8 @@ const Promotions = () => {
     const [createPromotion, { isLoading: isCreating }] = useCreatePromotionMutation();
     const [updatePromotion, { isLoading: isUpdating }] = useUpdatePromotionMutation();
     const [deletePromotion] = useDeletePromotionMutation();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [promotionToDelete, setPromotionToDelete] = useState(null);
 
     const promotions = data?.promotions || [];
 
@@ -120,14 +122,21 @@ const Promotions = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (promotionId) => {
-        if (!window.confirm("Are you sure you want to delete this promotion?")) return;
-        
+    const handleDelete = (promotionId) => {
+        setPromotionToDelete(promotionId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!promotionToDelete) return;
         try {
-            await deletePromotion(promotionId).unwrap();
+            await deletePromotion(promotionToDelete).unwrap();
             toast.success("Promotion deleted successfully");
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete promotion");
+        } finally {
+            setShowDeleteModal(false);
+            setPromotionToDelete(null);
         }
     };
 
@@ -517,6 +526,20 @@ const Promotions = () => {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setPromotionToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Promotion"
+                message="Are you sure you want to delete this promotion? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

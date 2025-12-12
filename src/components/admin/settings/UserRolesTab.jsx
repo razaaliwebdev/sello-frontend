@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { FaPlus, FaUserPlus, FaEdit, FaTrash, FaShieldAlt, FaUserShield } from "react-icons/fa";
 import InviteUserModal from "./InviteUserModal";
 import RoleForm from "./RoleForm";
+import ConfirmModal from "../ConfirmModal";
 
 const UserRolesTab = () => {
   const [activeSection, setActiveSection] = useState("users"); // 'users' or 'roles'
@@ -17,19 +18,25 @@ const UserRolesTab = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isRoleFormOpen, setIsRoleFormOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       // Fetch all admin users (including team members) - fetch with high limit to get all
+      const token = localStorage.getItem("token");
       const usersRes = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/admin/users?role=admin&limit=1000`,
-        { withCredentials: true }
+        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/admin/users?role=admin&limit=1000`,
+        { 
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       
       const [rolesRes, invitesRes] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles`, { withCredentials: true }),
-        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles/invites/all`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles`, { withCredentials: true }),
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/invites/all`, { withCredentials: true })
       ]);
 
       if (usersRes.data.success) {
@@ -54,7 +61,6 @@ const UserRolesTab = () => {
         setInvites(Array.isArray(invitesData) ? invitesData : []);
       }
     } catch (error) {
-      console.error("Fetch Data Error:", error);
       toast.error(error.response?.data?.message || "Failed to load data");
     } finally {
       setLoading(false);
@@ -87,13 +93,21 @@ const UserRolesTab = () => {
     setIsRoleFormOpen(true);
   };
 
-  const handleDeleteRole = async (roleId) => {
-    if (!window.confirm("Are you sure you want to delete this role? This action cannot be undone.")) return;
+  const handleDeleteRole = (roleId) => {
+    setRoleToDelete(roleId);
+    setShowDeleteModal(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!roleToDelete) return;
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/roles/${roleId}`,
-        { withCredentials: true }
+        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/roles/${roleToDelete}`,
+        { 
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       if (response.data.success) {
@@ -102,6 +116,9 @@ const UserRolesTab = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete role");
+    } finally {
+      setShowDeleteModal(false);
+      setRoleToDelete(null);
     }
   };
 
@@ -431,6 +448,20 @@ const UserRolesTab = () => {
         onClose={() => setIsInviteModalOpen(false)} 
         onInviteSuccess={fetchData}
         roles={roles}
+      />
+
+      {/* Delete Role Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setRoleToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Role"
+        message="Are you sure you want to delete this role? This action cannot be undone. Users with this role will need to be reassigned."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );

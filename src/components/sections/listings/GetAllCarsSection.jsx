@@ -268,6 +268,15 @@ const GetAllCarsSection = () => {
                           FEATURED
                         </div>
                       )}
+                      {/* Verified Dealer Badge */}
+                      {car?.postedBy?.role === "dealer" && car?.postedBy?.dealerInfo?.verified && !car?.isSold && (
+                        <div className={`absolute ${car?.featured || car?.isBoosted ? 'top-14' : 'top-4'} left-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold z-10 flex items-center gap-1 shadow-lg`}>
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          VERIFIED DEALER
+                        </div>
+                      )}
                       <button
                         onClick={(e) => toggleSave(carId, e)}
                         disabled={isSaving || isUnsaving}
@@ -283,6 +292,19 @@ const GetAllCarsSection = () => {
                     </div>
 
                     <div className="p-5">
+                      {/* Dealer Badge in Card */}
+                      {car?.postedBy?.role === "dealer" && 
+                       car?.postedBy?.dealerInfo && 
+                       car?.postedBy?.dealerInfo?.verified && (
+                        <div className="mb-2 flex items-center gap-1">
+                          <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-xs font-semibold text-green-600">
+                            {car?.postedBy?.dealerInfo?.businessName || "Verified Dealer"}
+                          </span>
+                        </div>
+                      )}
                       <h4 className="md:text-xl text-lg font-medium">
                         {carMake} {carModel} - {carYear}
                       </h4>

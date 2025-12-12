@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Use environment variable or default to port 3000 (matching server .env)
-// Note: Server defaults to 4000 if PORT not set, but .env has PORT=3000
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Use environment variable or default to match api.js BASE_URL
+// Note: Should match the production backend URL or localhost for development
+// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
+
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
@@ -15,21 +18,60 @@ export const adminApi = createApi({
                     const token = localStorage.getItem("token");
                     if (token) {
                         headers.set("Authorization", `Bearer ${token}`);
+                    } else {
+                        // Log warning if no token found for admin endpoints
+                        if (endpoint && (endpoint.includes("admin") || endpoint.includes("dashboard"))) {
+                            console.warn("⚠️ No token found for admin API request:", endpoint);
+                        }
                     }
                     headers.set("Content-Type", "application/json");
                     // Don't set Content-Type for FormData - browser will set it with boundary
                     // RTK Query will handle this automatically
                     return headers;
                 },
+                // Add credentials to ensure cookies are sent if backend uses them
+                credentials: "include",
             })(args, api, extraOptions);
 
             // Handle 401 errors - token expired or invalid
             if (baseResult.error && baseResult.error.status === 401) {
                 const url = args?.url || '';
+                const token = localStorage.getItem("token");
+                const errorData = baseResult.error?.data || {};
+
+                // Log detailed error information for debugging
+                console.error("⚠️ 401 Unauthorized error:", {
+                    url,
+                    hasToken: !!token,
+                    tokenLength: token?.length,
+                    tokenPreview: token ? `${token.substring(0, 20)}...` : 'N/A',
+                    errorMessage: errorData?.message,
+                    errorData: errorData,
+                });
+
                 // Only clear token for auth-related endpoints
                 if (url.includes('/admin/') || url.includes('/auth/')) {
+                    console.warn("⚠️ Clearing token due to 401 error on:", url);
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
+
+                    // Return a modified error that components can handle
+                    baseResult.error = {
+                        ...baseResult.error,
+                        data: {
+                            ...baseResult.error.data,
+                            message: errorData?.message || "Authentication failed. Please login again.",
+                            shouldRedirect: true
+                        }
+                    };
+                }
+
+                // Ensure error message is properly extracted from backend response
+                if (errorData.message && !baseResult.error.data.message) {
+                    baseResult.error.data = {
+                        ...baseResult.error.data,
+                        message: errorData.message
+                    };
                 }
                 // Don't redirect automatically - let components handle it
             }
@@ -64,13 +106,25 @@ export const adminApi = createApi({
             };
         }
     },
-    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials", "Roles", "Invites"],
+    tagTypes: ["Admin", "Users", "Cars", "Dealers", "Categories", "Blogs", "Notifications", "Chats", "Analytics", "Settings", "Promotions", "SupportChat", "ContactForms", "CustomerRequests", "Banners", "Testimonials", "Roles", "Invites", "SubscriptionPlans"],
     endpoints: (builder) => ({
         // Dashboard
         getDashboardStats: builder.query({
             query: () => "/admin/dashboard",
             providesTags: ["Admin"],
             transformResponse: (response) => response?.data || response,
+            transformErrorResponse: (response, meta, arg) => {
+                // Handle error responses from backend
+                const errorData = response?.data || response;
+                return {
+                    status: response?.status || 'FETCH_ERROR',
+                    data: {
+                        message: errorData?.message || "Failed to load dashboard data",
+                        error: errorData?.error
+                    },
+                    originalStatus: response?.status
+                };
+            },
         }),
 
         // Users
@@ -168,7 +222,7 @@ export const adminApi = createApi({
                 method: "PUT",
                 body: { verified },
             }),
-            invalidatesTags: ["Dealers"],
+            invalidatesTags: ["Dealers", "Users"], // Also invalidate Users so dealer dashboard refreshes
         }),
 
         // Categories
@@ -230,6 +284,7 @@ export const adminApi = createApi({
                 body: formData,
             }),
             invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            transformResponse: (response) => response?.data || response,
         }),
         updateBlog: builder.mutation({
             query: ({ blogId, formData }) => ({
@@ -238,6 +293,7 @@ export const adminApi = createApi({
                 body: formData,
             }),
             invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            transformResponse: (response) => response?.data || response,
         }),
         deleteBlog: builder.mutation({
             query: (blogId) => ({
@@ -245,6 +301,7 @@ export const adminApi = createApi({
                 method: "DELETE",
             }),
             invalidatesTags: ["Blogs", "Blog"], // Invalidate both admin and public cache
+            transformResponse: (response) => response?.data || response,
         }),
 
         // Notifications
@@ -484,11 +541,23 @@ export const adminApi = createApi({
         // Contact Forms
         getAllContactForms: builder.query({
             query: (params = {}) => {
-                const searchParams = new URLSearchParams(params).toString();
-                return `/contact-form?${searchParams}`;
+                // Remove undefined values
+                const cleanParams = Object.fromEntries(
+                    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+                );
+                const searchParams = new URLSearchParams(cleanParams).toString();
+                return `/contact-form${searchParams ? `?${searchParams}` : ''}`;
             },
             providesTags: ["ContactForms"],
-            transformResponse: (response) => response?.data || response,
+            transformResponse: (response, meta, arg) => {
+                // Backend returns: { success: true, data: { contactForms: [...], pagination: {...} } }
+                // Return the data object directly so contactForms and pagination are accessible
+                if (response && response.data) {
+                    return response.data;
+                }
+                // Fallback: if response is already the data object
+                return response;
+            },
         }),
         getContactFormById: builder.query({
             query: (id) => `/contact-form/${id}`,
@@ -744,6 +813,51 @@ export const adminApi = createApi({
             invalidatesTags: ["Subscriptions", "Users"],
             transformResponse: (response) => response?.data || response,
         }),
+
+        // Subscription Plans Management
+        getAllSubscriptionPlans: builder.query({
+            query: (params = {}) => {
+                const searchParams = new URLSearchParams(params).toString();
+                return `/subscription-plans?${searchParams}`;
+            },
+            providesTags: ["SubscriptionPlans"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        getSubscriptionPlanById: builder.query({
+            query: (planId) => `/subscription-plans/${planId}`,
+            providesTags: ["SubscriptionPlans"],
+            transformResponse: (response) => response?.data || response,
+        }),
+        createSubscriptionPlan: builder.mutation({
+            query: (data) => ({
+                url: "/subscription-plans",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["SubscriptionPlans"],
+        }),
+        updateSubscriptionPlan: builder.mutation({
+            query: ({ planId, ...data }) => ({
+                url: `/subscription-plans/${planId}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["SubscriptionPlans"],
+        }),
+        deleteSubscriptionPlan: builder.mutation({
+            query: (planId) => ({
+                url: `/subscription-plans/${planId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["SubscriptionPlans"],
+        }),
+        toggleSubscriptionPlanStatus: builder.mutation({
+            query: (planId) => ({
+                url: `/subscription-plans/${planId}/toggle`,
+                method: "PATCH",
+            }),
+            invalidatesTags: ["SubscriptionPlans"],
+        }),
     }),
 });
 
@@ -833,6 +947,12 @@ export const {
     useGetAllSubscriptionsQuery,
     useAdminUpdateSubscriptionMutation,
     useAdminCancelSubscriptionMutation,
+    useGetAllSubscriptionPlansQuery,
+    useGetSubscriptionPlanByIdQuery,
+    useCreateSubscriptionPlanMutation,
+    useUpdateSubscriptionPlanMutation,
+    useDeleteSubscriptionPlanMutation,
+    useToggleSubscriptionPlanStatusMutation,
 } = adminApi;
 
 

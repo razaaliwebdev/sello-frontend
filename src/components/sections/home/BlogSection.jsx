@@ -65,7 +65,7 @@ const BlogSection = () => {
           {blogs.map((blog) => (
             <Link
               key={blog._id}
-              to={`/blog/${blog._id}`}
+              to={`/blog/${blog.slug || blog._id}`}
               className="md:w-[390px] w-full min-w-[85vw] md:min-w-[390px] bg-white rounded-lg px-6 py-6 flex-shrink-0 overflow-hidden shadow-md hover:shadow-lg transition-shadow"
             >
               <img

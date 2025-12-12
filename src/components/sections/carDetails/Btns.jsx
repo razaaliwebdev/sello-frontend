@@ -16,9 +16,10 @@ import { FaHeart, FaRegHeart, FaShareAlt, FaPhone, FaCommentDots } from "react-i
 const Btns = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const token = localStorage.getItem("token");
   const { data: car } = useGetSingleCarQuery(id, { skip: !id });
-  const { data: currentUser } = useGetMeQuery();
-  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, { skip: !currentUser });
+  const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
+  const { data: savedCarsData } = useGetSavedCarsQuery(undefined, { skip: !currentUser || !token });
   const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
   const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
   const [trackRecentlyViewed] = useTrackRecentlyViewedMutation();

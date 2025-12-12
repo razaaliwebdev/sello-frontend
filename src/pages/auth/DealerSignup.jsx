@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import HeaderLogo from "../../components/utils/HeaderLogo";
-import { FaRegEye, FaRegEyeSlash, FaUpload } from "react-icons/fa";
+import { FaRegEye, FaRegEyeSlash, FaUpload, FaPlus, FaTimes } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -15,7 +15,11 @@ const DealerSignup = ({ onBack }) => {
   const [avatar, setAvatar] = useState(null);
   const [cnicFile, setCnicFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
+  
   const [formData, setFormData] = useState({
+    // Step 1: Basic Information
     dealerName: "",
     ownerFullName: "",
     mobileNumber: "",
@@ -26,8 +30,27 @@ const DealerSignup = ({ onBack }) => {
     vehicleTypes: "",
     password: "",
     confirmPassword: "",
+    
+    // Step 2: Business Details
+    description: "",
+    website: "",
+    establishedYear: "",
+    employeeCount: "",
+    specialties: [],
+    languages: [],
+    paymentMethods: [],
+    services: [],
+    facebook: "",
+    instagram: "",
+    twitter: "",
+    linkedin: "",
   });
+  
   const [errors, setErrors] = useState({});
+  const [specialtyInput, setSpecialtyInput] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+  const [paymentMethodInput, setPaymentMethodInput] = useState("");
+  const [serviceInput, setServiceInput] = useState("");
 
   const [registerUser] = useRegisterUserMutation();
   const navigate = useNavigate();
@@ -36,6 +59,12 @@ const DealerSignup = ({ onBack }) => {
     "Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", 
     "Fujairah", "Umm Al Quwain", "Al Ain"
   ];
+
+  const employeeCountOptions = ["1-10", "11-50", "51-100", "100+"];
+  const commonSpecialties = ["Luxury Cars", "Budget Cars", "Electric Vehicles", "SUVs", "Sports Cars", "Classic Cars", "Commercial Vehicles"];
+  const commonLanguages = ["English", "Arabic", "Urdu", "Hindi", "French", "Spanish"];
+  const commonPaymentMethods = ["Cash", "Credit Card", "Bank Transfer", "Cheque", "Financing Available"];
+  const commonServices = ["Financing", "Trade-in", "Warranty", "Insurance", "Delivery", "Test Drive"];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,76 +85,75 @@ const DealerSignup = ({ onBack }) => {
     }
   };
 
-  const validateForm = () => {
+  const addToArray = (field, input, setInput) => {
+    if (input.trim() && !formData[field].includes(input.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: [...prev[field], input.trim()]
+      }));
+      setInput("");
+    }
+  };
+
+  const removeFromArray = (field, item) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((i) => i !== item)
+    }));
+  };
+
+  const validateStep1 = () => {
     const newErrors = {};
-
-    if (!formData.dealerName.trim()) {
-      newErrors.dealerName = "Dealer/Showroom name is required";
-    }
-
-    if (!formData.ownerFullName.trim()) {
-      newErrors.ownerFullName = "Owner full name is required";
-    }
-
-    if (!formData.mobileNumber.trim()) {
-      newErrors.mobileNumber = "Mobile number is required";
-    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.mobileNumber.trim())) {
-      newErrors.mobileNumber = "Please enter a valid mobile number";
-    }
-
-    if (!formData.whatsappNumber.trim()) {
-      newErrors.whatsappNumber = "WhatsApp number is required";
-    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.whatsappNumber.trim())) {
-      newErrors.whatsappNumber = "Please enter a valid WhatsApp number";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email address is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.city) {
-      newErrors.city = "City is required";
-    }
-
-    if (!formData.area.trim()) {
-      newErrors.area = "Area is required";
-    }
-
-    if (!formData.vehicleTypes.trim()) {
-      newErrors.vehicleTypes = "Type of vehicles is required";
-    }
-
-    if (!cnicFile) {
-      newErrors.cnicFile = "CNIC/Business License is required";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
+    if (!formData.dealerName.trim()) newErrors.dealerName = "Dealer/Showroom name is required";
+    if (!formData.ownerFullName.trim()) newErrors.ownerFullName = "Owner full name is required";
+    if (!formData.mobileNumber.trim()) newErrors.mobileNumber = "Mobile number is required";
+    if (!formData.whatsappNumber.trim()) newErrors.whatsappNumber = "WhatsApp number is required";
+    if (!formData.email.trim()) newErrors.email = "Email address is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) newErrors.email = "Please enter a valid email address";
+    if (!formData.city) newErrors.city = "City is required";
+    if (!formData.area.trim()) newErrors.area = "Area is required";
+    if (!formData.vehicleTypes.trim()) newErrors.vehicleTypes = "Type of vehicles is required";
+    if (!cnicFile) newErrors.cnicFile = "CNIC/Business License is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleNext = () => {
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+      } else {
+        toast.error("Please fix the errors in the form");
+      }
+    } else if (currentStep === 2) {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (currentStep < totalSteps) {
+      handleNext();
+      return;
+    }
 
-    if (!validateForm()) {
+    if (!validateStep1()) {
       toast.error("Please fix the errors in the form");
       return;
     }
 
-    // Create default avatar if none provided
     let avatarFile = avatar;
     if (!avatarFile) {
       const canvas = document.createElement("canvas");
@@ -158,7 +186,7 @@ const DealerSignup = ({ onBack }) => {
     registrationData.append("role", "dealer");
     registrationData.append("avatar", avatarFile);
     
-    // Dealer-specific information
+    // Basic dealer information
     registrationData.append("dealerName", formData.dealerName);
     registrationData.append("mobileNumber", formData.mobileNumber);
     registrationData.append("whatsappNumber", formData.whatsappNumber);
@@ -166,25 +194,25 @@ const DealerSignup = ({ onBack }) => {
     registrationData.append("area", formData.area);
     registrationData.append("vehicleTypes", formData.vehicleTypes);
     registrationData.append("cnicFile", cnicFile);
+    
+    // Enhanced dealer information
+    if (formData.description) registrationData.append("description", formData.description);
+    if (formData.website) registrationData.append("website", formData.website);
+    if (formData.establishedYear) registrationData.append("establishedYear", formData.establishedYear);
+    if (formData.employeeCount) registrationData.append("employeeCount", formData.employeeCount);
+    if (formData.specialties.length > 0) registrationData.append("specialties", JSON.stringify(formData.specialties));
+    if (formData.languages.length > 0) registrationData.append("languages", JSON.stringify(formData.languages));
+    if (formData.paymentMethods.length > 0) registrationData.append("paymentMethods", JSON.stringify(formData.paymentMethods));
+    if (formData.services.length > 0) registrationData.append("services", JSON.stringify(formData.services));
+    if (formData.facebook) registrationData.append("facebook", formData.facebook);
+    if (formData.instagram) registrationData.append("instagram", formData.instagram);
+    if (formData.twitter) registrationData.append("twitter", formData.twitter);
+    if (formData.linkedin) registrationData.append("linkedin", formData.linkedin);
 
     try {
       setLoading(true);
       const res = await registerUser(registrationData).unwrap();
       toast.success("Dealer registration submitted successfully! Pending admin verification.");
-      setFormData({
-        dealerName: "",
-        ownerFullName: "",
-        mobileNumber: "",
-        whatsappNumber: "",
-        email: "",
-        city: "",
-        area: "",
-        vehicleTypes: "",
-        password: "",
-        confirmPassword: "",
-      });
-      setAvatar(null);
-      setCnicFile(null);
       navigate("/login");
     } catch (err) {
       toast.error(err?.data?.message || "Registration failed");
@@ -196,10 +224,13 @@ const DealerSignup = ({ onBack }) => {
   return (
     <>
       <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl my-8">
+        <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl my-8">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-3xl font-bold text-gray-800">Dealer Registration</h2>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Dealer Registration</h2>
+              <p className="text-sm text-gray-500 mt-1">Step {currentStep} of {totalSteps}</p>
+            </div>
             {onBack && (
               <button
                 onClick={onBack}
@@ -210,314 +241,764 @@ const DealerSignup = ({ onBack }) => {
             )}
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+          {/* Progress Bar */}
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              {[1, 2, 3].map((step) => (
+                <div key={step} className="flex items-center flex-1">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                    currentStep >= step 
+                      ? "bg-primary-500 border-primary-500 text-white" 
+                      : "bg-white border-gray-300 text-gray-400"
+                  }`}>
+                    {step}
+                  </div>
+                  {step < 3 && (
+                    <div className={`flex-1 h-1 mx-2 ${
+                      currentStep > step ? "bg-primary-500" : "bg-gray-300"
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>Basic Info</span>
+              <span>Business Details</span>
+              <span>Review & Submit</span>
+            </div>
+          </div>
+
+          <div className="p-6 overflow-y-auto max-h-[calc(100vh-300px)]">
             <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-              {/* Row 1: Dealer Name & Owner Name */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dealer/Showroom Name *
-                  </label>
-                  <input
-                    name="dealerName"
-                    value={formData.dealerName}
-                    onChange={handleChange}
-                    className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      errors.dealerName ? "border-red-500" : "border-gray-300"
-                    }`}
-                    type="text"
-                    placeholder="Enter dealer/showroom name"
-                  />
-                  {errors.dealerName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.dealerName}</p>
-                  )}
-                </div>
+              {/* Step 1: Basic Information */}
+              {currentStep === 1 && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Basic Information</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Dealer/Showroom Name *
+                      </label>
+                      <input
+                        name="dealerName"
+                        value={formData.dealerName}
+                        onChange={handleChange}
+                        className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                          errors.dealerName ? "border-red-500" : "border-gray-300"
+                        }`}
+                        type="text"
+                        placeholder="Enter dealer/showroom name"
+                      />
+                      {errors.dealerName && (
+                        <p className="text-red-500 text-xs mt-1">{errors.dealerName}</p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Owner Full Name *
-                  </label>
-                  <input
-                    name="ownerFullName"
-                    value={formData.ownerFullName}
-                    onChange={handleChange}
-                    className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      errors.ownerFullName ? "border-red-500" : "border-gray-300"
-                    }`}
-                    type="text"
-                    placeholder="Enter owner full name"
-                  />
-                  {errors.ownerFullName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.ownerFullName}</p>
-                  )}
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Owner Full Name *
+                      </label>
+                      <input
+                        name="ownerFullName"
+                        value={formData.ownerFullName}
+                        onChange={handleChange}
+                        className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                          errors.ownerFullName ? "border-red-500" : "border-gray-300"
+                        }`}
+                        type="text"
+                        placeholder="Enter owner full name"
+                      />
+                      {errors.ownerFullName && (
+                        <p className="text-red-500 text-xs mt-1">{errors.ownerFullName}</p>
+                      )}
+                    </div>
+                  </div>
 
-              {/* Row 2: Mobile & WhatsApp */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobile Number *
-                  </label>
-                  <input
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleChange}
-                    className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      errors.mobileNumber ? "border-red-500" : "border-gray-300"
-                    }`}
-                    type="tel"
-                    placeholder="+971 XX XXX XXXX"
-                  />
-                  {errors.mobileNumber && (
-                    <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>
-                  )}
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Mobile Number *
+                      </label>
+                      <input
+                        name="mobileNumber"
+                        value={formData.mobileNumber}
+                        onChange={handleChange}
+                        className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                          errors.mobileNumber ? "border-red-500" : "border-gray-300"
+                        }`}
+                        type="tel"
+                        placeholder="+971 XX XXX XXXX"
+                      />
+                      {errors.mobileNumber && (
+                        <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    WhatsApp Number *
-                  </label>
-                  <input
-                    name="whatsappNumber"
-                    value={formData.whatsappNumber}
-                    onChange={handleChange}
-                    className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      errors.whatsappNumber ? "border-red-500" : "border-gray-300"
-                    }`}
-                    type="tel"
-                    placeholder="+971 XX XXX XXXX"
-                  />
-                  {errors.whatsappNumber && (
-                    <p className="text-red-500 text-xs mt-1">{errors.whatsappNumber}</p>
-                  )}
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        WhatsApp Number *
+                      </label>
+                      <input
+                        name="whatsappNumber"
+                        value={formData.whatsappNumber}
+                        onChange={handleChange}
+                        className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                          errors.whatsappNumber ? "border-red-500" : "border-gray-300"
+                        }`}
+                        type="tel"
+                        placeholder="+971 XX XXX XXXX"
+                      />
+                      {errors.whatsappNumber && (
+                        <p className="text-red-500 text-xs mt-1">{errors.whatsappNumber}</p>
+                      )}
+                    </div>
+                  </div>
 
-              {/* Row 3: Email (Full Width) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address *
-                </label>
-                <input
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  }`}
-                  type="email"
-                  placeholder="Enter your email address"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Row 4: City & Area */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City & Area *
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="city"
-                      value={formData.city}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none ${
-                        errors.city ? "border-red-500" : "border-gray-300"
+                      className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                        errors.email ? "border-red-500" : "border-gray-300"
                       }`}
+                      type="email"
+                      placeholder="Enter your email address"
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        City *
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="city"
+                          value={formData.city}
+                          onChange={handleChange}
+                          className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none ${
+                            errors.city ? "border-red-500" : "border-gray-300"
+                          }`}
+                        >
+                          <option value="">Select City</option>
+                          {cities.map((city) => (
+                            <option key={city} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                        </select>
+                        <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
+                      {errors.city && (
+                        <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Area *
+                      </label>
+                      <input
+                        name="area"
+                        value={formData.area}
+                        onChange={handleChange}
+                        className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                          errors.area ? "border-red-500" : "border-gray-300"
+                        }`}
+                        type="text"
+                        placeholder="Enter area"
+                      />
+                      {errors.area && (
+                        <p className="text-red-500 text-xs mt-1">{errors.area}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Type of Vehicles *
+                    </label>
+                    <input
+                      name="vehicleTypes"
+                      value={formData.vehicleTypes}
+                      onChange={handleChange}
+                      className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                        errors.vehicleTypes ? "border-red-500" : "border-gray-300"
+                      }`}
+                      type="text"
+                      placeholder="New, Used, Bikes, SUVs, etc."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Separate multiple types with commas
+                    </p>
+                    {errors.vehicleTypes && (
+                      <p className="text-red-500 text-xs mt-1">{errors.vehicleTypes}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Upload CNIC / Business License *
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary-500 transition-colors">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "cnic")}
+                        className="hidden"
+                        id="cnic-upload"
+                      />
+                      <label
+                        htmlFor="cnic-upload"
+                        className="flex flex-col items-center justify-center cursor-pointer"
+                      >
+                        <FaUpload className="text-gray-400 mb-2" size={24} />
+                        <span className="text-sm text-gray-600">
+                          {cnicFile ? cnicFile.name : "Click to upload or drag and drop"}
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          PDF, JPG, PNG (Max 5MB)
+                        </span>
+                      </label>
+                    </div>
+                    {errors.cnicFile && (
+                      <p className="text-red-500 text-xs mt-1">{errors.cnicFile}</p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
+                            errors.password ? "border-red-500" : "border-gray-300"
+                          }`}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter password"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Confirm Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
+                            errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                          }`}
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm password"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Business Details */}
+              {currentStep === 2 && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Business Details</h3>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Business Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows={4}
+                      className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Tell us about your business..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Website
+                      </label>
+                      <input
+                        name="website"
+                        value={formData.website}
+                        onChange={handleChange}
+                        type="url"
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://www.example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Established Year
+                      </label>
+                      <input
+                        name="establishedYear"
+                        value={formData.establishedYear}
+                        onChange={handleChange}
+                        type="number"
+                        min="1900"
+                        max={new Date().getFullYear()}
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="2020"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Employee Count
+                    </label>
+                    <select
+                      name="employeeCount"
+                      value={formData.employeeCount}
+                      onChange={handleChange}
+                      className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
-                      <option value="">Select City</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
+                      <option value="">Select employee count</option>
+                      {employeeCountOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
                         </option>
                       ))}
                     </select>
-                    <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                   </div>
-                  {errors.city && (
-                    <p className="text-red-500 text-xs mt-1">{errors.city}</p>
-                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Specialties
+                    </label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.specialties.map((specialty) => (
+                        <span
+                          key={specialty}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
+                        >
+                          {specialty}
+                          <button
+                            type="button"
+                            onClick={() => removeFromArray("specialties", specialty)}
+                            className="hover:text-primary-600"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={specialtyInput}
+                        onChange={(e) => setSpecialtyInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addToArray("specialties", specialtyInput, setSpecialtyInput);
+                          }
+                        }}
+                        className="flex-1 py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Add specialty"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addToArray("specialties", specialtyInput, setSpecialtyInput)}
+                        className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {commonSpecialties.map((specialty) => (
+                        <button
+                          key={specialty}
+                          type="button"
+                          onClick={() => {
+                            if (!formData.specialties.includes(specialty)) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                specialties: [...prev.specialties, specialty]
+                              }));
+                            }
+                          }}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          + {specialty}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Languages Spoken
+                    </label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.languages.map((language) => (
+                        <span
+                          key={language}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                        >
+                          {language}
+                          <button
+                            type="button"
+                            onClick={() => removeFromArray("languages", language)}
+                            className="hover:text-blue-600"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={languageInput}
+                        onChange={(e) => setLanguageInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addToArray("languages", languageInput, setLanguageInput);
+                          }
+                        }}
+                        className="flex-1 py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Add language"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addToArray("languages", languageInput, setLanguageInput)}
+                        className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {commonLanguages.map((language) => (
+                        <button
+                          key={language}
+                          type="button"
+                          onClick={() => {
+                            if (!formData.languages.includes(language)) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                languages: [...prev.languages, language]
+                              }));
+                            }
+                          }}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          + {language}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Methods Accepted
+                    </label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.paymentMethods.map((method) => (
+                        <span
+                          key={method}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                        >
+                          {method}
+                          <button
+                            type="button"
+                            onClick={() => removeFromArray("paymentMethods", method)}
+                            className="hover:text-green-600"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {commonPaymentMethods.map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => {
+                            if (!formData.paymentMethods.includes(method)) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                paymentMethods: [...prev.paymentMethods, method]
+                              }));
+                            }
+                          }}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          + {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Services Offered
+                    </label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.services.map((service) => (
+                        <span
+                          key={service}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                        >
+                          {service}
+                          <button
+                            type="button"
+                            onClick={() => removeFromArray("services", service)}
+                            className="hover:text-purple-600"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {commonServices.map((service) => (
+                        <button
+                          key={service}
+                          type="button"
+                          onClick={() => {
+                            if (!formData.services.includes(service)) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                services: [...prev.services, service]
+                              }));
+                            }
+                          }}
+                          className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                          + {service}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Facebook URL
+                      </label>
+                      <input
+                        name="facebook"
+                        value={formData.facebook}
+                        onChange={handleChange}
+                        type="url"
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://facebook.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Instagram URL
+                      </label>
+                      <input
+                        name="instagram"
+                        value={formData.instagram}
+                        onChange={handleChange}
+                        type="url"
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://instagram.com/..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Twitter URL
+                      </label>
+                      <input
+                        name="twitter"
+                        value={formData.twitter}
+                        onChange={handleChange}
+                        type="url"
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://twitter.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        LinkedIn URL
+                      </label>
+                      <input
+                        name="linkedin"
+                        value={formData.linkedin}
+                        onChange={handleChange}
+                        type="url"
+                        className="w-full py-2 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://linkedin.com/..."
+                      />
+                    </div>
+                  </div>
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Area *
-                  </label>
-                  <input
-                    name="area"
-                    value={formData.area}
-                    onChange={handleChange}
-                    className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      errors.area ? "border-red-500" : "border-gray-300"
-                    }`}
-                    type="text"
-                    placeholder="Enter area"
-                  />
-                  {errors.area && (
-                    <p className="text-red-500 text-xs mt-1">{errors.area}</p>
-                  )}
+              {/* Step 3: Review & Submit */}
+              {currentStep === 3 && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Review Your Information</h3>
+                  
+                  <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-800 mb-2">Basic Information</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">Business Name:</span>
+                          <p className="font-medium">{formData.dealerName}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Owner:</span>
+                          <p className="font-medium">{formData.ownerFullName}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Email:</span>
+                          <p className="font-medium">{formData.email}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Phone:</span>
+                          <p className="font-medium">{formData.mobileNumber}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Location:</span>
+                          <p className="font-medium">{formData.area}, {formData.city}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Vehicle Types:</span>
+                          <p className="font-medium">{formData.vehicleTypes}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {(formData.description || formData.website || formData.specialties.length > 0) && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-2">Business Details</h4>
+                        <div className="text-sm space-y-2">
+                          {formData.description && (
+                            <div>
+                              <span className="text-gray-600">Description:</span>
+                              <p className="font-medium">{formData.description}</p>
+                            </div>
+                          )}
+                          {formData.website && (
+                            <div>
+                              <span className="text-gray-600">Website:</span>
+                              <p className="font-medium">{formData.website}</p>
+                            </div>
+                          )}
+                          {formData.specialties.length > 0 && (
+                            <div>
+                              <span className="text-gray-600">Specialties:</span>
+                              <p className="font-medium">{formData.specialties.join(", ")}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        required
+                        className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        I accept the{" "}
+                        <Link
+                          to="/privacy-policy"
+                          className="text-primary-500 hover:underline font-medium"
+                        >
+                          Privacy Policy
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          to="/terms-conditon"
+                          className="text-primary-500 hover:underline font-medium"
+                        >
+                          Terms & Conditions
+                        </Link>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Row 5: Vehicle Types */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type of Vehicles *
-                </label>
-                <input
-                  name="vehicleTypes"
-                  value={formData.vehicleTypes}
-                  onChange={handleChange}
-                  className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                    errors.vehicleTypes ? "border-red-500" : "border-gray-300"
-                  }`}
-                  type="text"
-                  placeholder="New, Used. Bikes, SUVs, alt etc."
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Separate multiple types with commas (e.g., New Cars, Used Cars, Bikes)
-                </p>
-                {errors.vehicleTypes && (
-                  <p className="text-red-500 text-xs mt-1">{errors.vehicleTypes}</p>
-                )}
-              </div>
-
-              {/* Row 6: CNIC/Business License Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Upload CNIC / Business License *
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary-500 transition-colors">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "cnic")}
-                    className="hidden"
-                    id="cnic-upload"
-                  />
-                  <label
-                    htmlFor="cnic-upload"
-                    className="flex flex-col items-center justify-center cursor-pointer"
-                  >
-                    <FaUpload className="text-gray-400 mb-2" size={24} />
-                    <span className="text-sm text-gray-600">
-                      {cnicFile ? cnicFile.name : "Click to upload or drag and drop"}
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={currentStep === 1}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner fullScreen={false} />
+                      Submitting...
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">
-                      PDF, JPG, PNG (Max 5MB)
-                    </span>
-                  </label>
-                </div>
-                {errors.cnicFile && (
-                  <p className="text-red-500 text-xs mt-1">{errors.cnicFile}</p>
-                )}
-              </div>
-
-              {/* Row 7: Password & Confirm Password */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
-                        errors.password ? "border-red-500" : "border-gray-300"
-                      }`}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter password"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                  ) : currentStep < totalSteps ? (
+                    "Next"
+                  ) : (
+                    "Register Now"
                   )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className={`w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
-                        errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                      }`}
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                  )}
-                </div>
+                </button>
               </div>
-
-              {/* Terms Checkbox */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    required
-                    className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">
-                    I accept the{" "}
-                    <Link
-                      to="/privacy-policy"
-                      className="text-primary-500 hover:underline font-medium"
-                    >
-                      Privacy Policy
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      to="/terms-conditon"
-                      className="text-primary-500 hover:underline font-medium"
-                    >
-                      Terms & Conditions
-                    </Link>
-                  </span>
-                </div>
-              </div>
-
-              {/* Register Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4 disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5 inline-block"></span>
-                ) : (
-                  "Register Now"
-                )}
-              </button>
 
               {/* Login Link */}
-              <p className="text-center text-gray-600 text-sm">
+              <p className="text-center text-gray-600 text-sm mt-4">
                 Already have an account?{" "}
                 <Link
                   to="/login"
@@ -535,4 +1016,3 @@ const DealerSignup = ({ onBack }) => {
 };
 
 export default DealerSignup;
-

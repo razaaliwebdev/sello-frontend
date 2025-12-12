@@ -1,13 +1,12 @@
 import React from "react";
-import { FaBars } from "react-icons/fa6";
+import {images} from '../../assets/assets.js';
+import { useNavigate } from "react-router-dom";
 
 const HeaderLogo = () => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-primary-500 w-full px-4 md:px-6 py-4 flex items-center justify-between">
-      <h1 className="text-white text-xl md:text-2xl font-bold">SELLO</h1>
-      <button className="text-white">
-        <FaBars size={24} />
-      </button>
+    <div className="inline cursor-pointer" onClick={() => navigate("/")}>
+      <img className="h-24 pl-4 pt-4" src={images.blackLogo} alt="" />
     </div>
   );
 };

@@ -10,6 +10,8 @@ import {
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiSearch, FiEdit2, FiTrash2, FiEye, FiGrid, FiZap } from "react-icons/fi";
+import ConfirmModal from "../../components/admin/ConfirmModal";
+import PromptModal from "../../components/admin/PromptModal";
 
 const Listings = () => {
     const [page, setPage] = useState(1);
@@ -17,6 +19,12 @@ const Listings = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [brandFilter, setBrandFilter] = useState("all");
     const [brands, setBrands] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showPromoteModal, setShowPromoteModal] = useState(false);
+    const [showChargeModal, setShowChargeModal] = useState(false);
+    const [carToDelete, setCarToDelete] = useState(null);
+    const [carToPromote, setCarToPromote] = useState(null);
+    const [promoteDuration, setPromoteDuration] = useState("7");
 
     const { data, isLoading, refetch } = useGetAllListingsQuery({ 
         page, 
@@ -66,27 +74,44 @@ const Listings = () => {
         }
     };
 
-    const handleDelete = async (carId) => {
-        if (!window.confirm("Are you sure you want to delete this car?")) return;
+    const handleDelete = (carId) => {
+        setCarToDelete(carId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!carToDelete) return;
         try {
-            await deleteCar(carId).unwrap();
+            await deleteCar(carToDelete).unwrap();
             toast.success("Car deleted successfully");
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete car");
+        } finally {
+            setShowDeleteModal(false);
+            setCarToDelete(null);
         }
     };
 
-    const handlePromote = async (carId) => {
-        const duration = prompt("Enter promotion duration in days (default: 7):", "7");
-        if (!duration) return;
-        
-        const days = parseInt(duration) || 7;
-        const chargeUser = window.confirm("Charge the user for this promotion? (OK = Yes, Cancel = No)");
+    const handlePromote = (carId) => {
+        setCarToPromote(carId);
+        setPromoteDuration("7");
+        setShowPromoteModal(true);
+    };
+
+    const handlePromoteDurationConfirm = (duration) => {
+        setPromoteDuration(duration);
+        setShowPromoteModal(false);
+        setShowChargeModal(true);
+    };
+
+    const handlePromoteConfirm = async (chargeUser) => {
+        if (!carToPromote) return;
+        const days = parseInt(promoteDuration) || 7;
         
         try {
             await promoteCar({
-                carId,
+                carId: carToPromote,
                 duration: days,
                 chargeUser: chargeUser,
                 priority: 100
@@ -95,6 +120,10 @@ const Listings = () => {
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to promote car");
+        } finally {
+            setShowChargeModal(false);
+            setCarToPromote(null);
+            setPromoteDuration("7");
         }
     };
 
@@ -365,6 +394,52 @@ const Listings = () => {
                         </button>
                     </div>
                 )}
+
+                {/* Delete Confirmation Modal */}
+                <ConfirmModal
+                    isOpen={showDeleteModal}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setCarToDelete(null);
+                    }}
+                    onConfirm={handleDeleteConfirm}
+                    title="Delete Car Listing"
+                    message="Are you sure you want to delete this car listing? This action cannot be undone."
+                    confirmText="Delete"
+                    variant="danger"
+                />
+
+                {/* Promote Duration Modal */}
+                <PromptModal
+                    isOpen={showPromoteModal}
+                    onClose={() => {
+                        setShowPromoteModal(false);
+                        setCarToPromote(null);
+                    }}
+                    onConfirm={handlePromoteDurationConfirm}
+                    title="Promote Car Listing"
+                    message="Enter promotion duration in days:"
+                    placeholder="7"
+                    defaultValue="7"
+                    type="number"
+                    confirmText="Continue"
+                />
+
+                {/* Charge User Confirmation Modal */}
+                <ConfirmModal
+                    isOpen={showChargeModal}
+                    onClose={() => {
+                        setShowChargeModal(false);
+                        setCarToPromote(null);
+                    }}
+                    onConfirm={() => handlePromoteConfirm(true)}
+                    onCancel={() => handlePromoteConfirm(false)}
+                    title="Charge User?"
+                    message={`Charge the user for this ${promoteDuration}-day promotion?`}
+                    confirmText="Yes, Charge User"
+                    cancelText="No, Free Promotion"
+                    variant="warning"
+                />
             </div>
         </AdminLayout>
     );

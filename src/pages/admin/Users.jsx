@@ -1,22 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
     useGetAllUsersQuery,
+    useGetUserByIdQuery,
     useUpdateUserMutation,
     useDeleteUserMutation,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiSearch, FiEdit2, FiTrash2, FiX, FiSave } from "react-icons/fi";
 import { MdBlock, MdCheckCircle } from "react-icons/md";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Users = () => {
+    const { userId } = useParams();
+    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [selectedUser, setSelectedUser] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    
+    // If userId is in URL, fetch that user
+    const { data: userDetail, isLoading: userDetailLoading } = useGetUserByIdQuery(
+        userId,
+        { skip: !userId }
+    );
+    
+    useEffect(() => {
+        if (userId && userDetail) {
+            setSelectedUser(userDetail);
+            setShowEditModal(true);
+        }
+    }, [userId, userDetail]);
     
     // Build query params
     const queryParams = { 
@@ -48,16 +66,36 @@ const Users = () => {
     const handleEdit = (user) => {
         setSelectedUser(user);
         setShowEditModal(true);
+        // Update URL if not already there
+        if (!userId) {
+            navigate(`/admin/users/${user._id}`);
+        }
+    };
+    
+    const handleCloseModal = () => {
+        setShowEditModal(false);
+        setSelectedUser(null);
+        if (userId) {
+            navigate("/admin/users");
+        }
     };
 
-    const handleDelete = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+    const handleDelete = (userId) => {
+        setUserToDelete(userId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!userToDelete) return;
         try {
-            await deleteUser(userId).unwrap();
+            await deleteUser(userToDelete).unwrap();
             toast.success("User deleted successfully");
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete user");
+        } finally {
+            setShowDeleteModal(false);
+            setUserToDelete(null);
         }
     };
 
@@ -288,19 +326,16 @@ const Users = () => {
                 )}
 
                 {/* Edit User Modal */}
-                {showEditModal && selectedUser && (
+                {(showEditModal || userId) && (selectedUser || userDetail) && (
                     <EditUserModal
-                        user={selectedUser}
-                        onClose={() => {
-                            setShowEditModal(false);
-                            setSelectedUser(null);
-                        }}
+                        user={selectedUser || userDetail}
+                        onClose={handleCloseModal}
                         onUpdate={async (formData) => {
                             try {
-                                await updateUser({ userId: selectedUser._id, ...formData }).unwrap();
+                                const targetUser = selectedUser || userDetail;
+                                await updateUser({ userId: targetUser._id, ...formData }).unwrap();
                                 toast.success("User updated successfully");
-                                setShowEditModal(false);
-                                setSelectedUser(null);
+                                handleCloseModal();
                                 refetch();
                             } catch (error) {
                                 toast.error(error?.data?.message || "Failed to update user");
@@ -316,11 +351,25 @@ const Users = () => {
 // Edit User Modal Component
 const EditUserModal = ({ user, onClose, onUpdate }) => {
     const [formData, setFormData] = useState({
-        name: user.name || "",
-        role: user.role || "individual",
-        status: user.status || "active",
-        boostCredits: user.boostCredits || 0,
+        name: user?.name || "",
+        role: user?.role || "individual",
+        status: user?.status || "active",
+        boostCredits: user?.boostCredits || 0,
     });
+    
+    // Update form data when user changes
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                name: user.name || "",
+                role: user.role || "individual",
+                status: user.status || "active",
+                boostCredits: user.boostCredits || 0,
+            });
+        }
+    }, [user]);
+    
+    if (!user) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -365,7 +414,7 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600"
                         >
-                            <FiTrash2 size={20} />
+                            <FiX size={20} />
                         </button>
                     </div>
                 </div>
@@ -434,6 +483,59 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
                             min="0"
                         />
                     </div>
+                    
+                    {/* Dealer Information Section */}
+                    {user?.role === "dealer" && user?.dealerInfo && (
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Dealer Information</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-600">Business Name</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {user.dealerInfo.businessName || "N/A"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">Location</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {user.dealerInfo.city || "N/A"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">Phone</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {user.dealerInfo.businessPhone || "N/A"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">Verification Status</p>
+                                    <span
+                                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
+                                            user.dealerInfo.verified
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-yellow-100 text-yellow-700"
+                                        }`}
+                                    >
+                                        {user.dealerInfo.verified ? "✓ Verified" : "Pending"}
+                                    </span>
+                                </div>
+                                {user.dealerInfo.businessLicense && (
+                                    <div className="md:col-span-2">
+                                        <p className="text-sm text-gray-600 mb-2">Business License</p>
+                                        <a
+                                            href={user.dealerInfo.businessLicense}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary-500 hover:underline text-sm"
+                                        >
+                                            View License Document
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                         <button
                             type="button"

@@ -4,7 +4,7 @@ import { useGetAllBlogsQuery, useUpdateBlogMutation, useGetAllCategoriesQuery } 
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiX, FiSave, FiArrowLeft } from "react-icons/fi";
+import { FiX, FiSave, FiArrowLeft, FiEye } from "react-icons/fi";
 import TiptapEditor from "../../components/admin/TiptapEditor";
 
 const BlogEdit = () => {
@@ -89,7 +89,7 @@ const BlogEdit = () => {
             }
 
             await updateBlog({ blogId: id, formData: formDataToSend }).unwrap();
-            toast.success("Blog updated successfully");
+            toast.success("Blog updated successfully! Changes will reflect on the public site immediately.");
             navigate("/admin/blogs");
         } catch (error) {
             toast.error(error?.data?.message || "Failed to update blog");
@@ -135,6 +135,17 @@ const BlogEdit = () => {
                             <p className="text-sm text-gray-500 mt-1">Update your blog content</p>
                         </div>
                     </div>
+                    {blog && (
+                        <a
+                            href={`/blog/${blog.slug || blog._id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2 transition-colors"
+                        >
+                            <FiEye size={18} />
+                            View on Site
+                        </a>
+                    )}
                 </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

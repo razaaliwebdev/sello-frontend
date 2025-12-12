@@ -4,13 +4,10 @@ import SpecsUtility from "./SpecsUtility";
 
 const HorsePowerSpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
-    let transformedValue = "N/A";
-    if (titleValue && titleValue !== "N/A") {
-      const [min] = titleValue.split("-").map((v) => parseInt(v)) || [];
-      transformedValue = titleValue.includes("+") ? "900 HP" : `${min} HP`;
-    }
+    // Allow clearing (null) and keep the full label for backend/UI consistency
+    const value = titleValue || "";
     if (onChange) {
-      onChange(transformedValue);
+      onChange(value);
     }
   };
 

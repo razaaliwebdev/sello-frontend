@@ -28,8 +28,9 @@ import SpecsUtility from "./SpecsUtility";
 
 const EngineCapacitySpecs = ({ onChange }) => {
   const handleSelect = (titleValue) => {
+    const value = titleValue || "";
     if (onChange) {
-      onChange(titleValue); // prevent crash if no handler passed
+      onChange(value); // prevent crash if no handler passed
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { images, menuLinks } from "../assets/assets";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import SearchBar from "./utils/SearchBar";
@@ -14,7 +14,61 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef(null);
   const linkRefs = useRef([]);
-  const { data: currentUser, isLoading } = useGetMeQuery();
+  
+  // Track token in state so skip option re-evaluates when token changes
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  
+  // Get user from localStorage as fallback
+  const getCachedUser = () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        return JSON.parse(storedUser);
+      }
+    } catch (e) {
+      console.error("Error parsing cached user:", e);
+    }
+    return null;
+  };
+  
+  // Only fetch if token exists
+  const { data: currentUser, isLoading, refetch } = useGetMeQuery(undefined, {
+    skip: !token,
+  });
+  
+  // Use cached user as fallback while loading or if query is skipped
+  const cachedUser = getCachedUser();
+  const user = currentUser || cachedUser;
+  
+  // Update token state when localStorage changes (after login)
+  useEffect(() => {
+    const checkToken = () => {
+      const currentToken = localStorage.getItem("token");
+      if (currentToken !== token) {
+        setToken(currentToken);
+      }
+    };
+    
+    // Check immediately
+    checkToken();
+    
+    // Listen for storage events (from other tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        setToken(e.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically for same-tab changes (localStorage.setItem doesn't trigger storage event)
+    const interval = setInterval(checkToken, 500);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [token]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -59,9 +113,9 @@ const Navbar = () => {
   };
 
   const avatarFallback = () => {
-    if (!currentUser) return images.avatarIcon;
-    if (currentUser.avatar) return currentUser.avatar;
-    const name = currentUser.name || currentUser.email || "User";
+    if (!user) return images.avatarIcon;
+    if (user.avatar) return user.avatar;
+    const name = user.name || user.email || "User";
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
       name.charAt(0)
     )}`;
@@ -79,7 +133,13 @@ const Navbar = () => {
         }`}
       >
         {/* Logo */}
-        <div onClick={() => navigate("/")} className="cursor-pointer">
+        <Link 
+          to="/" 
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          className="cursor-pointer"
+        >
           <img
             className="h-14 md:h-20"
             src={
@@ -91,7 +151,7 @@ const Navbar = () => {
             }
             alt="logo"
           />
-        </div>
+        </Link>
 
         {/* Desktop Search Bar */}
         <div className="hidden lg:block w-full max-w-xs">
@@ -150,7 +210,7 @@ const Navbar = () => {
                   Admin
                 </Link>
               )}
-              {currentUser.role === "dealer" && currentUser.dealerInfo?.verified && (
+              {user?.role === "dealer" && (
                 <Link
                   to="/dealer/dashboard"
                   className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
@@ -158,20 +218,12 @@ const Navbar = () => {
                   Dealer Dashboard
                 </Link>
               )}
-              {currentUser.role === "individual" && (
+              {user.role === "individual" && (
                 <Link
                   to="/seller/dashboard"
                   className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
                 >
                   My Dashboard
-                </Link>
-              )}
-              {currentUser.role === "dealer" && (
-                <Link
-                  to="/dealer/dashboard"
-                  className={`hidden md:block text-sm px-3 py-1 bg-primary-500 rounded-md hover:bg-primary-600 text-white transition-colors`}
-                >
-                  Dealer Dashboard
                 </Link>
               )}
               {/* Notification Bell */}
@@ -264,7 +316,7 @@ const Navbar = () => {
             </button>
 
             {/* Dashboard Links (Mobile) */}
-            {!isLoading && currentUser?.role === "admin" && (
+            {!isLoading && user?.role === "admin" && (
               <Link
                 to="/admin/dashboard"
                 onClick={closeDrawer}
@@ -273,7 +325,7 @@ const Navbar = () => {
                 <span>Admin Panel</span>
               </Link>
             )}
-            {!isLoading && currentUser?.role === "dealer" && currentUser?.dealerInfo?.verified && (
+            {!isLoading && user?.role === "dealer" && (
               <Link
                 to="/dealer/dashboard"
                 onClick={closeDrawer}
@@ -282,7 +334,7 @@ const Navbar = () => {
                 <span>Dealer Dashboard</span>
               </Link>
             )}
-            {!isLoading && currentUser?.role === "individual" && (
+            {!isLoading && user?.role === "individual" && (
               <Link
                 to="/seller/dashboard"
                 onClick={closeDrawer}

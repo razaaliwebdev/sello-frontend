@@ -53,8 +53,8 @@ const BlogMediaLibrary = () => {
     };
 
     const handleDelete = (fileId) => {
-        // In a real app, this would call an API
-        console.log(`Deleting file ${fileId}`);
+        // TODO: Implement delete file API call
+        toast.success("File deleted");
     };
 
     return (

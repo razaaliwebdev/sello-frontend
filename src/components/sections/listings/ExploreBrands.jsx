@@ -12,13 +12,13 @@ const ExploreBrands = () => {
         {/* Text Content */}
         <div className="w-full md:w-1/2">
           <h1 className="md:text-4xl text-2xl font-semibold mb-4">
-            Explore Our Premium Brands
+           Explore Our Premium Brands
           </h1>
           <p className="text-base text-gray-700 leading-relaxed">
-            Discover an exclusive selection of top-tier automotive brands,
-            carefully curated for their quality, performance, and reliability.
-            Whether you're seeking luxury, efficiency, or power—experience the
-            best in every drive.
+            Discover a curated selection of top automotive brands known for their quality, performance, and reliability. Whether you're exploring luxury options, searching for efficiency, or comparing models among <b>cars for sale</b> across Pakistan, our premium brands give you the best driving experience.
+          </p>
+          <p className="text-base text-gray-700 leading-relaxed">
+            No matter what you’re looking for, from family-friendly sedans to powerful SUVs, these brands help you find the right <b>car for sale in Karachi, Islamabad, Lahore</b>, or anywhere in Pakistan.
           </p>
           <button
             onClick={() => navigate("/view-all-brands")}

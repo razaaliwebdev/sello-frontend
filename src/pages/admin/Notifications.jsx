@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { FiPlus, FiX, FiTrash2, FiCheck, FiAlertCircle, FiInfo, FiCheckCircle } from "react-icons/fi";
 import { MdNotifications, MdNotificationsActive } from "react-icons/md";
 import { io } from "socket.io-client";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Notifications = () => {
     const [showModal, setShowModal] = useState(false);
@@ -18,6 +19,8 @@ const Notifications = () => {
     const { data, isLoading, refetch } = useGetAllNotificationsQuery({ page: 1, limit: 50 });
     const [createNotification, { isLoading: isCreating }] = useCreateNotificationMutation();
     const [deleteNotification] = useDeleteNotificationMutation();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [notificationToDelete, setNotificationToDelete] = useState(null);
 
     const notifications = data?.notifications || [];
     const totalNotifications = notifications.length;
@@ -34,7 +37,7 @@ const Notifications = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
         const SOCKET_URL = BASE_URL.endsWith('/api') ? BASE_URL.replace('/api', '') : BASE_URL;
 
         const newSocket = io(SOCKET_URL, {
@@ -45,11 +48,10 @@ const Notifications = () => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Admin notification socket connected');
+            // Socket connected
         });
 
         newSocket.on('new-notification', (data) => {
-            console.log('New notification created:', data);
             toast.success("New notification sent to users", { icon: '🔔' });
             refetch();
         });
@@ -127,14 +129,22 @@ const Notifications = () => {
         });
     };
 
-    const handleDelete = async (notificationId) => {
-        if (!window.confirm("Are you sure you want to delete this notification?")) return;
+    const handleDelete = (notificationId) => {
+        setNotificationToDelete(notificationId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!notificationToDelete) return;
         try {
-            await deleteNotification(notificationId).unwrap();
+            await deleteNotification(notificationToDelete).unwrap();
             toast.success("Notification deleted successfully");
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete notification");
+        } finally {
+            setShowDeleteModal(false);
+            setNotificationToDelete(null);
         }
     };
 
@@ -536,6 +546,19 @@ const Notifications = () => {
                     </div>
                 )}
             </div>
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setNotificationToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Notification"
+                message="Are you sure you want to delete this notification? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

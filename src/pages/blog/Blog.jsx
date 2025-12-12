@@ -9,10 +9,15 @@ import BlogsCates from "../../components/sections/blogs/BlogsCates";
 import ReviewSliderBanner from "../../components/sections/blogs/ReviewSliderBanner";
 import BottomReviews from "../../components/sections/blogs/BottomReviews";
 import NewsLatter from "../../components/utils/NewsLatter";
+import SEO from "../../components/common/SEO";
 
 const Blog = () => {
   return (
     <div>
+      <SEO
+        title="Blog | Sello"
+        description="Read our latest blog posts about cars, automotive news, buying guides, maintenance tips, and more."
+      />
       <BlogsHeroSection />
       <div className="py-8 px-10">
         <div className=" flex items-center justify-between w-full">

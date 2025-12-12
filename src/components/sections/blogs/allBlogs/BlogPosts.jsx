@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useGetBlogsQuery } from "../../../../redux/services/api";
 
-const BlogPosts = () => {
+const BlogPosts = ({ search = '', category = '' }) => {
   const [page, setPage] = useState(1);
+  
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, category]);
+  
   const { data, isLoading, error } = useGetBlogsQuery({ 
     page, 
     limit: 10, 
-    status: 'published' 
+    status: 'published',
+    ...(search && { search }),
+    ...(category && { category })
   });
 
   const blogs = data?.blogs || [];
@@ -117,7 +125,7 @@ const BlogPosts = () => {
 
                   {/* Button */}
                   <Link
-                    to={`/blog/${blog._id}`}
+                    to={`/blog/${blog.slug || blog._id}`}
                     className="inline-block bg-primary-500 hover:opacity-90 text-white text-sm md:text-base px-4 md:px-5 py-2 rounded mt-2 md:mt-5 transition-all"
                   >
                     Read full article...

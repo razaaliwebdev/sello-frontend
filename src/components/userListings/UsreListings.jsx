@@ -28,7 +28,7 @@ const UserListings = () => {
       try {
         setUpdatingCars(prev => new Set(prev).add(car._id));
         const token = localStorage.getItem("token");
-        const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com";
+        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
         const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
         const response = await fetch(`${API_URL}/cars/${car._id}/sold`, {
           method: "PUT",

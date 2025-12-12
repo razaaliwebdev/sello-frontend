@@ -22,12 +22,15 @@ import {
   useGetMeQuery,
   useLogoutMutation,
   useUpdateProfileMutation,
+  useUpdateDealerProfileMutation,
   useGetSavedCarsQuery,
+  useGetMySubscriptionQuery,
 } from "../../../redux/services/api";
 import { useSupportChat } from "../../../contexts/SupportChatContext";
 import NotificationsSection from "./NotificationsSection";
 import DealerRequestForm from "../../profile/DealerRequestForm";
 import SubscriptionManagement from "../../subscriptions/SubscriptionManagement";
+import DealerProfileEditSection from "./DealerProfileEditSection";
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -58,6 +61,37 @@ const ProfileHero = () => {
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateProfileMutation();
+  const [updateDealerProfile, { isLoading: isUpdatingDealer }] =
+    useUpdateDealerProfileMutation();
+  
+  // Dealer profile form state
+  const [dealerFormData, setDealerFormData] = useState({
+    businessName: "",
+    businessAddress: "",
+    businessPhone: "",
+    whatsappNumber: "",
+    city: "",
+    area: "",
+    vehicleTypes: "",
+    description: "",
+    website: "",
+    facebook: "",
+    instagram: "",
+    twitter: "",
+    linkedin: "",
+    establishedYear: "",
+    employeeCount: "",
+    specialties: [],
+    languages: [],
+    paymentMethods: [],
+    services: [],
+  });
+  const [dealerFiles, setDealerFiles] = useState({
+    avatar: null,
+    businessLicense: null,
+    showroomImages: [],
+  });
+  const [isEditingDealer, setIsEditingDealer] = useState(false);
 
   const [metrics, setMetrics] = useState({
     posts: 0,
@@ -71,17 +105,44 @@ const ProfileHero = () => {
 
   useEffect(() => {
     if (user) {
+      try {
       setFormData({
-        name: user.name || "",
-        email: user.email || "",
+          name: user?.name || "",
+          email: user?.email || "",
         avatar: null,
-        avatarPreview: user.avatar || null,
+          avatarPreview: user?.avatar || null,
       });
-      const posts = user.carsPosted?.length || 0;
-      const sales = user.carsPurchased?.length || 0;
-      const savedCount = user.savedCars?.length || savedCarsData?.length || 0;
+        
+        // Set dealer form data if user is a dealer
+        if (user?.role === "dealer" && user?.dealerInfo) {
+          setDealerFormData({
+            businessName: user.dealerInfo.businessName || "",
+            businessAddress: user.dealerInfo.businessAddress || "",
+            businessPhone: user.dealerInfo.businessPhone || "",
+            whatsappNumber: user.dealerInfo.whatsappNumber || "",
+            city: user.dealerInfo.city || "",
+            area: user.dealerInfo.area || "",
+            vehicleTypes: user.dealerInfo.vehicleTypes || "",
+            description: user.dealerInfo.description || "",
+            website: user.dealerInfo.website || "",
+            facebook: user.dealerInfo.socialMedia?.facebook || "",
+            instagram: user.dealerInfo.socialMedia?.instagram || "",
+            twitter: user.dealerInfo.socialMedia?.twitter || "",
+            linkedin: user.dealerInfo.socialMedia?.linkedin || "",
+            establishedYear: user.dealerInfo.establishedYear?.toString() || "",
+            employeeCount: user.dealerInfo.employeeCount || "",
+            specialties: user.dealerInfo.specialties || [],
+            languages: user.dealerInfo.languages || [],
+            paymentMethods: user.dealerInfo.paymentMethods || [],
+            services: user.dealerInfo.services || [],
+          });
+        }
+        
+        const posts = user?.carsPosted?.length || 0;
+        const sales = user?.carsPurchased?.length || 0;
+        const savedCount = user?.savedCars?.length || savedCarsData?.length || 0;
       const earnings =
-        user.carsPurchased?.reduce((sum, car) => sum + (car.price || 0), 0) ||
+          (user?.carsPurchased?.reduce((sum, car) => sum + (car?.price || 0), 0)) ||
         0;
       setMetrics({
         posts,
@@ -90,9 +151,12 @@ const ProfileHero = () => {
         earnings,
         savedCount,
         clicks: 0,
-        rating: user.sellerRating || 0,
-        ratingCount: user.reviewCount || 0,
+          rating: user?.sellerRating || 0,
+          ratingCount: user?.reviewCount || 0,
       });
+      } catch (error) {
+        console.error("Error setting user data:", error);
+      }
     }
   }, [user, savedCarsData]);
 
@@ -183,13 +247,40 @@ const ProfileHero = () => {
   }
 
   if (isError && error?.status !== 401) {
+    console.error("Profile error:", error);
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-lg mb-2">Error loading profile</div>
           <div className="text-gray-500 text-sm">
-            {error?.data?.message || "Failed to load profile"}
+            {error?.data?.message || error?.message || "Failed to load profile"}
           </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check: if no user data after loading, show error
+  if (!user && !isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-2">No user data available</div>
+          <div className="text-gray-500 text-sm mb-4">
+            Please try logging in again.
+          </div>
+          <button
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );
@@ -222,7 +313,8 @@ const ProfileHero = () => {
       icon: FiMessageSquare,
       onClick: () => navigate("/my-chats"),
     },
-    ...(user?.role === "dealer" && user?.dealerInfo?.verified
+    // For dealers: Only show Dealer Dashboard (not My Dashboard)
+    ...(user?.role === "dealer"
       ? [
           {
             id: "dealer-dashboard",
@@ -233,13 +325,25 @@ const ProfileHero = () => {
           },
         ]
       : []),
-    ...((user?.role === "individual" || user?.role === "dealer")
+    // For individual users: Show My Dashboard
+    ...(user?.role === "individual"
       ? [
           {
             id: "seller-dashboard",
             label: "My Dashboard",
             icon: FiCheckCircle,
             onClick: () => navigate("/seller/dashboard"),
+            highlight: true,
+          },
+        ]
+      : []),
+    ...(user?.role === "dealer"
+      ? [
+          {
+            id: "dealer-profile",
+            label: "Dealer Profile",
+            icon: FiUser,
+            onClick: () => setActiveSection("dealer-profile"),
             highlight: true,
           },
         ]
@@ -260,7 +364,7 @@ const ProfileHero = () => {
     // Only show subscription tab if user doesn't have active premium subscription
     ...(subscriptionData?.subscription?.isActive && 
         subscriptionData?.subscription?.endDate && 
-        new Date(subscriptionData.subscription.endDate) > new Date() &&
+        new Date(subscriptionData?.subscription?.endDate) > new Date() &&
         subscriptionData?.subscription?.plan !== 'free' ? [] : [{
       id: "subscription",
       label: "Subscription",
@@ -410,59 +514,122 @@ const ProfileHero = () => {
           <div className="lg:col-span-3 space-y-6">
             {activeSection === "overview" && (
               <>
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500">Total Posts</span>
-                      <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
-                        <FiFileText className="text-primary-600" size={20} />
+                {/* Account Information Cards - Different for Dealers vs Individuals */}
+                {user?.role === "dealer" ? (
+                  <>
+                    {/* Dealer Account Overview */}
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Overview</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border-l-4 border-primary-500 pl-4">
+                          <p className="text-sm text-gray-600">Account Status</p>
+                          <p className="font-semibold text-gray-900 text-lg capitalize">
+                            {user?.dealerInfo?.verified ? (
+                              <span className="text-green-600">Verified Dealer</span>
+                            ) : (
+                              <span className="text-yellow-600">Pending Verification</span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="border-l-4 border-blue-500 pl-4">
+                          <p className="text-sm text-gray-600">Business Name</p>
+                          <p className="font-semibold text-gray-900 text-lg">
+                            {user?.dealerInfo?.businessName || "Not set"}
+                          </p>
+                        </div>
+                        <div className="border-l-4 border-green-500 pl-4">
+                          <p className="text-sm text-gray-600">Email</p>
+                          <p className="font-semibold text-gray-900 text-lg">{user?.email}</p>
+                        </div>
+                        <div className="border-l-4 border-purple-500 pl-4">
+                          <p className="text-sm text-gray-600">Member Since</p>
+                          <p className="font-semibold text-gray-900 text-lg">
+                            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-6 pt-6 border-t border-gray-200">
+                        <p className="text-sm text-gray-600 mb-2">Quick Actions</p>
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            onClick={() => setActiveSection("dealer-profile")}
+                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 text-sm font-medium"
+                          >
+                            Edit Business Profile
+                          </button>
+                          <button
+                            onClick={() => navigate("/dealer/dashboard")}
+                            className="px-4 py-2 border border-primary-500 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium"
+                          >
+                            View Dashboard
+                          </button>
+                          <button
+                            onClick={() => navigate("/my-listings")}
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
+                          >
+                            Manage Listings
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-3xl font-semibold text-gray-900">
-                      {metrics.posts}
-                    </div>
-                  </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Individual User Stats */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-500">Total Posts</span>
+                          <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                            <FiFileText className="text-primary-600" size={20} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-semibold text-gray-900">
+                          {metrics.posts}
+                        </div>
+                      </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500">Active Listings</span>
-                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                        <FiCheckCircle className="text-green-600" size={20} />
+                      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-500">Active Listings</span>
+                          <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                            <FiCheckCircle className="text-green-600" size={20} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-semibold text-gray-900">
+                          {metrics.activeListings}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-3xl font-semibold text-gray-900">
-                      {metrics.activeListings}
-                    </div>
-                  </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500">Total Sales</span>
-                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                        <FiStar className="text-blue-600" size={20} />
+                      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-500">Total Sales</span>
+                          <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <FiStar className="text-blue-600" size={20} />
+                          </div>
+                        </div>
+                        <div className="text-3xl font-semibold text-gray-900">
+                          {metrics.sales}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-3xl font-semibold text-gray-900">
-                      {metrics.sales}
-                    </div>
-                  </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500">Earnings</span>
-                      <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
-                        <span className="text-yellow-600 text-xl">💰</span>
+                      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-500">Earnings</span>
+                          <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
+                            <span className="text-yellow-600 text-xl">💰</span>
+                          </div>
+                        </div>
+                        <div className="text-2xl font-semibold text-gray-900">
+                          AED {metrics.earnings.toLocaleString()}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-2xl font-semibold text-gray-900">
-                      AED {metrics.earnings.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
 
                 {/* Notifications */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
                   <NotificationsSection />
                 </div>
               </>
@@ -492,6 +659,21 @@ const ProfileHero = () => {
                   <SubscriptionManagement />
                 )}
               </div>
+            )}
+
+            {activeSection === "dealer-profile" && user?.role === "dealer" && (
+              <DealerProfileEditSection
+                user={user}
+                dealerFormData={dealerFormData}
+                setDealerFormData={setDealerFormData}
+                dealerFiles={dealerFiles}
+                setDealerFiles={setDealerFiles}
+                isEditingDealer={isEditingDealer}
+                setIsEditingDealer={setIsEditingDealer}
+                updateDealerProfile={updateDealerProfile}
+                isUpdatingDealer={isUpdatingDealer}
+                refetch={refetch}
+              />
             )}
           </div>
         </div>

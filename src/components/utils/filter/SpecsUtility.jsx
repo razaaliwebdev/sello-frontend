@@ -9,11 +9,14 @@ const SpecsUtility = ({ groupName, specsTypes, onChange, multiple }) => {
         ? selected.filter((v) => v !== titleValue)
         : [...selected, titleValue];
       setSelected(newSelected);
-      onChange(newSelected);
-    } else {
-      setSelected(titleValue);
-      onChange(titleValue);
+      if (onChange) onChange(newSelected);
+      return;
     }
+
+    // Single select: allow toggle-off to clear the value
+    const nextValue = selected === titleValue ? null : titleValue;
+    setSelected(nextValue);
+    if (onChange) onChange(nextValue);
   };
 
   return (

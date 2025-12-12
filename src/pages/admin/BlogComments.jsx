@@ -38,13 +38,13 @@ const BlogComments = () => {
     ];
 
     const handleApprove = (commentId) => {
-        // In a real app, this would call an API
-        console.log(`Approving comment ${commentId}`);
+        // TODO: Implement approve comment API call
+        toast.success("Comment approved");
     };
 
     const handleDelete = (commentId) => {
-        // In a real app, this would call an API
-        console.log(`Deleting comment ${commentId}`);
+        // TODO: Implement delete comment API call
+        toast.success("Comment deleted");
     };
 
     const filteredComments = comments.filter(comment => {

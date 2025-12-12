@@ -1,57 +1,77 @@
 import React from "react";
-import { FiPhone } from "react-icons/fi";
+import { FiPhone, FiMail, FiMapPin, FiClock } from "react-icons/fi";
 
 const ContactCard = ({ contact }) => (
-  <div className="max-w-sm w-[90%] md:w-96 bg-white rounded-xl shadow-xl p-6">
-    <h2 className="text-2xl font-semibold mb-2">{contact.title}</h2>
-    <p className="text-sm text-gray-600 mb-4">{contact.subtitle}</p>
+  <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm">
+    <h2 className="text-2xl font-bold text-gray-900 mb-2">{contact.title}</h2>
+    <p className="text-sm text-gray-600 mb-6">{contact.subtitle}</p>
 
     {/* Phone */}
     <a
       href={`tel:${contact.phone}`}
-      className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-full shadow hover:bg-gray-200 mb-6"
+      className="flex items-center gap-3 bg-primary-50 text-primary-700 px-4 py-3 rounded-lg hover:bg-primary-100 mb-4 transition-colors group"
     >
-      <FiPhone className="text-lg" />
-      <span>{contact.phone}</span>
+      <FiPhone className="text-lg group-hover:scale-110 transition-transform" />
+      <span className="font-medium">{contact.phone}</span>
     </a>
 
+    {/* Email */}
+    <a
+      href={`mailto:${contact.email}`}
+      className="flex items-center gap-3 bg-gray-50 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-100 mb-4 transition-colors group"
+    >
+      <FiMail className="text-lg group-hover:scale-110 transition-transform" />
+      <span className="font-medium">{contact.email}</span>
+    </a>
+
+    {/* Address */}
+    <div className="flex items-start gap-3 bg-gray-50 px-4 py-3 rounded-lg mb-4">
+      <FiMapPin className="text-lg text-gray-600 mt-0.5" />
+      <span className="text-sm text-gray-700">{contact.address}</span>
+    </div>
+
     {/* Hours */}
-    <ul className="text-sm text-gray-700 space-y-2">
-      {contact.hours.map((h) => (
-        <li key={h.day} className="flex justify-between">
-          <span>{h.day}:</span>
-          <span className="font-medium">{h.hours}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="border-t border-gray-200 pt-4">
+      <div className="flex items-center gap-2 mb-3">
+        <FiClock className="text-gray-600" />
+        <h3 className="text-sm font-semibold text-gray-700">Business Hours</h3>
+      </div>
+      <ul className="text-sm text-gray-600 space-y-1.5">
+        {contact.hours.map((h) => (
+          <li key={h.day} className="flex justify-between">
+            <span>{h.day}:</span>
+            <span className="font-medium text-gray-900">{h.hours}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
 );
 
 const ContactMap = () => {
   const contact = {
-    title: "Get in Touch",
-    subtitle: "Contact our Sales Department",
-    phone: "+971524847862",
+    title: "Visit Our Office",
+    subtitle: "Sello.ae Head Office",
+    phone: "+97145061300",
+    email: "info@sello.ae",
+    address: "Sello.ae Head Office, JLT, Dubai, UAE",
     hours: [
-      { day: "Monday", hours: "9:00–13:00" },
-      { day: "Tuesday", hours: "9:00–13:00" },
-      { day: "Wednesday", hours: "9:00–13:00" },
-      { day: "Thursday", hours: "9:00–13:00" },
-      { day: "Friday", hours: "9:00–13:00" },
-      { day: "Saturday", hours: "9:00–13:00" },
-      { day: "Sunday", hours: "CLOSED" },
+      { day: "Sunday - Thursday", hours: "9:00 AM - 6:00 PM" },
+      { day: "Friday", hours: "9:00 AM - 1:00 PM" },
+      { day: "Saturday", hours: "Closed" },
     ],
-    mapUrl: "https://www.google.com/maps/embed?...",
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.198509618!2d55.1414!3d25.0657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDAzJzU2LjUiTiA1NcKwMDgnMzAuMSJF!5e0!3m2!1sen!2sae!4v1234567890",
   };
 
   return (
-    <section className="relative w-full h-[70vh] md:h-[80vh]">
+    <section className="relative w-full h-[70vh] md:h-[80vh] rounded-2xl overflow-hidden shadow-2xl">
       {/* Map */}
       <iframe
-        title="Office location"
+        title="Sello.ae Office Location"
         src={contact.mapUrl}
         className="absolute inset-0 w-full h-full border-0"
         loading="lazy"
+        allowFullScreen
       />
 
       {/* Card Overlay */}

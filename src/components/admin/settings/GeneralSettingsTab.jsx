@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { FaSave, FaSpinner, FaGlobe, FaShieldAlt, FaCheckCircle, FaBell, FaCamera, FaUpload } from "react-icons/fa";
+import { FaSave, FaSpinner, FaGlobe, FaShieldAlt, FaCheckCircle, FaBell, FaCamera, FaUpload, FaDollarSign } from "react-icons/fa";
 
 const ToggleSwitch = ({ checked, onChange }) => (
   <button
@@ -43,7 +43,14 @@ const GeneralSettingsTab = () => {
     
     // Notifications
     enableEmailNotifications: true,
-    enablePushNotifications: true
+    enablePushNotifications: true,
+    
+    // Payment System
+    paymentSystemEnabled: true,
+    showSubscriptionPlans: true,
+    showPaymentHistory: true,
+    enableAutoRenewal: true,
+    requirePaymentApproval: false
   });
 
   useEffect(() => {
@@ -52,9 +59,15 @@ const GeneralSettingsTab = () => {
 
   const fetchSettings = async () => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/settings`,
-        { withCredentials: true }
+        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
+        { 
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
 
       if (response.data.success) {
@@ -112,11 +125,15 @@ const GeneralSettingsTab = () => {
 
     setUploading(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/upload`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/upload`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`
+          },
           withCredentials: true
         }
       );
@@ -128,8 +145,7 @@ const GeneralSettingsTab = () => {
         toast.success("Site logo uploaded successfully");
       }
     } catch (error) {
-      console.error("Upload Error:", error);
-      toast.error("Failed to upload logo");
+      toast.error(error.response?.data?.message || "Failed to upload logo");
     } finally {
       setUploading(false);
     }
@@ -161,12 +177,17 @@ const GeneralSettingsTab = () => {
         { key: "autoApproveDealers", value: settings.autoApproveDealers || false, category: "general", type: "boolean" },
         { key: "autoApproveListings", value: settings.autoApproveListings || false, category: "general", type: "boolean" },
         { key: "enableEmailNotifications", value: settings.enableEmailNotifications || false, category: "email", type: "boolean" },
-        { key: "enablePushNotifications", value: settings.enablePushNotifications || false, category: "general", type: "boolean" }
+        { key: "enablePushNotifications", value: settings.enablePushNotifications || false, category: "general", type: "boolean" },
+        { key: "paymentSystemEnabled", value: settings.paymentSystemEnabled !== undefined ? settings.paymentSystemEnabled : true, category: "payment", type: "boolean" },
+        { key: "showSubscriptionPlans", value: settings.showSubscriptionPlans !== undefined ? settings.showSubscriptionPlans : true, category: "payment", type: "boolean" },
+        { key: "showPaymentHistory", value: settings.showPaymentHistory !== undefined ? settings.showPaymentHistory : true, category: "payment", type: "boolean" },
+        { key: "enableAutoRenewal", value: settings.enableAutoRenewal !== undefined ? settings.enableAutoRenewal : true, category: "payment", type: "boolean" },
+        { key: "requirePaymentApproval", value: settings.requirePaymentApproval !== undefined ? settings.requirePaymentApproval : false, category: "payment", type: "boolean" }
       ];
 
       const promises = settingsToSave.map(setting => 
         axios.post(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/settings`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/settings`,
           setting,
           { withCredentials: true }
         )
@@ -394,6 +415,84 @@ const GeneralSettingsTab = () => {
               onChange={(val) => handleChange("enablePushNotifications", val)} 
             />
           </div>
+        </div>
+      </div>
+
+      {/* Payment System Settings */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+          <FaDollarSign className="text-orange-500" />
+          <h3 className="font-bold text-gray-800">Payment System Control</h3>
+        </div>
+        <div className="p-6 space-y-4">
+          {/* Main Toggle */}
+          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+            <div>
+              <h4 className="font-medium text-gray-800">Enable Payment System</h4>
+              <p className="text-sm text-gray-500">Master switch for entire payment system. When disabled, all payment features are hidden.</p>
+            </div>
+            <ToggleSwitch 
+              checked={settings.paymentSystemEnabled !== undefined ? settings.paymentSystemEnabled : true} 
+              onChange={(val) => handleChange("paymentSystemEnabled", val)} 
+            />
+          </div>
+
+          {/* Granular Controls */}
+          {settings.paymentSystemEnabled !== false && (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-800">Show Subscription Plans</h4>
+                  <p className="text-sm text-gray-500">Display subscription plans to users on client side</p>
+                </div>
+                <ToggleSwitch 
+                  checked={settings.showSubscriptionPlans !== undefined ? settings.showSubscriptionPlans : true} 
+                  onChange={(val) => handleChange("showSubscriptionPlans", val)} 
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-800">Show Payment History</h4>
+                  <p className="text-sm text-gray-500">Allow users to view their payment history</p>
+                </div>
+                <ToggleSwitch 
+                  checked={settings.showPaymentHistory !== undefined ? settings.showPaymentHistory : true} 
+                  onChange={(val) => handleChange("showPaymentHistory", val)} 
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-800">Enable Auto-Renewal</h4>
+                  <p className="text-sm text-gray-500">Allow users to enable automatic subscription renewal</p>
+                </div>
+                <ToggleSwitch 
+                  checked={settings.enableAutoRenewal !== undefined ? settings.enableAutoRenewal : true} 
+                  onChange={(val) => handleChange("enableAutoRenewal", val)} 
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-800">Require Payment Approval</h4>
+                  <p className="text-sm text-gray-500">Manually approve all subscription purchases</p>
+                </div>
+                <ToggleSwitch 
+                  checked={settings.requirePaymentApproval !== undefined ? settings.requirePaymentApproval : false} 
+                  onChange={(val) => handleChange("requirePaymentApproval", val)} 
+                />
+              </div>
+            </>
+          )}
+
+          {settings.paymentSystemEnabled === false && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> Payment system is disabled. All payment-related features are hidden on the client side.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

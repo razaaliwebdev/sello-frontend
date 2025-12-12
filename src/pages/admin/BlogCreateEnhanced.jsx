@@ -93,8 +93,8 @@ const BlogCreateEnhanced = () => {
                 // The backend will handle this based on status
             }
 
-            await createBlog(formDataToSend).unwrap();
-            toast.success(status === "published" ? "Blog published successfully" : "Blog saved as draft");
+            const result = await createBlog(formDataToSend).unwrap();
+            toast.success(status === "published" ? "Blog published successfully! It will appear on the public site immediately." : "Blog saved as draft");
             navigate("/admin/blogs");
         } catch (error) {
             toast.error(error?.data?.message || "Failed to create blog");

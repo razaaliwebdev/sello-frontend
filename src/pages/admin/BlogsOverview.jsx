@@ -406,14 +406,15 @@ const BlogsOverview = () => {
                                                 >
                                                     <FiTrash2 size={18} />
                                                 </button>
-                                                <Link
-                                                    to={`/blog/${blog.slug || blog._id}`}
+                                                <a
+                                                    href={`/blog/${blog.slug || blog._id}`}
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="text-green-600 hover:text-green-900"
                                                     title="View"
                                                 >
                                                     <FiEye size={18} />
-                                                </Link>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

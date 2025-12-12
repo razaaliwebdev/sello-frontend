@@ -19,13 +19,14 @@ const SimilarListings = ({ carId }) => {
     // Show skeleton while loading
     if (isLoading) {
         return (
-            <div className="px-4 md:px-20 py-12 bg-gray-50">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900">
-                    Similar Listings
-                </h2>
+            <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-white">
+                <div className="mb-8">
+                    <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {[...Array(4)].map((_, i) => (
-                        <div key={i} className="bg-white rounded-lg shadow-md animate-pulse">
+                        <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm animate-pulse">
                             <div className="h-48 bg-gray-200"></div>
                             <div className="p-4">
                                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -39,16 +40,19 @@ const SimilarListings = ({ carId }) => {
     }
 
     return (
-        <div className="px-4 md:px-20 py-12 bg-gray-50">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900">
-                Similar Listings
-            </h2>
+        <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-white">
+            <div className="mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                    Similar Listings
+                </h2>
+                <p className="text-gray-600">Cars similar to this one</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {similarCars.map((car) => (
                     <Link
                         key={car._id}
                         to={`/cars/${car._id}`}
-                        className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden group"
+                        className="bg-white rounded-xl shadow-sm hover:shadow-xl border border-gray-200 transition-all duration-300 overflow-hidden group transform hover:-translate-y-1"
                     >
                         <div className="relative h-48 overflow-hidden">
                             <LazyImage

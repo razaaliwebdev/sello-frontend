@@ -1,6 +1,7 @@
-import React from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useParams, useLocation, Navigate } from "react-router-dom";
 import { useGetSingleCarQuery } from "../../redux/services/api";
+import { useRecentlyViewedCars } from "../../hooks/useRecentlyViewedCars";
 import CarDetailsHeroSection from "../../components/sections/carDetails/CarDetailsHeroSection";
 import CarDetailsGallerySection from "../../components/sections/carDetails/CarDetailsGallerySection";
 import Btns from "../../components/sections/carDetails/Btns";
@@ -18,77 +19,213 @@ import SEO from "../../components/common/SEO";
 
 const CarDetails = () => {
   const { id } = useParams();
-  const { data: car, isLoading } = useGetSingleCarQuery(id, {
-    skip: !id,
+  const location = useLocation();
+  
+  // CRITICAL: Get actual URL from window to verify route
+  const actualPath = typeof window !== 'undefined' ? window.location.pathname : location.pathname;
+  
+  // ABSOLUTE CHECK - If we're on home route, return null immediately
+  // Check both location.pathname AND window.location.pathname
+  if (location.pathname === '/' || location.pathname === '/home' || 
+      actualPath === '/' || actualPath === '/home') {
+    return null;
+  }
+  
+  // Double check - ensure we're on a valid car route
+  // Use actualPath for verification
+  const pathToCheck = actualPath || location.pathname;
+  const pathParts = pathToCheck.split('/').filter(Boolean);
+  
+  const isValidCarRoute = 
+    pathToCheck.startsWith('/cars/') &&
+    pathToCheck !== '/cars' &&
+    pathParts.length === 2 &&
+    pathParts[0] === 'cars' &&
+    pathParts[1] &&
+    pathParts[1].trim() !== '' &&
+    id &&
+    typeof id === 'string' &&
+    id.trim() !== '' &&
+    id === pathParts[1];
+  
+  // If not valid, return null immediately
+  if (!isValidCarRoute) {
+    return null;
+  }
+  
+  // Query will only run if we have a valid id
+  const { data: car, isLoading, error } = useGetSingleCarQuery(id, {
+    skip: !id || !isValidCarRoute,
   });
+  const { addRecentlyViewed } = useRecentlyViewedCars();
+
+  // Track car as recently viewed when it loads
+  useEffect(() => {
+    if (car && car._id) {
+      addRecentlyViewed(car);
+    }
+  }, [car, addRecentlyViewed]);
+
+  // Scroll to top when component mounts or route changes
+  useEffect(() => {
+    // Scroll to top immediately when navigating to car details page
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [id, location.pathname]);
+
+  // Ensure body overflow is restored when leaving this page
+  useEffect(() => {
+    // Restore body styles on mount and when location changes
+    if (document.body) {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+    
+    return () => {
+      // Cleanup: ensure body styles are restored when component unmounts
+      if (document.body) {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    };
+  }, [location.pathname]);
   
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
     { label: 'Cars', path: '/cars' },
-    { label: car ? `${car.make} ${car.model}` : 'Car Details', path: `/cars/${id}` }
+    { label: car ? `${car.make || ''} ${car.model || ''}`.trim() || 'Car Details' : 'Car Details', path: `/cars/${id}` }
   ];
 
-  if (!car && !isLoading) {
+  if (error) {
+    console.error("Car details error:", error);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-500 text-lg">Car not found</p>
+          <p className="text-red-500 text-lg mb-2">Error loading car details</p>
+          <p className="text-gray-600 text-sm mb-4">
+            {error?.data?.message || error?.message || "Please try again later"}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
   }
 
-  const carTitle = car ? `${car.year} ${car.make} ${car.model} - ${car.condition} - AED ${car.price?.toLocaleString()}` : 'Car Details';
+  if (!car && !isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-2">Car not found</p>
+          <p className="text-gray-600 text-sm mb-4">
+            The car listing you're looking for doesn't exist or has been removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Wait for car data before rendering
+  if (isLoading || !car) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-primary-500 mx-auto mb-4"></div>
+          <div className="text-gray-500 text-sm">Loading car details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const carTitle = car ? `${car.year || ''} ${car.make || ''} ${car.model || ''} - ${car.condition || ''} - AED ${car.price?.toLocaleString() || '0'}`.trim() : 'Car Details';
   const carDescription = car 
-    ? `View details for ${car.year} ${car.make} ${car.model} in ${car.city}. ${car.condition} car with ${car.mileage?.toLocaleString() || 'N/A'} km. Price: AED ${car.price?.toLocaleString()}. ${car.description || ''}`
+    ? `View details for ${car.year || ''} ${car.make || ''} ${car.model || ''} in ${car.city || ''}. ${car.condition || ''} car with ${car.mileage?.toLocaleString() || 'N/A'} km. Price: AED ${car.price?.toLocaleString() || '0'}. ${car.description || ''}`
     : 'View car details on Sello';
   const carImage = car?.images?.[0] || '/logo.png';
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <SEO
         title={carTitle}
         description={carDescription}
         image={carImage}
         type="product"
-        keywords={`${car?.make} ${car?.model}, ${car?.year}, ${car?.condition} car, ${car?.city}, car for sale`}
+        keywords={`${car?.make || ''} ${car?.model || ''}, ${car?.year || ''}, ${car?.condition || ''} car, ${car?.city || ''}, car for sale`}
       />
       <Breadcrumb items={breadcrumbItems} />
-      <CarDetailsHeroSection />
-      <CarDetailsGallerySection />
+      
+      {/* Hero Section */}
+      <CarDetailsHeroSection key={`hero-${id}`} />
+      
+      {/* Gallery Section */}
+      <CarDetailsGallerySection key={`gallery-${id}`} />
+      
+      {/* Action Buttons */}
       <Btns />
+      
+      {/* Main Content */}
       <CarDetailsEtc />
-      {car.postedBy && (
-        <div className="px-4 md:px-20 py-8">
+      
+      {/* Seller Reviews */}
+      {car?.postedBy && (
+        <div className="max-w-7xl mx-auto px-4 md:px-20 py-8 bg-white">
           <UserReviewSection 
-            userId={car.postedBy._id || car.postedBy} 
+            userId={car.postedBy?._id || car.postedBy} 
             carId={id}
             sellerName={car.postedBy?.name}
           />
         </div>
       )}
-      <CustomerReviews />
+      
+      {/* Customer Reviews */}
+      <div className="bg-white">
+        <CustomerReviews />
+      </div>
       
       {/* Similar Listings Section */}
-      <SimilarListings carId={id} />
+      {id && <SimilarListings carId={id} />}
       
       {/* Recently Viewed Section */}
       <RecentlyViewed />
       
-      <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
-        <div className="flex items-center md:justify-between">
-          <h1 className="md:text-4xl text-2xl font-semibold">
-            Explore Our Premium Brands
-          </h1>
-          <button className="text-primary-500">
-            <Link to="/view-all-brands">Show All Brands</Link>
-          </button>
+      {/* Brands Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-white">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Explore Our Premium Brands
+            </h2>
+            <p className="text-gray-600 mt-2">Discover trusted automotive brands</p>
+          </div>
+          <Link 
+            to="/view-all-brands"
+            className="text-primary-500 hover:text-primary-600 font-semibold flex items-center gap-2 transition-colors"
+          >
+            Show All Brands
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-        {/* BrandMarquee will fetch brands from admin categories automatically */}
         <BrandMarquee />
       </div>
-      <Ads />
-      <BlogSection />
+      
+      {/* Ads Section */}
+      <div className="bg-gray-50">
+        <Ads />
+      </div>
+      
+      {/* Blog Section */}
+      <div className="bg-white">
+        <BlogSection />
+      </div>
     </div>
   );
 };

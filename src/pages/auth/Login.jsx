@@ -9,13 +9,18 @@ import toast from "react-hot-toast";
 import {
   useLoginUserMutation,
   useGoogleLoginMutation,
+  api,
 } from "../../redux/services/api";
+import { store } from "../../redux/store";
 import Spinner from "../../components/Spinner";
+
+// Check if Google OAuth is configured
+const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({ email: "", password: "" });
-  const [googleLoading, setGoogleLoading] = useState(false); // ✅
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const navigate = useNavigate();
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -25,30 +30,84 @@ const Login = () => {
     e.preventDefault();
 
     if (!data.email || !data.password) {
-      return toast.error("All fields are required");
+      toast.error("All fields are required");
+      return;
     }
 
     try {
       const res = await loginUser(data).unwrap();
+      
+      if (!res) {
+        throw new Error("Empty response from server");
+      }
+
+      // Validate response structure
+      if (!res || (!res.token && !res.data?.token)) {
+        throw new Error("Invalid response from server. Missing token.");
+      }
+
+      if (!res.user && !res.data?.user) {
+        throw new Error("Invalid response from server. Missing user data.");
+      }
 
       // Store token in the Local Storage
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
+      const token = res.token || res.data?.token;
+      const user = res.user || res.data?.user;
+      
+      if (!token || !user) {
+        throw new Error("Failed to extract login credentials from response.");
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Invalidate and refetch user queries (mutation already does this, but ensure it happens)
+      try {
+        if (api?.util?.invalidateTags) {
+          store.dispatch(api.util.invalidateTags(["User"]));
+        }
+      } catch (error) {
+        console.warn("Failed to invalidate cache:", error);
+        // This is not critical - the mutation already invalidates tags
+      }
 
       toast.success("Login successful");
       
-      // Redirect based on user role
-      if (res.user?.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (res.user?.role === "dealer" && res.user?.dealerInfo?.verified) {
-        navigate("/dealer/dashboard");
-      } else if (res.user?.role === "individual" || res.user?.role === "dealer") {
-        navigate("/seller/dashboard");
-      } else {
-        navigate("/");
-      }
+      // Small delay to allow state updates
+      setTimeout(() => {
+        // Redirect based on user role - be strict about admin checks
+        const userRole = user?.role?.toLowerCase()?.trim();
+        
+        // Debug logging (can be removed in production)
+        console.log("Login redirect - User role:", userRole);
+        console.log("Login redirect - User adminRole:", user?.adminRole);
+        console.log("Login redirect - User roleId:", user?.roleId);
+        
+        // Redirect based on user role - be conservative about admin redirects
+        // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
+        if (userRole === "admin") {
+          // Check if user object has admin-related properties (indicating real admin)
+          // If unsure, let AdminRoute handle the check
+          if ('adminRole' in user || 'roleId' in user || user?.status === "active") {
+            navigate("/admin/dashboard");
+          } else {
+            // Role is "admin" but missing admin properties - redirect to home for safety
+            console.warn("User with admin role missing admin properties. Redirecting to home.");
+            navigate("/");
+          }
+        } else if (userRole === "dealer" && user?.dealerInfo?.verified) {
+          navigate("/dealer/dashboard");
+        } else if (userRole === "individual" || userRole === "dealer") {
+          navigate("/seller/dashboard");
+        } else {
+          // Default: redirect to home page
+          navigate("/");
+        }
+      }, 100);
     } catch (err) {
-      toast.error(err?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      const errorMessage = err?.data?.message || err?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -75,18 +134,49 @@ const Login = () => {
       localStorage.setItem("token", responseToken);
       localStorage.setItem("user", JSON.stringify(responseUser));
 
+      // Invalidate and refetch user queries
+      try {
+        if (api?.util?.invalidateTags) {
+          store.dispatch(api.util.invalidateTags(["User"]));
+        }
+      } catch (error) {
+        console.warn("Failed to invalidate cache:", error);
+        // This is not critical - the mutation already invalidates tags
+      }
+
       toast.success("Google login successful");
       
-      // Redirect based on user role
-      if (responseUser?.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (responseUser?.role === "dealer" && responseUser?.dealerInfo?.verified) {
-        navigate("/dealer/dashboard");
-      } else if (responseUser?.role === "individual" || responseUser?.role === "dealer") {
-        navigate("/seller/dashboard");
-      } else {
-        navigate("/");
-      }
+      // Small delay to allow state updates
+      setTimeout(() => {
+        // Redirect based on user role - be strict about admin checks
+        const userRole = responseUser?.role?.toLowerCase()?.trim();
+        
+        // Debug logging (can be removed in production)
+        console.log("Google login redirect - User role:", userRole);
+        console.log("Google login redirect - User adminRole:", responseUser?.adminRole);
+        console.log("Google login redirect - User roleId:", responseUser?.roleId);
+        
+        // Redirect based on user role - be conservative about admin redirects
+        // Only redirect to admin if role is explicitly "admin" (AdminRoute will handle final check)
+        if (userRole === "admin") {
+          // Check if user object has admin-related properties (indicating real admin)
+          // If unsure, let AdminRoute handle the check
+          if ('adminRole' in responseUser || 'roleId' in responseUser || responseUser?.status === "active") {
+            navigate("/admin/dashboard");
+          } else {
+            // Role is "admin" but missing admin properties - redirect to home for safety
+            console.warn("User with admin role missing admin properties. Redirecting to home.");
+            navigate("/");
+          }
+        } else if (userRole === "dealer" && responseUser?.dealerInfo?.verified) {
+          navigate("/dealer/dashboard");
+        } else if (userRole === "individual" || userRole === "dealer") {
+          navigate("/seller/dashboard");
+        } else {
+          // Default: redirect to home page
+          navigate("/");
+        }
+      }, 100);
     } catch (err) {
       console.error("Google login error:", err);
       console.error("Error details:", {
@@ -127,7 +217,7 @@ const Login = () => {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex md:flex-row flex-col h-screen bg-gray-50">
         {/* Orange Header */}
         <HeaderLogo />
 
@@ -139,8 +229,12 @@ const Login = () => {
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
                 <img
                   className="w-10 h-10"
-                  src={images.userIcon}
+                  src={images?.userIcon || '/user-icon.png'}
                   alt="userIcon"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/user-icon.png';
+                  }}
                 />
               </div>
             </div>
@@ -235,7 +329,21 @@ const Login = () => {
                   <GoogleLogin
                     onSuccess={handleGoogleLoginSuccess}
                     onError={(error) => {
+                      // Handle configuration errors gracefully - don't show errors for unconfigured OAuth
+                      if (!hasGoogleClientId) {
+                        // Silently handle - user knows it's not configured from console warning
+                        return;
+                      }
+                      
+                      // Handle actual errors when OAuth IS configured
+                      if (error?.message?.includes("origin is not allowed") || error?.message?.includes("GSI_LOGGER")) {
+                        toast.error("Google Sign-In configuration error. Please use email/password login.");
+                        return;
+                      }
+                      
+                      // Log other errors for debugging (only if configured)
                       console.error("Google OAuth error:", error);
+                      
                       let errorMsg = "Google login failed. ";
                       
                       if (error?.type === "popup_closed_by_user") {
@@ -243,7 +351,7 @@ const Login = () => {
                       } else if (error?.type === "popup_failed_to_open") {
                         errorMsg = "Popup blocked. Please allow popups for this site.";
                       } else if (error?.type === "idpiframe_initialization_failed") {
-                        errorMsg = "Google authentication service unavailable. Please check your internet connection.";
+                        errorMsg = "Google authentication service unavailable. Please use email/password login.";
                       } else {
                         errorMsg += "Please try again or use email/password login.";
                       }

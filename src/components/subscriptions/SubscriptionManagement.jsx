@@ -11,21 +11,26 @@ import {
 import toast from "react-hot-toast";
 import Spinner from "../Spinner";
 import { format } from "date-fns";
+import ConfirmModal from "../admin/ConfirmModal";
 
 const SubscriptionManagement = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [autoRenew, setAutoRenew] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const { data: plans, isLoading: plansLoading } = useGetSubscriptionPlansQuery();
+  const { data: plansData, isLoading: plansLoading } = useGetSubscriptionPlansQuery();
   const { data: mySubscription, isLoading: subLoading, refetch: refetchSubscription } = useGetMySubscriptionQuery();
   const { data: paymentHistory, isLoading: historyLoading } = useGetPaymentHistoryQuery();
   const [purchaseSubscription, { isLoading: isPurchasing }] = usePurchaseSubscriptionMutation();
   const [createSubscriptionCheckout, { isLoading: isCreatingCheckout }] = useCreateSubscriptionCheckoutMutation();
   const [cancelSubscription, { isLoading: isCancelling }] = useCancelSubscriptionMutation();
 
-  const subscriptionPlans = plans || {};
+  // Extract plans and payment system status
+  const plans = plansData?.data || {};
+  const paymentSystemEnabled = plansData?.paymentSystemEnabled !== undefined ? plansData.paymentSystemEnabled : true;
+  const subscriptionPlans = plans;
   const currentSubscription = mySubscription?.subscription;
   const planDetails = mySubscription?.planDetails;
   const isActive = currentSubscription?.isActive || false;
@@ -54,15 +59,16 @@ const SubscriptionManagement = () => {
     }
   };
 
-  const handleCancel = async () => {
-    if (!window.confirm("Are you sure you want to cancel auto-renewal? Your subscription will remain active until the end date.")) {
-      return;
-    }
+  const handleCancel = () => {
+    setShowCancelModal(true);
+  };
 
+  const handleCancelConfirm = async () => {
     try {
       await cancelSubscription().unwrap();
       toast.success("Subscription auto-renewal cancelled successfully");
       refetchSubscription();
+      setShowCancelModal(false);
     } catch (error) {
       toast.error(error?.data?.message || "Failed to cancel subscription");
     }
@@ -85,6 +91,20 @@ const SubscriptionManagement = () => {
     return (
       <div className="flex justify-center items-center py-12">
         <Spinner fullScreen={false} />
+      </div>
+    );
+  }
+
+  // If payment system is explicitly disabled, don't show anything
+  if (paymentSystemEnabled === false) {
+    return null;
+  }
+
+  // If no plans available but payment system is enabled, show message
+  if (Object.keys(subscriptionPlans).length === 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <p className="text-yellow-800">No subscription plans are currently available. Please check back later.</p>
       </div>
     );
   }
@@ -132,6 +152,18 @@ const SubscriptionManagement = () => {
           )}
         </div>
       )}
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleCancelConfirm}
+        title="Cancel Auto-Renewal"
+        message="Are you sure you want to cancel auto-renewal? Your subscription will remain active until the end date."
+        confirmText="Cancel Auto-Renewal"
+        variant="warning"
+        isLoading={isCancelling}
+      />
 
       {/* Subscription Plans */}
       <div>
@@ -213,7 +245,7 @@ const SubscriptionManagement = () => {
         </div>
       </div>
 
-      {/* Payment History */}
+      {/* Payment History - Only show if enabled */}
       {paymentHistory && paymentHistory.payments && paymentHistory.payments.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Payment History</h3>

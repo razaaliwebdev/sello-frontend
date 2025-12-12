@@ -1,7 +1,8 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Hero from "../components/sections/home/Hero";
 import BrandsSection from "../components/sections/home/BrandsSection";
-import PopularMakes from "../components/sections/home/PopularMakes";
+import FeaturedCarsCarousel from "../components/sections/home/FeaturedCarsCarousel";
 import ShopBoxCar from "../components/sections/home/ShopBoxCarSection";
 import CustomerReview from "../components/sections/home/CustomerReview";
 import BlogSection from "../components/sections/home/BlogSection";
@@ -13,6 +14,13 @@ import SEO from "../components/common/SEO";
 import Video from "../components/sections/home/Video";
 
 const Home = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Ensure we scroll to top when Home component renders
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+  
   return (
     <div className="">
       <SEO
@@ -25,7 +33,7 @@ const Home = () => {
         <BrandsSection />
         <Video/>
         <BannerCarousal/>
-        <PopularMakes />
+        <FeaturedCarsCarousel />
         <ShopBoxCar />
         <GetAllCarsSection />
         <CustomerReview />

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { images } from "../../../assets/assets";
 import { useGetTestimonialsQuery, useSubmitReviewMutation } from "../../../redux/services/api";
 import { useGetMeQuery } from "../../../redux/services/api";
 import toast from "react-hot-toast";
 
 const CustomerReview = () => {
+  const navigate = useNavigate();
   const [currentReview, setCurrentReview] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,11 +16,34 @@ const CustomerReview = () => {
     rating: 5,
   });
 
-  const { data: user } = useGetMeQuery();
-  const { data: testimonialsData, isLoading } = useGetTestimonialsQuery({ isActive: true });
+  const token = localStorage.getItem("token");
+  const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
+    skip: !token,
+  });
+  
+  // Check if user is logged in (must be declared before use in skip options)
+  const isLoggedIn = !!user && !!token;
+  
+  // Fetch active testimonials for display
+  const { data: testimonialsData, isLoading, refetch } = useGetTestimonialsQuery({ isActive: true });
+  // Also fetch user's pending reviews (if logged in)
+  const { data: userPendingReviews, refetch: refetchPending } = useGetTestimonialsQuery(
+    { createdBy: user?._id?.toString(), isActive: 'false' },
+    { skip: !isLoggedIn || !user?._id }
+  );
   const [submitReview, { isLoading: isSubmitting }] = useSubmitReviewMutation();
 
+  const handleOpenReviewForm = () => {
+    if (!isLoggedIn) {
+      toast.error("Please login to write a review");
+      navigate("/login");
+      return;
+    }
+    setShowReviewForm(true);
+  };
+
   const testimonials = testimonialsData || [];
+  const pendingReviews = userPendingReviews || [];
   
   // Auto-play carousel
   useEffect(() => {
@@ -32,10 +57,10 @@ const CustomerReview = () => {
 
   // Pre-fill form with user data if logged in
   useEffect(() => {
-    if (user?.user?.name) {
+    if (user?.name) {
       setFormData(prev => ({
         ...prev,
-        name: user.user.name,
+        name: user.name,
       }));
     }
   }, [user]);
@@ -51,6 +76,13 @@ const CustomerReview = () => {
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      toast.error("Please login to submit a review");
+      navigate("/login");
+      return;
+    }
+    
     if (!formData.name || !formData.text) {
       toast.error("Please fill in all required fields");
       return;
@@ -65,8 +97,14 @@ const CustomerReview = () => {
 
       await submitReview(formDataToSend).unwrap();
       toast.success("Review submitted successfully! It will be published after admin approval.");
-      setFormData({ name: user?.user?.name || "", role: "", text: "", rating: 5 });
+      setFormData({ name: user?.name || "", role: "", text: "", rating: 5 });
       setShowReviewForm(false);
+      // Refetch pending reviews to show the newly submitted review
+      setTimeout(() => {
+        if (refetchPending) {
+          refetchPending();
+        }
+      }, 500);
     } catch (error) {
       toast.error(error?.data?.message || "Failed to submit review. Please try again.");
     }
@@ -206,25 +244,58 @@ const CustomerReview = () => {
             </div>
           ) : (
             <div className="flex flex-col md:flex-row md:gap-16 gap-6 items-center justify-center py-12">
-              <p className="text-gray-500 text-lg">No reviews yet. Be the first to review!</p>
+              <div className="text-center">
+                <p className="text-gray-500 text-lg mb-2">No reviews yet. Be the first to review!</p>
+                {isLoggedIn && pendingReviews.length > 0 && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800 text-sm">
+                      ⏳ You have {pendingReviews.length} pending review{pendingReviews.length > 1 ? 's' : ''} waiting for admin approval.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Submit Review Button */}
+          {/* Pending Review Message */}
+          {isLoggedIn && pendingReviews.length > 0 && (
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm flex items-center gap-2">
+                <span>⏳</span>
+                <span>You have {pendingReviews.length} review{pendingReviews.length > 1 ? 's' : ''} pending approval. {pendingReviews.length > 1 ? 'They will' : 'It will'} appear here once approved by admin.</span>
+              </p>
+            </div>
+          )}
+
+          {/* Submit Review Button - Show based on login status */}
           <div className="mt-8">
-            <button
-              onClick={() => setShowReviewForm(true)}
-              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              {user?.user ? "Write a Review" : "Login to Write a Review"}
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleOpenReviewForm}
+                className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+              >
+                Write a Review
+              </button>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 items-center">
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Want to share your experience?
+                </p>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                >
+                  Login to Write a Review
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div className="ad"></div>
       </div>
 
-      {/* Review Form Modal/Popup */}
-      {showReviewForm && (
+      {/* Review Form Modal/Popup - Only show if user is logged in */}
+      {showReviewForm && isLoggedIn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -232,7 +303,7 @@ const CustomerReview = () => {
               <button
                 onClick={() => {
                   setShowReviewForm(false);
-                  setFormData({ name: user?.user?.name || "", role: "", text: "", rating: 5 });
+                  setFormData({ name: user?.name || "", role: "", text: "", rating: 5 });
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label="Close modal"
@@ -339,7 +410,7 @@ const CustomerReview = () => {
                   type="button"
                   onClick={() => {
                     setShowReviewForm(false);
-                    setFormData({ name: user?.user?.name || "", role: "", text: "", rating: 5 });
+                    setFormData({ name: user?.name || "", role: "", text: "", rating: 5 });
                   }}
                   className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
                 >

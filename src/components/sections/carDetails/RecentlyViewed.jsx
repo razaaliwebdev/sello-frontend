@@ -25,13 +25,14 @@ const RecentlyViewed = () => {
     // Show skeleton while loading
     if (isLoading) {
         return (
-            <div className="px-4 md:px-20 py-12 bg-white">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900">
-                    Recently Viewed
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-gray-50">
+                <div className="mb-8">
+                    <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-gray-50 rounded-lg shadow-sm animate-pulse">
+                        <div key={i} className="bg-white rounded-lg border border-gray-200 shadow-sm animate-pulse">
                             <div className="h-32 bg-gray-200"></div>
                             <div className="p-3">
                                 <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -45,16 +46,19 @@ const RecentlyViewed = () => {
     }
 
     return (
-        <div className="px-4 md:px-20 py-12 bg-white">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900">
-                Recently Viewed
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-gray-50">
+            <div className="mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                    Recently Viewed
+                </h2>
+                <p className="text-gray-600">Continue browsing your recent searches</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {recentlyViewed.map((car) => (
                     <Link
                         key={car._id}
                         to={`/cars/${car._id}`}
-                        className="bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+                        className="bg-white rounded-lg shadow-sm hover:shadow-lg border border-gray-200 transition-all duration-300 overflow-hidden group transform hover:-translate-y-1"
                     >
                         <div className="relative h-32 overflow-hidden">
                             <LazyImage

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { io } from "socket.io-client";
 import {
@@ -13,10 +13,23 @@ import toast from "react-hot-toast";
 import { FiSend, FiPaperclip, FiTrash2, FiSearch, FiMoreVertical, FiEdit2 } from "react-icons/fi";
 import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { formatDistanceToNow } from "date-fns";
+import ConfirmModal from "../../components/admin/ConfirmModal";
+import { useSearchParams } from "react-router-dom";
 
 const SupportChat = () => {
+    const [searchParams] = useSearchParams();
+    const chatIdFromUrl = searchParams.get('chatId');
+    
+    // Helper function to ensure chatId is a string
+    const getChatIdString = (chatId) => {
+        if (!chatId) return null;
+        if (typeof chatId === 'string') return chatId;
+        if (chatId?._id) return String(chatId._id);
+        return String(chatId);
+    };
+    
     const [socket, setSocket] = useState(null);
-    const [selectedChat, setSelectedChat] = useState(null);
+    const [selectedChat, setSelectedChat] = useState(() => getChatIdString(chatIdFromUrl));
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [typingUsers, setTypingUsers] = useState([]);
@@ -25,20 +38,27 @@ const SupportChat = () => {
     const [socketConnected, setSocketConnected] = useState(false);
     const [editingMessageId, setEditingMessageId] = useState(null);
     const [editMessageText, setEditMessageText] = useState("");
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState(null);
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
     const SOCKET_URL = BASE_URL.replace('/api', ''); // Remove /api if present
 
+    // If chatId is in URL, fetch all chats (no status filter) to ensure we find it
+    const shouldFetchAll = !!chatIdFromUrl;
+    
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery({
-        status: filterStatus !== "all" ? filterStatus : undefined,
+        status: (shouldFetchAll || filterStatus === "all") ? undefined : filterStatus,
         search: searchQuery || undefined,
     }, {
         pollingInterval: 5000, // Poll every 5 seconds for new chats
-        refetchOnMountOrArgChange: true
+        refetchOnMountOrArgChange: true,
+        // Refetch when chatId is in URL to ensure we have the chat
+        refetchOnFocus: true
     });
 
     const { data: messagesData, isLoading: messagesLoading, refetch: refetchMessages } = useGetSupportChatMessagesAdminQuery(
@@ -53,8 +73,36 @@ const SupportChat = () => {
     const [sendResponse] = useSendAdminResponseMutation();
     const [updateStatus] = useUpdateSupportChatStatusMutation();
 
-    const chats = chatsData?.chats || [];
-    const selectedChatData = chats.find(c => c._id === selectedChat);
+    const { data: adminUser } = useGetMeQuery();
+    const adminId = adminUser?._id;
+
+    // Get chats from response - handle different response structures
+    const chats = React.useMemo(() => {
+        if (!chatsData) return [];
+        // Handle response structure: { chats: [...], pagination: {...} }
+        if (chatsData.chats && Array.isArray(chatsData.chats)) {
+            return chatsData.chats;
+        }
+        // Handle array response
+        if (Array.isArray(chatsData)) {
+            return chatsData;
+        }
+        return [];
+    }, [chatsData]);
+    
+    // Find chat by ID - handle both string and ObjectId comparisons
+    // Also check if chatId from URL exists in chats, if not, it might still be loading
+    const selectedChatData = React.useMemo(() => {
+        if (!selectedChat) return null;
+        return chats.find(c => {
+            const chatId = c._id?.toString();
+            const selectedId = selectedChat?.toString();
+            return chatId === selectedId;
+        });
+    }, [chats, selectedChat]);
+    
+    // If we have a chatId from URL but chat not found, it might still be loading
+    const isChatLoading = selectedChat && !selectedChatData && chatsLoading;
 
     // Initialize Socket.io
     useEffect(() => {
@@ -136,12 +184,37 @@ const SupportChat = () => {
             const messagesArray = Array.isArray(messagesData) 
                 ? messagesData 
                 : (messagesData?.data || []);
-            console.log('Admin loading messages:', messagesArray.length, messagesArray);
+            // Load messages
             setMessages(messagesArray);
         } else {
             setMessages([]);
         }
     }, [messagesData, selectedChat]);
+
+    // Set selectedChat from URL when it changes or when chats load
+    useEffect(() => {
+        if (!chatIdFromUrl) return;
+        
+        const chatIdString = getChatIdString(chatIdFromUrl);
+        if (!chatIdString || chatIdString === selectedChat) return;
+        
+        // If chats are loading, wait for them
+        if (chatsLoading) return;
+        
+        // Check if chat exists in current list
+        const chatExists = chats.some(c => {
+            const chatId = c._id?.toString();
+            return chatId === chatIdString;
+        });
+        
+        // If chat not found, refetch chats to make sure we have the latest data
+        if (!chatExists && chats.length > 0) {
+            refetchChats();
+        }
+        
+        // Set selectedChat
+        setSelectedChat(chatIdString);
+    }, [chatIdFromUrl, chats, chatsLoading, selectedChat, refetchChats]);
 
     // Auto scroll to bottom
     useEffect(() => {
@@ -160,10 +233,14 @@ const SupportChat = () => {
     }, [messages, selectedChat, socket, adminId]);
 
     const handleSelectChat = (chatId) => {
-        setSelectedChat(chatId);
+        // Ensure chatId is a string
+        const chatIdString = getChatIdString(chatId);
+        if (!chatIdString) return;
+        
+        setSelectedChat(chatIdString);
         setMessages([]); // Clear messages when switching chats
         if (socket) {
-            socket.emit('join-chat', chatId);
+            socket.emit('join-chat', chatIdString);
         }
         // Refetch messages for the new chat
         setTimeout(() => {
@@ -261,12 +338,19 @@ const SupportChat = () => {
         }
     };
 
-    const handleDeleteMessage = async (messageId) => {
+    const handleDeleteMessage = (messageId) => {
         if (!selectedChat) return;
-        if (!window.confirm("Are you sure you want to delete this message?")) return;
+        setMessageToDelete(messageId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!messageToDelete || !selectedChat) return;
         
         try {
-            const result = await fetch(`${BASE_URL}/api/support-chat/messages/${messageId}`, {
+            const token = localStorage.getItem("token");
+            const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+            const result = await fetch(`${BASE_URL}/api/support-chat/messages/${messageToDelete}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -302,12 +386,14 @@ const SupportChat = () => {
     };
 
     const getUserName = (chat) => {
-        const user = chat.participants?.find(p => p.role !== 'admin');
+        if (!chat || !chat.participants) return "User";
+        const user = chat.participants.find(p => p.role !== 'admin');
         return user?.name || "User";
     };
 
     const getUserAvatar = (chat) => {
-        const user = chat.participants?.find(p => p.role !== 'admin');
+        if (!chat || !chat.participants) return null;
+        const user = chat.participants.find(p => p.role !== 'admin');
         return user?.avatar || null;
     };
 
@@ -315,9 +401,6 @@ const SupportChat = () => {
         if (!selectedChatData) return null;
         return selectedChatData.participants?.find(p => p._id === userId);
     };
-
-    const { data: adminUser } = useGetMeQuery();
-    const adminId = adminUser?._id;
 
     const getUnreadCount = (chat) => {
         if (!adminId || !chat.unreadCount) return 0;
@@ -389,7 +472,9 @@ const SupportChat = () => {
                         ) : (
                             filteredChats.map((chat) => {
                                 const unreadCount = getUnreadCount(chat);
-                                const isSelected = chat._id === selectedChat;
+                                const chatId = chat._id?.toString();
+                                const selectedId = selectedChat?.toString();
+                                const isSelected = chatId === selectedId;
                                 
                                 return (
                                     <div
@@ -447,6 +532,27 @@ const SupportChat = () => {
                             <div className="text-center text-gray-500">
                                 <p className="text-lg font-semibold mb-2">Select a chat to start</p>
                                 <p className="text-sm">Choose a conversation from the sidebar</p>
+                            </div>
+                        </div>
+                    ) : isChatLoading ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <Spinner fullScreen={false} />
+                        </div>
+                    ) : !selectedChatData ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="text-center text-gray-500">
+                                <p className="text-lg font-semibold mb-2">Chat not found</p>
+                                <p className="text-sm">The chat you're looking for doesn't exist or has been deleted.</p>
+                                <button
+                                    onClick={() => {
+                                        setSelectedChat(null);
+                                        // Clear URL parameter
+                                        window.history.replaceState({}, '', '/admin/support-chat');
+                                    }}
+                                    className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                >
+                                    Go Back to Chat List
+                                </button>
                             </div>
                         </div>
                     ) : (
@@ -749,6 +855,20 @@ const SupportChat = () => {
                     )}
                 </div>
             </div>
+
+            {/* Delete Message Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setMessageToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Message"
+                message="Are you sure you want to delete this message? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

@@ -1,14 +1,34 @@
-import React from "react";
-import { useParams, Link } from "react-router-dom";
-import { useGetBlogByIdQuery } from "../../redux/services/api";
+import React, { useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useGetBlogByIdQuery, useGetBlogsQuery } from "../../redux/services/api";
 import { formatDate } from "../../utils/format";
 import BlogsHeroSection from "../../components/sections/blogs/BlogsHeroSection";
+import SEO from "../../components/common/SEO";
+import Spinner from "../../components/Spinner";
 
 const BlogDetails = () => {
   const { id } = useParams();
-  const { data, isLoading, error } = useGetBlogByIdQuery(id);
+  const navigate = useNavigate();
+  const { data: blog, isLoading, error, isError } = useGetBlogByIdQuery(id);
+  
+  // Get related blogs (same category, excluding current blog)
+  const { data: relatedBlogsData } = useGetBlogsQuery({
+    limit: 3,
+    status: 'published',
+    category: blog?.category?._id,
+    ...(blog?._id && { exclude: blog._id })
+  }, {
+    skip: !blog?.category?._id
+  });
 
-  const blog = data;
+  const relatedBlogs = relatedBlogsData?.blogs?.filter(b => b._id !== blog?._id).slice(0, 3) || [];
+
+  // Redirect to 404 or show error
+  useEffect(() => {
+    if (isError && error?.status === 404) {
+      // Blog not found - could redirect or show error
+    }
+  }, [isError, error]);
 
   // Show skeleton while loading
   if (isLoading) {
@@ -16,16 +36,7 @@ const BlogDetails = () => {
       <div>
         <BlogsHeroSection />
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-12 bg-gray-200 rounded w-3/4 mb-6"></div>
-            <div className="h-64 bg-gray-200 rounded mb-8"></div>
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-            </div>
-          </div>
+          <Spinner fullScreen={false} />
         </div>
       </div>
     );
@@ -35,14 +46,17 @@ const BlogDetails = () => {
     return (
       <div>
         <BlogsHeroSection />
-        <div className="text-center py-12 px-4">
-          <p className="text-red-500 text-lg mb-4">Blog post not found.</p>
-          <Link
-            to="/blog/all"
-            className="text-primary-500 hover:underline"
-          >
-            Back to all blogs
-          </Link>
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h2>
+            <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist or has been removed.</p>
+            <Link
+              to="/blog/all"
+              className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Back to All Blogs
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -50,6 +64,12 @@ const BlogDetails = () => {
 
   return (
     <div>
+      <SEO
+        title={blog.metaTitle || blog.title}
+        description={blog.metaDescription || blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').substring(0, 160)}
+        image={blog.featuredImage}
+        url={`/blog/${blog.slug || blog._id}`}
+      />
       <BlogsHeroSection />
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
         {/* Blog Header */}
@@ -118,7 +138,7 @@ const BlogDetails = () => {
 
         {/* Blog Content */}
         <div
-          className="prose prose-lg max-w-none mb-8"
+          className="prose prose-lg prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-md max-w-none mb-8"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
 
@@ -133,6 +153,43 @@ const BlogDetails = () => {
                 #{tag}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Related Blogs Section */}
+        {relatedBlogs.length > 0 && (
+          <div className="border-t border-gray-200 pt-8 mt-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Related Articles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedBlogs.map((relatedBlog) => (
+                <Link
+                  key={relatedBlog._id}
+                  to={`/blog/${relatedBlog.slug || relatedBlog._id}`}
+                  className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                >
+                  {relatedBlog.featuredImage && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img
+                        src={relatedBlog.featuredImage}
+                        alt={relatedBlog.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-500 transition-colors">
+                      {relatedBlog.title}
+                    </h4>
+                    <p className="text-sm text-gray-500 mb-2">
+                      {formatDate(relatedBlog.publishedAt || relatedBlog.createdAt)}
+                    </p>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {relatedBlog.excerpt || relatedBlog.content?.replace(/<[^>]*>/g, '').substring(0, 100) + "..."}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

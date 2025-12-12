@@ -1,5 +1,5 @@
 // MapView.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -148,6 +148,32 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
   const [mapZoom, setMapZoom] = useState(13);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
 
+  // Use ref to track coordinates and prevent infinite loops
+  const coordinatesRef = useRef(coordinates);
+  const prevCoordinatesRef = useRef(coordinates);
+  
+  // Check if coordinates actually changed
+  const coordinatesChanged = useMemo(() => {
+    const prev = prevCoordinatesRef.current;
+    const curr = coordinates;
+    
+    if (!prev || !curr || !Array.isArray(prev) || !Array.isArray(curr)) {
+      if (prev !== curr) {
+        prevCoordinatesRef.current = curr;
+        coordinatesRef.current = curr;
+        return true;
+      }
+      return false;
+    }
+    
+    if (prev.length !== curr.length || prev[0] !== curr[0] || prev[1] !== curr[1]) {
+      prevCoordinatesRef.current = curr;
+      coordinatesRef.current = curr;
+      return true;
+    }
+    return false;
+  }, [coordinates]);
+
   // Get car coordinates
   const getCarCoordinates = () => {
     if (carLocation && carLocation.coordinates && carLocation.coordinates.length === 2) {
@@ -170,6 +196,8 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
   useEffect(() => {
     if (userLocation && getCarCoordinates()) {
       const carCoords = getCarCoordinates();
+      if (!carCoords) return;
+      
       setIsCalculatingRoute(true);
       
       calculateRoute(
@@ -182,9 +210,11 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
           setTravelTime(routeData.duration);
         }
         setIsCalculatingRoute(false);
+      }).catch(() => {
+        setIsCalculatingRoute(false);
       });
     }
-  }, [userLocation, coordinates, carLocation]);
+  }, [userLocation, coordinatesChanged]);
 
   // Get user's current location
   const getCurrentLocation = () => {
@@ -219,19 +249,39 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
     // Don't auto-get, let user choose
   }, []);
 
+  // Update coordinates ref is handled in coordinatesChanged useMemo
+
   // Update map center when user location is found
   useEffect(() => {
-    if (userLocation) {
-      // Center between user and car location
-      const centerLat = (userLocation[0] + coordinates[0]) / 2;
-      const centerLng = (userLocation[1] + coordinates[1]) / 2;
-      setMapCenter([centerLat, centerLng]);
-      setMapZoom(12);
-    } else {
-      setMapCenter(coordinates);
-      setMapZoom(13);
+    const currentCoords = coordinatesRef.current;
+    if (!currentCoords || !Array.isArray(currentCoords) || currentCoords.length !== 2) {
+      return;
     }
-  }, [userLocation, coordinates]);
+    
+    if (userLocation && Array.isArray(userLocation) && userLocation.length === 2) {
+      // Center between user and car location
+      const centerLat = (userLocation[0] + currentCoords[0]) / 2;
+      const centerLng = (userLocation[1] + currentCoords[1]) / 2;
+      
+      // Only update if actually different
+      const [existingLat, existingLng] = mapCenter;
+      if (Math.abs(centerLat - existingLat) > 0.0001 || Math.abs(centerLng - existingLng) > 0.0001) {
+        setMapCenter([centerLat, centerLng]);
+        setMapZoom(12);
+      }
+    } else {
+      // Only update if coordinates actually changed
+      const [currentLat, currentLng] = currentCoords;
+      const [existingLat, existingLng] = mapCenter;
+      
+      // Check if coordinates are actually different (with small tolerance for floating point)
+      if (Math.abs(currentLat - existingLat) > 0.0001 || Math.abs(currentLng - existingLng) > 0.0001) {
+        setMapCenter([currentLat, currentLng]);
+        setMapZoom(13);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLocation, coordinatesChanged]);
 
   // Search for locations
   const searchLocation = async (query) => {
@@ -509,7 +559,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         </div>
       )}
       
-      <div className="w-full h-[500px] rounded-lg overflow-hidden border-2 border-gray-200 shadow-lg relative">
+      <div className="w-full h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-gray-300 shadow-md relative">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}

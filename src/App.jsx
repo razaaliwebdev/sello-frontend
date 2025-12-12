@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes, useLocation, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Route, Routes, useLocation, Navigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // Components
@@ -35,11 +35,33 @@ import SavedCars from "./pages/SavedCars.jsx";
 import Blog from "./pages/blog/Blog.jsx";
 import AllBlog from "./pages/blog/AllBlog.jsx";
 import BlogDetails from "./pages/blog/BlogDetails.jsx";
+import CategoryPage from "./pages/categories/CategoryPage.jsx";
 import MyChats from "./pages/chats/MyChats.jsx";
 import SellerChats from "./pages/seller/SellerChats.jsx";
 import DealerDashboard from "./pages/dashboards/DealerDashboard.jsx";
 import SellerDashboard from "./pages/dashboards/SellerDashboard.jsx";
 import HelpCenter from "./pages/help/HelpCenter.jsx";
+import AccountLogin from "./pages/help/AccountLogin.jsx";
+import BuyingSelling from "./pages/help/BuyingSelling.jsx";
+import Payments from "./pages/help/Payments.jsx";
+import Shipping from "./pages/help/Shipping.jsx";
+import Safety from "./pages/help/Safety.jsx";
+import BuyingCars from "./pages/help/BuyingCars.jsx";
+import SellingCars from "./pages/help/SellingCars.jsx";
+import PaymentMethods from "./pages/help/PaymentMethods.jsx";
+import AccountSettings from "./pages/help/AccountSettings.jsx";
+import FAQs from "./pages/help/FAQs.jsx";
+import Policies from "./pages/help/Policies.jsx";
+import Billing from "./pages/help/Billing.jsx";
+import Managing from "./pages/help/Managing.jsx";
+import Uploading from "./pages/help/Uploading.jsx";
+import Enterprise from "./pages/help/Enterprise.jsx";
+import Creators from "./pages/help/Creators.jsx";
+import Features from "./pages/help/Features.jsx";
+import Sales from "./pages/help/Sales.jsx";
+import Sharing from "./pages/help/Sharing.jsx";
+import Developers from "./pages/help/Developers.jsx";
+import HelpSearch from "./pages/help/HelpSearch.jsx";
 import SubscriptionSuccess from "./pages/payments/SubscriptionSuccess.jsx";
 import BoostSuccess from "./pages/payments/BoostSuccess.jsx";
 
@@ -76,6 +98,62 @@ import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import AdminRoute from "./components/common/AdminRoute.jsx";
 import { ErrorPage } from "./components/common/ErrorBoundary.jsx";
 
+// ScrollToTop component to scroll to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Scroll to top immediately on route change
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant", // Use instant for immediate scroll, can change to "smooth" if preferred
+    });
+  }, [pathname]);
+
+  return null;
+};
+
+// Route guard to ensure CarDetails only renders on valid car routes
+const CarDetailsRouteGuard = ({ children }) => {
+  const location = useLocation();
+  const { id } = useParams();
+  
+  // CRITICAL: Get current URL from window to verify actual route
+  const actualPath = window.location.pathname;
+  
+  // ABSOLUTE CHECK - If we're on home route, don't render at all
+  // Check both location.pathname AND window.location.pathname for safety
+  if (location.pathname === '/' || location.pathname === '/home' || 
+      actualPath === '/' || actualPath === '/home') {
+    return null;
+  }
+  
+  // Strict validation - only allow rendering on valid car detail routes
+  // Must check actualPath, not just location.pathname
+  const pathToCheck = actualPath || location.pathname;
+  const pathParts = pathToCheck.split('/').filter(Boolean);
+  
+  const isValidRoute = 
+    pathToCheck.startsWith('/cars/') &&
+    pathToCheck !== '/cars' &&
+    pathParts.length === 2 &&
+    pathParts[0] === 'cars' &&
+    pathParts[1] &&
+    pathParts[1].trim() !== '' &&
+    id &&
+    typeof id === 'string' &&
+    id.trim() !== '' &&
+    id === pathParts[1];
+  
+  // If not valid, don't render
+  if (!isValidRoute) {
+    return null;
+  }
+  return <>{children}</>;
+};
+
+
 const App = () => {
   const location = useLocation();
 
@@ -91,6 +169,7 @@ const App = () => {
 
   return (
     <>
+      <ScrollToTop />
       <Toaster />
 
       {/* Show Navbar + BottomHeader except for auth pages + admin */}
@@ -103,7 +182,7 @@ const App = () => {
         )}
 
       <Routes>
-        {/* HOME */}
+        {/* HOME - Exact path match, declared first */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
 
@@ -120,7 +199,17 @@ const App = () => {
         <Route path="/privacy-policy" element={<OurPrivacyPolicy />} />
         <Route path="/terms-conditon" element={<TermsCondition />} />
         <Route path="/cars" element={<CarListings />} />
-        <Route path="/cars/:id" element={<CarDetails />} />
+        {/* Car Details - Only match if path starts with /cars/ and has an ID */}
+        {/* Use a function to validate before rendering */}
+        <Route 
+          path="/cars/:id" 
+          element={
+            <CarDetailsRouteGuard>
+              <CarDetails />
+            </CarDetailsRouteGuard>
+          } 
+        />
+        <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/view-all-brands" element={<AllBrands />} />
@@ -131,6 +220,27 @@ const App = () => {
         <Route path="/blog/all" element={<AllBlog />} />
         <Route path="/blog/:id" element={<BlogDetails />} />
         <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/help/search" element={<HelpSearch />} />
+        <Route path="/help/account-login" element={<AccountLogin />} />
+        <Route path="/help/buying-selling" element={<BuyingSelling />} />
+        <Route path="/help/payments" element={<Payments />} />
+        <Route path="/help/shipping" element={<Shipping />} />
+        <Route path="/help/safety" element={<Safety />} />
+        <Route path="/help/buying-cars" element={<BuyingCars />} />
+        <Route path="/help/selling-cars" element={<SellingCars />} />
+        <Route path="/help/payment-methods" element={<PaymentMethods />} />
+        <Route path="/help/account-settings" element={<AccountSettings />} />
+        <Route path="/help/faqs" element={<FAQs />} />
+        <Route path="/help/policies" element={<Policies />} />
+        <Route path="/help/billing" element={<Billing />} />
+        <Route path="/help/managing" element={<Managing />} />
+        <Route path="/help/uploading" element={<Uploading />} />
+        <Route path="/help/enterprise" element={<Enterprise />} />
+        <Route path="/help/creators" element={<Creators />} />
+        <Route path="/help/features" element={<Features />} />
+        <Route path="/help/sales" element={<Sales />} />
+        <Route path="/help/sharing" element={<Sharing />} />
+        <Route path="/help/developers" element={<Developers />} />
 
         {/* Payment Success Pages */}
         <Route path="/subscription/success" element={<SubscriptionSuccess />} />
@@ -216,6 +326,7 @@ const App = () => {
         <Route element={<AdminRoute />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/users/:userId" element={<AdminUsers />} />
           <Route path="/admin/listings" element={<AdminListings />} />
           <Route path="/admin/dealers" element={<AdminDealers />} />
           <Route path="/admin/categories" element={<AdminCategories />} />

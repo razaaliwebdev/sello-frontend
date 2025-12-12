@@ -21,7 +21,7 @@ const CarChatWidget = ({ carId, sellerId, carTitle, onClose }) => {
     const { data: currentUser } = useGetMeQuery();
     const token = localStorage.getItem("token");
     // Get BASE_URL from environment or use default
-    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
     // Ensure API_URL has /api suffix
     const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
     // SOCKET_URL should not have /api

@@ -9,6 +9,7 @@ import {
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiGrid, FiUpload, FiX, FiEdit2, FiTrash2, FiEye, FiEyeOff } from "react-icons/fi";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Categories = () => {
     const [activeTab, setActiveTab] = useState("brands"); // brands, models, years, city, state, country
@@ -31,6 +32,8 @@ const Categories = () => {
     const [sortDirection, setSortDirection] = useState("asc");
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
 
     // Fetch all categories (car + location, active + inactive)
     const { data, isLoading, refetch } = useGetAllCategoriesQuery({});
@@ -884,6 +887,20 @@ const Categories = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Delete Confirmation Modal */}
+                <ConfirmModal
+                    isOpen={showDeleteModal}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setCategoryToDelete(null);
+                    }}
+                    onConfirm={handleDeleteConfirm}
+                    title="Delete Category"
+                    message="Are you sure you want to delete this category? This action cannot be undone."
+                    confirmText="Delete"
+                    variant="danger"
+                />
             </div>
         </AdminLayout>
     );

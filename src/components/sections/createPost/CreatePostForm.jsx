@@ -22,6 +22,7 @@ import CarCondition from "../../utils/filter/CarCondition";
 import { images } from "../../../assets/assets";
 import { useCarCategories } from "../../../hooks/useCarCategories";
 import LocationPicker from "../../utils/LocationPicker";
+import { isFieldVisible, getRequiredFields, getFieldLabel } from "../../../utils/vehicleFieldConfig";
 
 const CreatePostForm = () => {
   const navigate = useNavigate();
@@ -35,6 +36,8 @@ const CreatePostForm = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    vehicleType: "Car", // Default to Car
+    vehicleTypeCategory: "", // Category ID reference
     make: "",
     model: "",
     variant: "",
@@ -61,6 +64,8 @@ const CreatePostForm = () => {
     warranty: "",
     numberOfCylinders: "",
     ownerType: "",
+    batteryRange: "",
+    motorPower: "",
     images: [],
   });
 
@@ -206,26 +211,8 @@ const CreatePostForm = () => {
       return;
     }
 
-    // Validate required fields
-    const requiredFields = [
-      "title",
-      "make",
-      "model",
-      "year",
-      "condition",
-      "price",
-      "fuelType",
-      "engineCapacity",
-      "transmission",
-      "regionalSpec",
-      "bodyType",
-      "city",
-      "contactNumber",
-      "sellerType",
-      "warranty",
-      "ownerType",
-      "geoLocation",
-    ];
+    // Validate required fields dynamically based on vehicle type
+    const requiredFields = getRequiredFields(formData.vehicleType);
     
     const missing = requiredFields.filter((key) => {
       const value = formData[key];
@@ -259,21 +246,24 @@ const CreatePostForm = () => {
     }
     let parsedGeoLocation;
     try {
-      parsedGeoLocation = formData.geoLocation
-        ? JSON.parse(formData.geoLocation)
-        : null;
-      if (
-        !parsedGeoLocation ||
-        !Array.isArray(parsedGeoLocation) ||
-        parsedGeoLocation.length !== 2 ||
-        parsedGeoLocation[0] === 0 ||
-        parsedGeoLocation[1] === 0
-      ) {
-        toast.error("Invalid geoLocation. Please capture valid coordinates.");
-        return;
+      if (Array.isArray(formData.geoLocation)) {
+        parsedGeoLocation = formData.geoLocation;
+      } else if (typeof formData.geoLocation === "string") {
+        parsedGeoLocation = JSON.parse(formData.geoLocation);
       }
     } catch {
-      toast.error("Invalid geoLocation format. Use [longitude, latitude].");
+      // fall through to validation error below
+    }
+    if (
+      !parsedGeoLocation ||
+      !Array.isArray(parsedGeoLocation) ||
+      parsedGeoLocation.length !== 2 ||
+      Number(parsedGeoLocation[0]) === 0 ||
+      Number(parsedGeoLocation[1]) === 0 ||
+      Number.isNaN(Number(parsedGeoLocation[0])) ||
+      Number.isNaN(Number(parsedGeoLocation[1]))
+    ) {
+      toast.error("Invalid geoLocation. Please select coordinates on the map.");
       return;
     }
 
@@ -312,12 +302,17 @@ const CreatePostForm = () => {
 
     // Add all other fields efficiently
     const fieldsToAppend = [
-      'title', 'description', 'make', 'model', 'variant', 'year', 'condition',
+      'title', 'description', 'vehicleType', 'make', 'model', 'variant', 'year', 'condition',
       'price', 'colorExterior', 'colorInterior', 'fuelType', 'engineCapacity',
       'transmission', 'mileage', 'regionalSpec', 'bodyType', 'country', 'city',
       'location', 'sellerType', 'carDoors', 'contactNumber', 'geoLocation',
-      'horsepower', 'warranty', 'numberOfCylinders', 'ownerType'
+      'horsepower', 'warranty', 'numberOfCylinders', 'ownerType', 'batteryRange', 'motorPower'
     ];
+    
+    // Add vehicleTypeCategory if provided
+    if (formData.vehicleTypeCategory) {
+      data.append('vehicleTypeCategory', formData.vehicleTypeCategory);
+    }
 
     fieldsToAppend.forEach((key) => {
       const value = defaults[key] !== undefined ? defaults[key] : formData[key];
@@ -348,6 +343,8 @@ const CreatePostForm = () => {
       setFormData({
         title: "",
         description: "",
+        vehicleType: "Car",
+        vehicleTypeCategory: "",
         make: "",
         model: "",
         variant: "",
@@ -374,6 +371,8 @@ const CreatePostForm = () => {
         warranty: "",
         numberOfCylinders: "",
         ownerType: "",
+        batteryRange: "",
+        motorPower: "",
         images: [],
       });
       setSelectedMake("");
@@ -412,6 +411,51 @@ const CreatePostForm = () => {
           <ImagesUpload
             onImagesChange={(files) => handleChange("images", files)}
           />
+        </div>
+
+        <div className="mb-2">
+          <label className="block mb-1">Vehicle Type *</label>
+          <select
+            value={formData.vehicleType}
+            onChange={(e) => {
+              const newVehicleType = e.target.value;
+              handleChange("vehicleType", newVehicleType);
+              // Reset vehicleTypeCategory when vehicleType changes
+              handleChange("vehicleTypeCategory", "");
+              
+              // Clear fields that are not visible for the new vehicle type
+              if (!isFieldVisible(newVehicleType, "bodyType")) {
+                handleChange("bodyType", "");
+              }
+              if (!isFieldVisible(newVehicleType, "cylinders")) {
+                handleChange("numberOfCylinders", "");
+              }
+              if (!isFieldVisible(newVehicleType, "doors")) {
+                handleChange("carDoors", "");
+              }
+              if (!isFieldVisible(newVehicleType, "horsepower")) {
+                handleChange("horsepower", "");
+              }
+              if (!isFieldVisible(newVehicleType, "engineCapacity")) {
+                handleChange("engineCapacity", "");
+              }
+              if (!isFieldVisible(newVehicleType, "batteryRange")) {
+                handleChange("batteryRange", "");
+              }
+              if (!isFieldVisible(newVehicleType, "motorPower")) {
+                handleChange("motorPower", "");
+              }
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            required
+          >
+            <option value="Car">Car</option>
+            <option value="Bus">Bus</option>
+            <option value="Truck">Truck</option>
+            <option value="Van">Van</option>
+            <option value="Bike">Bike</option>
+            <option value="E-bike">E-bike</option>
+          </select>
         </div>
 
         <div className="mb-2">
@@ -598,12 +642,14 @@ const CreatePostForm = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block mb-1">Body Type</label>
-          <BodyTypes
-            onBodyTypeChange={(val) => handleChange("bodyType", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "bodyType") && (
+          <div>
+            <label className="block mb-1">Body Type</label>
+            <BodyTypes
+              onBodyTypeChange={(val) => handleChange("bodyType", val)}
+            />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Regional Spec</label>
@@ -624,12 +670,14 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div>
-          <label className="block mb-1">Number of Cylinders</label>
-          <CylindersSpecs
-            onChange={(val) => handleChange("numberOfCylinders", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "cylinders") && (
+          <div>
+            <label className="block mb-1">Number of Cylinders</label>
+            <CylindersSpecs
+              onChange={(val) => handleChange("numberOfCylinders", val)}
+            />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Exterior Color</label>
@@ -645,10 +693,12 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div>
-          <label className="block mb-1">Car Doors</label>
-          <DoorsSpecs onChange={(val) => handleChange("carDoors", val)} />
-        </div>
+        {isFieldVisible(formData.vehicleType, "doors") && (
+          <div>
+            <label className="block mb-1">Car Doors</label>
+            <DoorsSpecs onChange={(val) => handleChange("carDoors", val)} />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Owner Type</label>
@@ -674,19 +724,47 @@ const CreatePostForm = () => {
           </select>
         </div>
 
-        <div>
-          <label className="block mb-1">Horsepower</label>
-          <HorsePowerSpecs
-            onChange={(val) => handleChange("horsepower", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "horsepower") && (
+          <div>
+            <label className="block mb-1">Horsepower</label>
+            <HorsePowerSpecs
+              onChange={(val) => handleChange("horsepower", val)}
+            />
+          </div>
+        )}
 
-        <div>
-          <label className="block mb-1">Engine Capacity</label>
-          <EngineCapacitySpecs
-            onChange={(val) => handleChange("engineCapacity", val)}
-          />
-        </div>
+        {isFieldVisible(formData.vehicleType, "engineCapacity") && (
+          <div>
+            <label className="block mb-1">Engine Capacity</label>
+            <EngineCapacitySpecs
+              onChange={(val) => handleChange("engineCapacity", val)}
+            />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "batteryRange") && (
+          <div>
+            <label className="block mb-1">Battery Range (km)</label>
+            <Input
+              inputType="number"
+              value={formData.batteryRange}
+              onChange={(e) => handleChange("batteryRange", e.target.value)}
+              placeholder="e.g., 50"
+            />
+          </div>
+        )}
+
+        {isFieldVisible(formData.vehicleType, "motorPower") && (
+          <div>
+            <label className="block mb-1">Motor Power (W)</label>
+            <Input
+              inputType="number"
+              value={formData.motorPower}
+              onChange={(e) => handleChange("motorPower", e.target.value)}
+              placeholder="e.g., 250"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block mb-1">Features</label>

@@ -166,7 +166,7 @@ export { apple, android, facebook, twitter, instagram, linkedin };
 
 export const menuLinks = [
     {
-        path: "/home",
+        path: "/",
         name: "Home"
     },
     {
@@ -190,170 +190,338 @@ export const menuLinks = [
 // Footer Data like links etc
 export const footerData = [
     {
-        title: "USED CARS BY LOCATION",
+        title: "VIEW CARS BY CITY",
         links: [
             {
-                name: "Used Cars in Dubai",
-                path: "/filter?city=Dubai"
+                name: "Cars for sale in Karachi",
+                path: "/filter?city=Karachi"
             },
             {
-                name: "Used Cars in Abu Dhabi",
-                path: "/filter?city=Abu Dhabi"
+                name: "Cars for sale in Lahore",
+                path: "/filter?city=Lahore"
             },
             {
-                name: "Used Cars in Sharjah",
-                path: "/filter?city=Sharjah"
+                name: "Cars for sale in Islamabad",
+                path: "/filter?city=Islamabad"
             },
             {
-                name: "Used Cars in UAE",
-                path: "/cars"
+                name: "Cars for sale in Rawalpindi",
+                path: "/filter?city=Rawalpindi"
+            },
+            {
+                name: "Cars for sale in Peshawar",
+                path: "/filter?city=Peshawar"
+            },
+            {
+                name: "Cars for sale in Faisalabad",
+                path: "/filter?city=Faisalabad"
+            },
+            {
+                name: "Cars for sale in Multan",
+                path: "/filter?city=Multan"
+            },
+            {
+                name: "Cars for sale in Gujranwala",
+                path: "/filter?city=Gujranwala"
+            },
+            {
+                name: "Cars for sale in Sialkot",
+                path: "/filter?city=Sialkot"
+            },
+            {
+                name: "Cars for sale in Sargodha",
+                path: "/filter?city=Sargodha"
+            },
+            {
+                name: "Cars for sale in Hyderabad",
+                path: "/filter?city=Hyderabad"
+            },
+            {
+                name: "Cars for sale in Abbottabad",
+                path: "/filter?city=Abbottabad"
+            },
+            {
+                name: "Cars for sale in Quetta",
+                path: "/filter?city=Quetta"
+            },
+            {
+                name: "Cars for sale in Bahawalpur",
+                path: "/filter?city=Bahawalpur"
+            },
+            {
+                name: "Cars for sale in Mardan",
+                path: "/filter?city=Mardan"
+            },
+            {
+                name: "Cars for sale in Wah Cantt",
+                path: "/filter?city=Wah Cantt"
+            },
+            {
+                name: "Cars for sale in Gujrat",
+                path: "/filter?city=Gujrat"
+            },
+            {
+                name: "Cars for sale in Sahiwal",
+                path: "/filter?city=Sahiwal"
+            },
+            {
+                name: "Cars for sale in Mansehra",
+                path: "/filter?city=Mansehra"
+            },
+            {
+                name: "Cars for sale in Attock",
+                path: "/filter?city=Attock"
             }
         ]
     },
     {
-        title: "USED CARS BY BODY TYPE",
+        title: "VIEW CARS BY MAKE",
         links: [
             {
-                name: "Used Sedan Cars for Sale in UAE",
-                path: "/filter?bodyType=Sedan"
+                name: "Used Suzuki Cars",
+                path: "/filter?make=Suzuki"
             },
             {
-                name: "Used SUV Cars for Sale in UAE",
-                path: "/filter?bodyType=SUV"
+                name: "Used Toyota Cars",
+                path: "/filter?make=Toyota"
             },
             {
-                name: "Used Convertible Cars for Sale in UAE",
-                path: "/filter?bodyType=Convertible"
+                name: "Honda Cars",
+                path: "/filter?make=Honda"
             },
             {
-                name: "Used Hatchback Cars for Sale in UAE",
-                path: "/filter?bodyType=Hatchback"
+                name: "Daihatsu Cars",
+                path: "/filter?make=Daihatsu"
+            },
+            {
+                name: "Nissan Cars",
+                path: "/filter?make=Nissan"
+            },
+            {
+                name: "Hyundai Cars",
+                path: "/filter?make=Hyundai"
+            },
+            {
+                name: "KIA Cars",
+                path: "/filter?make=KIA"
+            },
+            {
+                name: "Mitsubishi Cars",
+                path: "/filter?make=Mitsubishi"
+            },
+            {
+                name: "Changan Cars",
+                path: "/filter?make=Changan"
+            },
+            {
+                name: "Haval Cars",
+                path: "/filter?make=Haval"
+            },
+            {
+                name: "Mercedes Benz Cars",
+                path: "/filter?make=Mercedes Benz"
+            },
+            {
+                name: "MG Cars",
+                path: "/filter?make=MG"
+            },
+            {
+                name: "FAW Cars",
+                path: "/filter?make=FAW"
+            },
+            {
+                name: "Audi Cars",
+                path: "/filter?make=Audi"
+            },
+            {
+                name: "BMW Cars",
+                path: "/filter?make=BMW"
+            },
+            {
+                name: "Mazda Cars",
+                path: "/filter?make=Mazda"
+            },
+            {
+                name: "Lexus Cars",
+                path: "/filter?make=Lexus"
+            },
+            {
+                name: "DFSK Cars",
+                path: "/filter?make=DFSK"
+            },
+            {
+                name: "Chevrolet Cars",
+                path: "/filter?make=Chevrolet"
+            },
+            {
+                name: "Peugeot Cars",
+                path: "/filter?make=Peugeot"
             }
         ]
     },
     {
-        title: "USED CARS BY YEAR",
+        title: "VIEW CARS BY MODEL",
         links: [
             {
-                name: "2020 Used Cars in UAE",
-                path: "/filter?yearMin=2020&yearMax=2020"
+                name: "Toyota Corolla for sale",
+                path: "/filter?make=Toyota&model=Corolla"
             },
             {
-                name: "2019 Used Cars in UAE",
-                path: "/filter?yearMin=2019&yearMax=2019"
+                name: "Honda City for sale",
+                path: "/filter?make=Honda&model=City"
             },
             {
-                name: "2018 Used Cars in UAE",
-                path: "/filter?yearMin=2018&yearMax=2018"
+                name: "Toyota Raize for sale",
+                path: "/filter?make=Toyota&model=Raize"
             },
             {
-                name: "2017 Used Cars in UAE",
-                path: "/filter?yearMin=2017&yearMax=2017"
+                name: "Toyota Prado for sale",
+                path: "/filter?make=Toyota&model=Prado"
+            },
+            {
+                name: "Toyota Passo for sale",
+                path: "/filter?make=Toyota&model=Passo"
+            },
+            {
+                name: "Suzuki Mehran for sale",
+                path: "/filter?make=Suzuki&model=Mehran"
+            },
+            {
+                name: "Suzuki Alto for sale",
+                path: "/filter?make=Suzuki&model=Alto"
+            },
+            {
+                name: "Suzuki Swift for sale",
+                path: "/filter?make=Suzuki&model=Swift"
+            },
+            {
+                name: "KIA Sportage for sale",
+                path: "/filter?make=KIA&model=Sportage"
+            },
+            {
+                name: "Toyota Land Cruiser for sale",
+                path: "/filter?make=Toyota&model=Land Cruiser"
+            },
+            {
+                name: "Honda Civic for sale",
+                path: "/filter?make=Honda&model=Civic"
+            },
+            {
+                name: "Suzuki Wagon R for sale",
+                path: "/filter?make=Suzuki&model=Wagon R"
+            },
+            {
+                name: "Suzuki Bolan for sale",
+                path: "/filter?make=Suzuki&model=Bolan"
+            },
+            {
+                name: "Daihatsu Cuore for sale",
+                path: "/filter?make=Daihatsu&model=Cuore"
+            },
+            {
+                name: "Toyota Yaris Sedan for sale",
+                path: "/filter?make=Toyota&model=Yaris Sedan"
+            },
+            {
+                name: "Suzuki Cultus for sale",
+                path: "/filter?make=Suzuki&model=Cultus"
+            },
+            {
+                name: "Toyota Vitz for sale",
+                path: "/filter?make=Toyota&model=Vitz"
+            },
+            {
+                name: "Daihatsu Mira for sale",
+                path: "/filter?make=Daihatsu&model=Mira"
+            },
+            {
+                name: "Toyota Hilux for sale",
+                path: "/filter?make=Toyota&model=Hilux"
+            },
+            {
+                name: "Honda Vezel for sale",
+                path: "/filter?make=Honda&model=Vezel"
             }
         ]
     },
     {
-        title: "USED CARS BY BUDGET",
+        title: "VIEW CARS BY VERSION",
         links: [
             {
-                name: "Used Cars under 15K AED in UAE",
-                path: "/filter?priceMax=15000"
+                name: "Mehran VXR",
+                path: "/filter?model=Mehran VXR"
             },
             {
-                name: "Used Cars under 25K AED in UAE",
-                path: "/filter?priceMax=25000"
+                name: "GLi",
+                path: "/filter?model=GLi"
             },
             {
-                name: "Used Cars under 35K AED in UAE",
-                path: "/filter?priceMax=35000"
+                name: "Civic EXi",
+                path: "/filter?make=Honda&model=Civic EXi"
             },
             {
-                name: "Used Cars under 45K AED in UAE",
-                path: "/filter?priceMax=45000"
-            }
-        ]
-    },
-    {
-        title: "POPULAR CARS BY LOCATION",
-        links: [
-            {
-                name: "Used Toyota Cars in Dubai",
-                path: "/filter?make=Toyota&city=Dubai"
+                name: "Toyota Corolla Altis X",
+                path: "/filter?make=Toyota&model=Corolla Altis X"
             },
             {
-                name: "Used Nissan Cars in Dubai",
-                path: "/filter?make=Nissan&city=Dubai"
+                name: "Swift DLX",
+                path: "/filter?make=Suzuki&model=Swift DLX"
             },
             {
-                name: "Used Ford Cars in Dubai",
-                path: "/filter?make=Ford&city=Dubai"
+                name: "Mehran VX",
+                path: "/filter?model=Mehran VX"
             },
             {
-                name: "Used BMW Cars in Dubai",
-                path: "/filter?make=BMW&city=Dubai"
-            }
-        ]
-    },
-    {
-        title: "POPULAR MODELS BY LOCATION",
-        links: [
-            {
-                name: "Used Mitsubishi Pajero for Sale in UAE",
-                path: "/filter?make=Mitsubishi&model=Pajero"
+                name: "Altis",
+                path: "/filter?model=Altis"
             },
             {
-                name: "Used Nissan X-Trail for Sale in UAE",
-                path: "/filter?make=Nissan&model=X-Trail"
+                name: "Vitz F",
+                path: "/filter?make=Toyota&model=Vitz F"
             },
             {
-                name: "Used Ford Edge for Sale in UAE",
-                path: "/filter?make=Ford&model=Edge"
+                name: "Honda City Prosmatec",
+                path: "/filter?make=Honda&model=City Prosmatec"
             },
             {
-                name: "Used Honda Accord for Sale in UAE",
-                path: "/filter?make=Honda&model=Accord"
-            }
-        ]
-    },
-    {
-        title: "SELL CARS BY MAKE",
-        links: [
-            {
-                name: "Sell your used Nissan cars",
-                path: "/create-post"
+                name: "Daihatsu Cuore CX",
+                path: "/filter?make=Daihatsu&model=Cuore CX"
             },
             {
-                name: "Sell your used Mercedes cars",
-                path: "/create-post"
+                name: "Honda Civic 1.8",
+                path: "/filter?make=Honda&model=Civic 1.8"
             },
             {
-                name: "Sell your used BMW cars",
-                path: "/create-post"
+                name: "Civic VTi",
+                path: "/filter?make=Honda&model=Civic VTi"
             },
             {
-                name: "Sell your used Ford cars",
-                path: "/create-post"
-            }
-        ]
-    },
-    {
-        title: "USED CARS BY SEATS",
-        links: [
-            {
-                name: "Used 2 Seater Cars in UAE",
-                path: "/filter?carDoors=2"
+                name: "Toyota Passo X",
+                path: "/filter?make=Toyota&model=Passo X"
             },
             {
-                name: "Used 4 Seater Cars in UAE",
-                path: "/filter?carDoors=4"
+                name: "Honda City Aspire i-VTEC",
+                path: "/filter?make=Honda&model=City Aspire i-VTEC"
             },
             {
-                name: "Used 5 Seater Cars in UAE",
-                path: "/filter?carDoors=5"
+                name: "Suzuki Cultus VXL",
+                path: "/filter?make=Suzuki&model=Cultus VXL"
             },
             {
-                name: "Used 7 Seater Cars in UAE",
-                path: "/filter?carDoors=7"
+                name: "Civic VTi Oriel",
+                path: "/filter?make=Honda&model=Civic VTi Oriel"
+            },
+            {
+                name: "XLi",
+                path: "/filter?model=XLi"
+            },
+            {
+                name: "Honda City iDSI",
+                path: "/filter?make=Honda&model=City iDSI"
+            },
+            {
+                name: "Suzuki Cultus VXRi",
+                path: "/filter?make=Suzuki&model=Cultus VXRi"
             }
         ]
     },
@@ -362,11 +530,11 @@ export const footerData = [
         links: [
             {
                 name: "Car Buying Guide",
-                path: "/blog"
+                path: "/help/buying-cars"
             },
             {
                 name: "Car Selling Guide",
-                path: "/blog"
+                path: "/help/selling-cars"
             },
             {
                 name: "Car Financing",
@@ -649,14 +817,14 @@ export const blogPosts = [
 // Go them buy or sell
 export const goThemBuyOrSell = [
     {
-        title: "Are You Looking for a Car? ",
+        title: "Are You Looking for a Car?",
         image: electricSvg,
-        description: "We help you find the best cars for sale in Pakistan, with verified listings, competitive prices, and trusted sellers across Karachi, Islamabad, Lahore, and more."
+        description: "Find the best cars for sale in Pakistan without the hassle. Browse verified listings, trusted sellers, and competitive deals across Karachi, Islamabad, Lahore, and all major cities. Whether you're searching for a new ride or used cars for sale in Pakistan, we make it easy to compare, choose, and buy your perfect car."
     },
     {
         title: "Do You Want to Sell a Car?",
         image: electricSvg2,
-        description: "We commited to providing our customers with exceptional service."
+        description: "Turn your car into cash quickly. List your vehicle in minutes and reach thousands of genuine buyers looking for cars for sale across Pakistan. Whether your car is in Karachi, Islamabad, or Lahore, our platform helps you sell smarter with maximum visibility and reliable customer support."
     },
 ]
 

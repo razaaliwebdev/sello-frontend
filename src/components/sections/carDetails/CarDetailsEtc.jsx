@@ -5,29 +5,29 @@ import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
 import CarChatWidget from "../../carChat/CarChatWidget";
 import toast from "react-hot-toast";
+import { FaCheckCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaTachometerAlt, FaGasPump, FaCog, FaCar, FaDoorOpen, FaCog as FaEngine, FaPalette, FaShieldAlt, FaUser, FaStar } from "react-icons/fa";
 
 const CarDetailsEtc = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const { data: car, isLoading, error, refetch } = useGetSingleCarQuery(id, {
     skip: !id,
   });
-  const { data: currentUser } = useGetMeQuery();
+  const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
   const [markCarAsSold] = useMarkCarAsSoldMutation();
   const [showMore, setShowMore] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-  // Show skeleton while loading
   if (isLoading) {
     return (
-      <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
-        <div className="border-[1px] border-gray-400 border-t-0 md:px-5 md:py-6 p-4 rounded-bl-xl rounded-br-xl animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-12 bg-white">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -37,9 +37,9 @@ const CarDetailsEtc = () => {
 
   if (error || !car) {
     return (
-      <p className="px-4 py-10 text-red-500">
-        Failed to load car details. Please try again later.
-      </p>
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-12">
+        <p className="text-red-500 text-center">Failed to load car details. Please try again later.</p>
+      </div>
     );
   }
 
@@ -48,293 +48,292 @@ const CarDetailsEtc = () => {
       ? [car.geoLocation.coordinates[1], car.geoLocation.coordinates[0]]
       : [25.217136, 55.284207];
 
+  const specs = [
+    { icon: FaTachometerAlt, label: "Mileage", value: `${car.mileage?.toLocaleString() || 'N/A'} km` },
+    { icon: FaGasPump, label: "Fuel Type", value: car.fuelType || 'N/A' },
+    { icon: FaCog, label: "Transmission", value: car.transmission || 'N/A' },
+    { icon: FaCar, label: "Body Type", value: car.bodyType || 'N/A' },
+    { icon: FaDoorOpen, label: "Doors", value: car.carDoors || 'N/A' },
+    { icon: FaEngine, label: "Engine", value: car.engineCapacity || 'N/A' },
+    { icon: FaCalendarAlt, label: "Year", value: car.year || 'N/A' },
+    { icon: FaShieldAlt, label: "Condition", value: car.condition || 'N/A' },
+  ];
+
+  const additionalSpecs = [
+    { label: "Interior Color", value: car.colorInterior, color: car.colorInterior },
+    { label: "Exterior Color", value: car.colorExterior, color: car.colorExterior },
+    { label: "Regional Specs", value: car.regionalSpec },
+    { label: "Cylinders", value: car.numberOfCylinders },
+    { label: "Seats", value: car.seats || "4" },
+    { label: "Seller Type", value: car.sellerType },
+    { label: "Warranty", value: car.warranty },
+    { label: "Horsepower", value: car.horsepower ? `${car.horsepower} HP` : 'N/A' },
+  ];
+
   return (
-    <div className="px-4 md:px-20 py-12 bg-[#F9FAFB]">
-      <div className="border-[1px] border-gray-400 border-t-0 md:px-5 md:py-6 p-4 rounded-bl-xl rounded-br-xl">
-        <div className="border-b-[1px] border-gray-400">
-          <h2 className="md:text-4xl text-2xl font-semibold">{`${car.title} ${car.model} - ${car.year}`}</h2>
-          <p className="my-2 text-sm md:text-base">
-            {car.features} {car.variant} - {car.transmission} - {car.bodyType}
-          </p>
-        </div>
-
-        {/* Icons Section (always visible) */}
-        <div className="flex flex-wrap justify-between border-b-[1px] border-gray-400 py-3 gap-4">
-          {/* ... keep your icon props here as they are ... */}
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img
-              className="md:h-10 md:w-10 h-8 w-8"
-              src={images.milesIcon}
-              alt=""
-            />
-            <p className="text-sm">{car.mileage} Miles</p>
-          </div>
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img
-              className="md:h-10 md:w-10 h-8 w-8"
-              src={images.fuelIcon}
-              alt=""
-            />
-            <p className="text-sm">{car.fuelType}</p>
-          </div>
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img
-              className="md:h-10 md:w-10 h-8 w-8"
-              src={images.transmissionIcon}
-              alt=""
-            />
-            <p className="text-sm">{car.transmission}</p>
-          </div>
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img
-              className="md:h-10 md:w-10 h-8 w-8"
-              src={images.sedan}
-              alt=""
-            />
-            <p className="text-sm">{car.bodyType}</p>
-          </div>
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img className="md:h-10 md:w-10 h-8 w-8" src={images.door} alt="" />
-            <p className="text-sm">{car.carDoors}</p>
-          </div>
-          <div className="flex items-center gap-4 my-2 w-[48%] sm:w-auto">
-            <img className="md:h-10 md:w-10 h-8 w-8" src={images.cc} alt="" />
-            <p className="text-sm">{car.engineCapacity}</p>
-          </div>
-        </div>
-
-        {/* Specs Section (always visible) */}
-        <div className="flex flex-wrap justify-between border-b-[1px] border-gray-400 py-5 gap-4">
-          {/* ... keep your specs props here ... */}
-          <div className="flex gap-3 items-center w-full sm:w-auto">
-            <div>
-              <h4 className="text-sm font-medium">Interior Color</h4>
-              <p className="text-sm">{car.colorInterior}</p>
-            </div>
-            <div
-              style={{ backgroundColor: `${car.colorInterior}` }}
-              className="h-5 w-5 rounded-full"
-            ></div>
-          </div>
-          <div className="flex gap-3 items-center w-full sm:w-auto">
-            <div>
-              <h4 className="text-sm font-medium">Exterior Color</h4>
-              <p className="text-sm">{car.colorExterior}</p>
-            </div>
-            <div
-              style={{ backgroundColor: `${car.colorExterior}` }}
-              className="h-5 w-5 rounded-full"
-            ></div>
-          </div>
-          <div className="w-full sm:w-auto">
-            <h4 className="text-sm font-medium">Regional Specs</h4>
-            <p className="text-sm">{car.regionalSpec}</p>
-          </div>
-          <div className="w-full sm:w-auto">
-            <h4 className="text-sm font-medium">Number of Cylinders</h4>
-            <p className="text-sm">{car.numberOfCylinders}</p>
-          </div>
-          <div className="w-full sm:w-auto">
-            <h4 className="text-sm font-medium">Seats</h4>
-            <p className="text-sm">4</p>
-          </div>
-          <div className="w-full sm:w-auto">
-            <h4 className="text-sm font-medium">Seller Type</h4>
-            <p className="text-sm">{car.sellerType}</p>
-          </div>
-          <div className="w-full sm:w-auto">
-            <h4 className="text-sm font-medium">Warranty</h4>
-            <p className="text-sm">{car.warranty}</p>
-          </div>
-          <div className="flex gap-2 items-center w-full sm:w-auto">
-            <div>
-              <h4 className="text-sm font-medium">Horsepower</h4>
-              <p className="text-sm">{car.horsepower} HP</p>
-            </div>
-            <img src={images.hp} alt="" className="h-5 w-5" />
-          </div>
-        </div>
-
-        {/* Seller Info Section */}
-        <div className="py-5 border-b border-gray-400">
-            <h3 className="text-lg font-semibold mb-3">Seller Information</h3>
-            <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 uppercase">
-                    {car.postedBy?.name?.[0] || "U"}
-                </div>
-                <div>
-                    <div className="flex items-center gap-2">
-                        <p className="font-medium text-lg">{car.postedBy?.name || "Unknown Seller"}</p>
-                        {car.postedBy?.isVerified && (
-                            <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                                Verified
-                            </span>
-                        )}
+    <div className="bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Specifications Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <FaCar className="text-primary-500" />
+                Specifications
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {specs.map((spec, idx) => {
+                  const Icon = spec.icon;
+                  return (
+                    <div key={idx} className="text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="bg-primary-50 rounded-full p-3">
+                          <Icon className="text-primary-600 text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">{spec.label}</p>
+                          <p className="text-sm font-semibold text-gray-900 mt-1">{spec.value}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <span className="text-yellow-500 font-bold">★ {car.postedBy?.sellerRating?.toFixed(1) || "0.0"}</span>
-                        <span>({car.postedBy?.reviewCount || 0} reviews)</span>
-                        <span className="mx-1">•</span>
-                        <span>Member since {new Date(car.postedBy?.createdAt || Date.now()).getFullYear()}</span>
-                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Additional Specs */}
+              {showMore && (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {additionalSpecs.map((spec, idx) => (
+                      <div key={idx}>
+                        <p className="text-xs text-gray-500 font-medium">{spec.label}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {spec.color ? (
+                            <>
+                              <p className="text-sm font-semibold text-gray-900">{spec.value}</p>
+                              <div
+                                className="w-5 h-5 rounded-full border border-gray-300"
+                                style={{ backgroundColor: spec.color }}
+                              ></div>
+                            </>
+                          ) : (
+                            <p className="text-sm font-semibold text-gray-900">{spec.value || 'N/A'}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-            </div>
-        </div>
+              )}
 
-        {/* Owner Actions (for seller) */}
-        {currentUser && car.postedBy && currentUser._id === car.postedBy._id && (
-          <div className="flex items-center gap-3 py-3 border-b border-gray-400 flex-wrap">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">Status:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                car.isSold 
-                  ? "bg-red-100 text-red-800" 
-                  : "bg-green-100 text-green-800"
-              }`}>
-                {car.isSold ? "Sold Out" : "Available"}
-              </span>
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setShowMore(!showMore)}
+                  className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
+                >
+                  {showMore ? "Show Less" : "Show More Details"}
+                  <span className="text-lg">{showMore ? "↑" : "↓"}</span>
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <button
-                onClick={() => navigate(`/edit-car/${car._id}`)}
-                className="px-4 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-              >
-                Edit Car
-              </button>
-              <button
-                onClick={async () => {
-                  if (window.confirm(`Are you sure you want to mark this car as ${car.isSold ? 'available' : 'sold'}?`)) {
-                    try {
-                      setIsUpdatingStatus(true);
-                      await markCarAsSold({ 
-                        carId: car._id, 
-                        isSold: !car.isSold 
-                      }).unwrap();
-                      toast.success(`Car marked as ${!car.isSold ? 'sold' : 'available'}`);
-                      refetch(); // Refetch car data
-                    } catch (error) {
-                      toast.error(error?.data?.message || "Failed to update car status");
-                    } finally {
-                      setIsUpdatingStatus(false);
-                    }
-                  }
-                }}
-                disabled={isUpdatingStatus}
-                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isUpdatingStatus && (
-                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-                {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
-              </button>
-            </div>
-          </div>
-        )}
 
-        {/* Price and Buy Now Button */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between py-4 gap-4">
-          <div>
-            <h2 className="md:text-2xl text-xl font-semibold">AED {car.price}</h2>
-            {car.isSold && (
-              <p className="text-red-600 font-medium text-sm mt-1">This car has been sold</p>
+            {/* Description Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {car.description || "No description available."}
+              </p>
+            </div>
+
+            {/* Features Card */}
+            {car.features && car.features.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Features</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {car.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <FaCheckCircle className="text-green-500 flex-shrink-0" size={16} />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-          </div>
-          {!car.isSold ? (
-            currentUser ? (
-              currentUser._id === car.postedBy?._id ? (
-                <button 
-                  className="bg-gray-400 px-4 py-2 rounded hover:opacity-90 transition cursor-not-allowed"
-                  disabled
-                >
-                  Your Listing
-                </button>
-              ) : (
-                <button 
-                  onClick={() => setShowChat(true)}
-                  className="bg-primary-500 text-white px-6 py-2 rounded hover:bg-primary-600 transition-colors font-medium"
-                >
-                  Buy Now / Chat with Seller
-                </button>
-              )
-            ) : (
-              <button 
-                onClick={() => {
-                  toast.error("Please login to chat with seller");
-                }}
-                className="bg-primary-500 text-white px-6 py-2 rounded hover:opacity-90 transition font-medium"
-              >
-                Buy Now / Chat with Seller
-              </button>
-            )
-          ) : (
-            <button 
-              className="bg-gray-400 px-4 py-2 rounded cursor-not-allowed"
-              disabled
-            >
-              Sold Out
-            </button>
-          )}
-        </div>
 
-        {/* Show More/Show Less Details */}
-        <div className="flex justify-end">
-          <button
-            onClick={() => setShowMore(!showMore)}
-            className="text-primary-500 underline text-lg mt-5 font-medium"
-          >
-            {showMore ? "Show Less" : "Show More"}
-          </button>
-        </div>
-
-        {showMore && (
-          <div className="mt-6 border-t border-gray-300 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <p>
-              <span className="font-medium">Make:</span> {car.make}
-            </p>
-            <p>
-              <span className="font-medium">Variant:</span> {car.variant}
-            </p>
-            <p>
-              <span className="font-medium">Condition:</span> {car.condition}
-            </p>
-            <p>
-              <span className="font-medium">Owner Type:</span> {car.ownerType}
-            </p>
-            <p>
-              <span className="font-medium">City:</span> {car.city}
-            </p>
-            <p>
-              <span className="font-medium">Location:</span> {car.location}
-            </p>
-            <p>
-              <span className="font-medium">Contact:</span> {car.contactNumber}
-            </p>
-            <div className="sm:col-span-2">
-              <span className="font-medium">Features:</span>{" "}
-              {car.features?.length > 0
-                ? car.features.join(", ")
-                : "No features listed"}
+            {/* Location Map Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FaMapMarkerAlt className="text-primary-500" />
+                Location
+              </h2>
+              <div className="rounded-lg overflow-hidden border border-gray-200">
+                <MapView coordinates={coordinates} carLocation={car.geoLocation} />
+              </div>
+              {car.location && (
+                <p className="mt-4 text-sm text-gray-600 flex items-center gap-2">
+                  <FaMapMarkerAlt className="text-primary-500" size={14} />
+                  {car.location}, {car.city}
+                </p>
+              )}
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Map Section */}
-      <div>
-        <h2 className="md:text-4xl text-2xl font-semibold my-4">Location</h2>
-        <div className="map">
-          <MapView coordinates={coordinates} carLocation={car.geoLocation} />
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Seller/Dealer Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FaUser className="text-primary-500" />
+                {car.postedBy?.role === "dealer" ? "Dealer Information" : "Seller Information"}
+              </h3>
+              
+              <div className="flex items-start gap-4 mb-4">
+                <div className="h-16 w-16 rounded-full bg-primary-500 flex items-center justify-center text-2xl font-bold text-white uppercase overflow-hidden flex-shrink-0">
+                  {car.postedBy?.avatar ? (
+                    <img src={car.postedBy.avatar} alt={car.postedBy?.name} className="w-full h-full object-cover" />
+                  ) : (
+                    car.postedBy?.name?.[0] || "U"
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <p className="font-semibold text-lg text-gray-900 truncate">
+                      {car.postedBy?.role === "dealer" && car.postedBy?.dealerInfo?.businessName
+                        ? car.postedBy.dealerInfo.businessName
+                        : car.postedBy?.name || "Unknown Seller"}
+                    </p>
+                    {car.postedBy?.role === "dealer" && car.postedBy?.dealerInfo?.verified && (
+                      <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
+                        <FaCheckCircle size={10} />
+                        VERIFIED
+                      </span>
+                    )}
+                    {car.postedBy?.isVerified && car.postedBy?.role !== "dealer" && (
+                      <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <FaCheckCircle size={10} />
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
+                    <FaStar className="text-yellow-500" size={12} />
+                    <span className="font-semibold">{car.postedBy?.sellerRating?.toFixed(1) || "0.0"}</span>
+                    <span className="text-gray-400">({car.postedBy?.reviewCount || 0} reviews)</span>
+                  </div>
+
+                  {car.postedBy?.role === "dealer" && car.postedBy?.dealerInfo && (
+                    <div className="space-y-1 text-sm text-gray-600">
+                      {(car.postedBy.dealerInfo?.businessAddress || car.postedBy.dealerInfo?.city) && (
+                        <p className="flex items-center gap-1">
+                          <FaMapMarkerAlt size={12} />
+                          {[car.postedBy.dealerInfo?.businessAddress, car.postedBy.dealerInfo?.city]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      )}
+                      {(car.postedBy.dealerInfo?.businessPhone || car.postedBy.dealerInfo?.whatsappNumber) && (
+                        <p className="flex items-center gap-1">
+                          <FaPhone size={12} />
+                          {car.postedBy.dealerInfo?.businessPhone || car.postedBy.dealerInfo?.whatsappNumber || ""}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Buttons */}
+              {!car.isSold && currentUser && currentUser._id !== car.postedBy?._id && (
+                <div className="space-y-3 mt-6">
+                  <button
+                    onClick={() => setShowChat(true)}
+                    className="w-full bg-primary-500 text-white px-4 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <FaEnvelope />
+                    Contact Seller
+                  </button>
+                  {car.contactNumber && (
+                    <a
+                      href={`tel:${car.contactNumber}`}
+                      className="w-full bg-white border-2 border-primary-500 text-primary-600 px-4 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <FaPhone />
+                      Call Now
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Owner Actions */}
+              {currentUser && car.postedBy && currentUser._id === car.postedBy._id && (
+                <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Status:</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      car.isSold 
+                        ? "bg-red-100 text-red-800" 
+                        : "bg-green-100 text-green-800"
+                    }`}>
+                      {car.isSold ? "Sold" : "Available"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/edit-car/${car._id}`)}
+                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                  >
+                    Edit Listing
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (window.confirm(`Mark this car as ${car.isSold ? 'available' : 'sold'}?`)) {
+                        try {
+                          setIsUpdatingStatus(true);
+                          await markCarAsSold({ 
+                            carId: car._id, 
+                            isSold: !car.isSold 
+                          }).unwrap();
+                          toast.success(`Car marked as ${!car.isSold ? 'sold' : 'available'}`);
+                          refetch();
+                        } catch (error) {
+                          toast.error(error?.data?.message || "Failed to update status");
+                        } finally {
+                          setIsUpdatingStatus(false);
+                        }
+                      }
+                    }}
+                    disabled={isUpdatingStatus}
+                    className="w-full bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                  >
+                    {isUpdatingStatus ? "Updating..." : car.isSold ? "Mark as Available" : "Mark as Sold"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Additional Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Listing Details</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Listing ID:</span>
+                  <span className="font-medium text-gray-900">{car._id?.slice(-8)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Posted:</span>
+                  <span className="font-medium text-gray-900">
+                    {car.createdAt ? new Date(car.createdAt).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Views:</span>
+                  <span className="font-medium text-gray-900">{car.views || 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Description Section */}
-      <div className="">
-        <h2 className="md:text-4xl text-2xl font-semibold my-4">Description</h2>
-        <p className="text-sm md:text-base">{car.description}</p>
       </div>
 
       {/* Car Chat Widget */}

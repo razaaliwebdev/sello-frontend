@@ -44,12 +44,16 @@ const ROLE_MENU_ACCESS = {
         "/admin/users",
         "/admin/listings",
         "/admin/dealers",
+        "/admin/categories",
         "/admin/blogs",
+        "/admin/testimonials",
         "/admin/analytics",
         "/admin/chat",
         "/admin/chatbot",
         "/admin/customer-requests",
+        "/admin/contact-forms",
         "/admin/promotions",
+        "/admin/payments",
         "/admin/notifications",
         "/admin/settings",
     ],
@@ -65,10 +69,12 @@ const ROLE_MENU_ACCESS = {
         "/admin/chat",            // Chat monitoring
         "/admin/chatbot",         // Support chatbot
         "/admin/customer-requests",       // Customer request forms
+        "/admin/contact-forms",   // Contact form submissions
     ],
     "Content Manager": [
         "/admin/dashboard",
         "/admin/blogs",           // Write/edit/publish blogs
+        "/admin/testimonials",    // Manage reviews and testimonials
         "/admin/promotions",      // Manage promotions
         "/admin/notifications",   // Create push notifications
     ],
@@ -80,12 +86,14 @@ const ROLE_MENU_ACCESS = {
     "Blogs/Content Agent": [
         "/admin/dashboard",
         "/admin/blogs",           // Write/edit/publish blogs
+        "/admin/testimonials",    // Manage reviews and testimonials
         "/admin/promotions",      // Manage promotions
         "/admin/notifications",   // Create push notifications
     ],
     "Marketing Team": [
         "/admin/dashboard",
         "/admin/blogs",           // Write/edit/publish blogs
+        "/admin/testimonials",    // Manage reviews and testimonials
         "/admin/promotions",      // Manage promotions
         "/admin/notifications",   // Create push notifications
     ],

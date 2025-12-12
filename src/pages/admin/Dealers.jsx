@@ -1,22 +1,31 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
     useGetAllDealersQuery,
     useVerifyDealerMutation,
+    useGetUserByIdQuery,
 } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiGrid, FiCheckCircle, FiXCircle, FiEye, FiEdit2 } from "react-icons/fi";
+import { FiSearch, FiGrid, FiCheckCircle, FiXCircle, FiEye, FiEdit2, FiX } from "react-icons/fi";
 
 const Dealers = () => {
+    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [selectedDealer, setSelectedDealer] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
     const { data, isLoading, refetch } = useGetAllDealersQuery({ 
         page, 
         limit: 20,
         search 
     });
     const [verifyDealer] = useVerifyDealerMutation();
+    const { data: dealerDetails, isLoading: detailsLoading } = useGetUserByIdQuery(
+        selectedDealer,
+        { skip: !selectedDealer }
+    );
 
     const dealers = data?.dealers || [];
     const pagination = data?.pagination || {};
@@ -34,6 +43,20 @@ const Dealers = () => {
         } catch (error) {
             toast.error(error?.data?.message || "Failed to update dealer");
         }
+    };
+
+    const handleViewDetails = (dealerId) => {
+        setSelectedDealer(dealerId);
+        setShowDetailsModal(true);
+    };
+
+    const handleEdit = (dealerId) => {
+        navigate(`/admin/users/${dealerId}`);
+    };
+
+    const handleCloseModal = () => {
+        setShowDetailsModal(false);
+        setSelectedDealer(null);
     };
 
     const getPlanBadge = (plan) => {
@@ -160,17 +183,33 @@ const Dealers = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanBadge(dealer.subscription?.plan || 'free')}`}>
-                                                    {(dealer.subscription?.plan || 'free').charAt(0).toUpperCase() + (dealer.subscription?.plan || 'free').slice(1)}
-                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanBadge(dealer.subscription?.plan || 'free')}`}>
+                                                        {(dealer.subscription?.plan || 'free').charAt(0).toUpperCase() + (dealer.subscription?.plan || 'free').slice(1)}
+                                                    </span>
+                                                    {dealer.subscription?.isActive && dealer.subscription?.endDate && new Date(dealer.subscription.endDate) > new Date() ? (
+                                                        <span className="text-xs text-green-600 font-medium">
+                                                            Active until {new Date(dealer.subscription.endDate).toLocaleDateString()}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-500">Inactive</span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 {getStatusBadge(dealer)}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm font-medium text-gray-900">
-                                                    {dealer.listingsCount || 0}
-                                                </span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-gray-900">
+                                                        {dealer.listingsCount || 0}
+                                                    </span>
+                                                    {dealer.subscription?.plan === 'free' && dealer.listingsCount >= 5 && (
+                                                        <span className="text-xs text-yellow-600 font-medium">
+                                                            Limit reached
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-sm font-medium text-gray-900">
@@ -195,12 +234,14 @@ const Dealers = () => {
                                                         )}
                                                     </button>
                                                     <button
+                                                        onClick={() => handleViewDetails(dealer._id)}
                                                         className="text-blue-600 hover:text-blue-700 transition-colors"
                                                         title="View Details"
                                                     >
                                                         <FiEye size={18} />
                                                     </button>
                                                     <button
+                                                        onClick={() => handleEdit(dealer._id)}
                                                         className="text-gray-600 hover:text-gray-700 transition-colors"
                                                         title="Edit"
                                                     >
@@ -236,6 +277,269 @@ const Dealers = () => {
                         >
                             Next
                         </button>
+                    </div>
+                )}
+
+                {/* Dealer Details Modal */}
+                {showDetailsModal && selectedDealer && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-gray-900">Dealer Details</h3>
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <FiX size={24} />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                {detailsLoading ? (
+                                    <div className="flex justify-center py-8">
+                                        <Spinner fullScreen={false} />
+                                    </div>
+                                ) : dealerDetails ? (
+                                    <div className="space-y-6">
+                                        {/* Basic Information */}
+                                        <div>
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h4>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Business Name</p>
+                                                    <p className="font-medium">{dealerDetails.dealerInfo?.businessName || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Owner Name</p>
+                                                    <p className="font-medium">{dealerDetails.name || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Email</p>
+                                                    <p className="font-medium">{dealerDetails.email || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Phone</p>
+                                                    <p className="font-medium">{dealerDetails.dealerInfo?.businessPhone || dealerDetails.phone || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600">WhatsApp</p>
+                                                    <p className="font-medium">{dealerDetails.dealerInfo?.whatsappNumber || "N/A"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Location</p>
+                                                    <p className="font-medium">{dealerDetails.dealerInfo?.area || "N/A"}, {dealerDetails.dealerInfo?.city || "N/A"}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Business Details */}
+                                        {(dealerDetails.dealerInfo?.description || dealerDetails.dealerInfo?.website || dealerDetails.dealerInfo?.establishedYear) && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Business Details</h4>
+                                                <div className="space-y-3">
+                                                    {dealerDetails.dealerInfo?.description && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Description</p>
+                                                            <p className="font-medium">{dealerDetails.dealerInfo.description}</p>
+                                                        </div>
+                                                    )}
+                                                    {dealerDetails.dealerInfo?.website && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Website</p>
+                                                            <a href={dealerDetails.dealerInfo.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                                                                {dealerDetails.dealerInfo.website}
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                    {dealerDetails.dealerInfo?.establishedYear && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Established Year</p>
+                                                            <p className="font-medium">{dealerDetails.dealerInfo.establishedYear}</p>
+                                                        </div>
+                                                    )}
+                                                    {dealerDetails.dealerInfo?.employeeCount && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Employee Count</p>
+                                                            <p className="font-medium">{dealerDetails.dealerInfo.employeeCount}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Specialties & Services */}
+                                        {(dealerDetails.dealerInfo?.specialties?.length > 0 || dealerDetails.dealerInfo?.services?.length > 0 || dealerDetails.dealerInfo?.languages?.length > 0) && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Specialties & Services</h4>
+                                                <div className="space-y-3">
+                                                    {dealerDetails.dealerInfo?.specialties?.length > 0 && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Specialties</p>
+                                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                                {dealerDetails.dealerInfo.specialties.map((specialty, idx) => (
+                                                                    <span key={idx} className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm">
+                                                                        {specialty}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {dealerDetails.dealerInfo?.services?.length > 0 && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Services</p>
+                                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                                {dealerDetails.dealerInfo.services.map((service, idx) => (
+                                                                    <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                                                        {service}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {dealerDetails.dealerInfo?.languages?.length > 0 && (
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">Languages</p>
+                                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                                {dealerDetails.dealerInfo.languages.map((lang, idx) => (
+                                                                    <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                                                        {lang}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Social Media */}
+                                        {(dealerDetails.dealerInfo?.socialMedia?.facebook || dealerDetails.dealerInfo?.socialMedia?.instagram || dealerDetails.dealerInfo?.socialMedia?.twitter) && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Social Media</h4>
+                                                <div className="space-y-2">
+                                                    {dealerDetails.dealerInfo.socialMedia.facebook && (
+                                                        <a href={dealerDetails.dealerInfo.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="block text-blue-600 hover:underline">
+                                                            Facebook
+                                                        </a>
+                                                    )}
+                                                    {dealerDetails.dealerInfo.socialMedia.instagram && (
+                                                        <a href={dealerDetails.dealerInfo.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="block text-pink-600 hover:underline">
+                                                            Instagram
+                                                        </a>
+                                                    )}
+                                                    {dealerDetails.dealerInfo.socialMedia.twitter && (
+                                                        <a href={dealerDetails.dealerInfo.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="block text-blue-400 hover:underline">
+                                                            Twitter
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Documents & Media */}
+                                        <div>
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Documents & Media</h4>
+                                            <div className="space-y-4">
+                                                {/* Profile Avatar */}
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-2">Profile Image</p>
+                                                    {dealerDetails.avatar ? (
+                                                        <div className="flex items-center gap-4">
+                                                            <img
+                                                                src={dealerDetails.avatar}
+                                                                alt="Profile"
+                                                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                                                            />
+                                                            <a
+                                                                href={dealerDetails.avatar}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:underline text-sm"
+                                                            >
+                                                                View Full Image
+                                                            </a>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-gray-500">No profile image uploaded</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Business License */}
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-2">Business License / CNIC</p>
+                                                    {dealerDetails.dealerInfo?.businessLicense ? (
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                                <span className="text-2xl">📄</span>
+                                                            </div>
+                                                            <div>
+                                                                <a
+                                                                    href={dealerDetails.dealerInfo.businessLicense}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-600 hover:underline font-medium"
+                                                                >
+                                                                    View License Document
+                                                                </a>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {dealerDetails.dealerInfo.businessLicense.split("/").pop()}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-gray-500">No license document uploaded</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Showroom Images */}
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-2">Showroom Images</p>
+                                                    {dealerDetails.dealerInfo?.showroomImages?.length > 0 ? (
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                            {dealerDetails.dealerInfo.showroomImages.map((img, idx) => (
+                                                                <div key={idx} className="relative group">
+                                                                    <img
+                                                                        src={img}
+                                                                        alt={`Showroom ${idx + 1}`}
+                                                                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                                                                    />
+                                                                    <a
+                                                                        href={img}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg"
+                                                                    >
+                                                                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
+                                                                            View Full
+                                                                        </span>
+                                                                    </a>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-gray-500">No showroom images uploaded</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Verification Status */}
+                                        <div>
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Verification Status</h4>
+                                            <div className="flex items-center gap-3">
+                                                {getStatusBadge(dealerDetails)}
+                                                {dealerDetails.dealerInfo?.verifiedAt && (
+                                                    <p className="text-sm text-gray-600">
+                                                        Verified on: {new Date(dealerDetails.dealerInfo.verifiedAt).toLocaleDateString()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500">Failed to load dealer details</p>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

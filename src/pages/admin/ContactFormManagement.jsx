@@ -1,26 +1,65 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useGetAllContactFormsQuery, useConvertToChatMutation, useUpdateContactFormStatusMutation, useDeleteContactFormMutation } from "../../redux/services/adminApi";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiTrash2, FiMessageSquare, FiCheckCircle, FiClock, FiXCircle } from "react-icons/fi";
+import { FiSearch, FiTrash2, FiMessageSquare, FiCheckCircle, FiClock, FiXCircle, FiRefreshCw } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const ContactFormManagement = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [selectedForm, setSelectedForm] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [formToDelete, setFormToDelete] = useState(null);
 
-    const { data: formsData, isLoading, refetch } = useGetAllContactFormsQuery({
-        status: filterStatus !== "all" ? filterStatus : undefined,
-        search: searchQuery || undefined,
+    const queryParams = {};
+    if (filterStatus !== "all") {
+        queryParams.status = filterStatus;
+    }
+    if (searchQuery && searchQuery.trim()) {
+        queryParams.search = searchQuery.trim();
+    }
+
+    const { data: formsData, isLoading, error, refetch } = useGetAllContactFormsQuery(queryParams, {
+        refetchOnMountOrArgChange: true,
+        pollingInterval: 30000, // Poll every 30 seconds for new forms
     });
 
     const [convertToChat] = useConvertToChatMutation();
     const [updateStatus] = useUpdateContactFormStatusMutation();
     const [deleteForm] = useDeleteContactFormMutation();
 
-    const contactForms = formsData?.contactForms || [];
+    // Handle response structure: 
+    // Backend returns: { success: true, data: { contactForms: [...], pagination: {...} } }
+    // transformResponse extracts data, so formsData should be { contactForms: [...], pagination: {...} }
+    const contactForms = React.useMemo(() => {
+        if (!formsData) return [];
+        
+        // Case 1: formsData is { contactForms: [...], pagination: {...} }
+        if (formsData.contactForms && Array.isArray(formsData.contactForms)) {
+            return formsData.contactForms;
+        }
+        
+        // Case 2: formsData is already an array
+        if (Array.isArray(formsData)) {
+            return formsData;
+        }
+        
+        // Case 3: Nested data structure
+        if (formsData.data) {
+            if (Array.isArray(formsData.data.contactForms)) {
+                return formsData.data.contactForms;
+            }
+            if (Array.isArray(formsData.data)) {
+                return formsData.data;
+            }
+        }
+        
+        return [];
+    }, [formsData]);
+
 
     const handleConvertToChat = async (formId) => {
         try {
@@ -28,8 +67,12 @@ const ContactFormManagement = () => {
             toast.success("Contact form converted to chat successfully!");
             refetch();
             if (result?.data?.chat?._id) {
+                // Ensure chatId is a string
+                const chatId = typeof result.data.chat._id === 'string' 
+                    ? result.data.chat._id 
+                    : result.data.chat._id.toString();
                 // Redirect to support chat with the new chat ID
-                window.location.href = `/admin/support-chat?chatId=${result.data.chat._id}`;
+                window.location.href = `/admin/support-chat?chatId=${chatId}`;
             }
         } catch (error) {
             toast.error(error?.data?.message || "Failed to convert to chat");
@@ -46,15 +89,23 @@ const ContactFormManagement = () => {
         }
     };
 
-    const handleDelete = async (formId) => {
-        if (!window.confirm("Are you sure you want to delete this contact form?")) return;
+    const handleDelete = (formId) => {
+        setFormToDelete(formId);
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!formToDelete) return;
         try {
-            await deleteForm(formId).unwrap();
+            await deleteForm(formToDelete).unwrap();
             toast.success("Contact form deleted successfully");
-            refetch();
+            // Refetch to update the list
+            await refetch();
         } catch (error) {
-            toast.error(error?.data?.message || "Failed to delete contact form");
+            toast.error(error?.data?.message || error?.message || "Failed to delete contact form");
+        } finally {
+            setShowDeleteModal(false);
+            setFormToDelete(null);
         }
     };
 
@@ -87,9 +138,29 @@ const ContactFormManagement = () => {
     return (
         <AdminLayout>
             <div className="p-6">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Contact Form Management</h1>
-                    <p className="text-gray-600">Manage and respond to contact form submissions</p>
+                <div className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-800 mb-2">Contact Form Management</h1>
+                        <p className="text-gray-600">
+                            Manage and respond to contact form submissions
+                            {contactForms.length > 0 && (
+                                <span className="ml-2 text-primary-600 font-semibold">
+                                    ({contactForms.length} {contactForms.length === 1 ? 'form' : 'forms'})
+                                </span>
+                            )}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => refetch()}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Refresh"
+                        >
+                            <FiRefreshCw className={isLoading ? "animate-spin" : ""} size={18} />
+                            <span className="hidden md:inline">Refresh</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Filters */}
@@ -118,6 +189,26 @@ const ContactFormManagement = () => {
                     </div>
                 </div>
 
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                        <p className="text-red-800 text-sm font-semibold mb-2">Error loading contact forms</p>
+                        <p className="text-red-700 text-sm mb-2">
+                            {error?.data?.message || error?.message || "Unknown error occurred"}
+                        </p>
+                        {error?.status && (
+                            <p className="text-red-600 text-xs mb-2">Status: {error.status}</p>
+                        )}
+                        <button
+                            onClick={() => refetch()}
+                            className="mt-2 text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
+
+
                 {/* Table */}
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     {isLoading ? (
@@ -125,8 +216,13 @@ const ContactFormManagement = () => {
                             <Spinner fullScreen={false} />
                         </div>
                     ) : contactForms.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
-                            No contact forms found
+                        <div className="text-center py-12">
+                            <p className="text-gray-500 mb-2">No contact forms found</p>
+                            <p className="text-sm text-gray-400">
+                                {searchQuery || filterStatus !== "all" 
+                                    ? "Try adjusting your search or filter criteria" 
+                                    : "Contact form submissions will appear here"}
+                            </p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -215,7 +311,7 @@ const ContactFormManagement = () => {
                                                     )}
                                                     {form.chatId && (
                                                         <a
-                                                            href={`/admin/support-chat?chatId=${form.chatId}`}
+                                                            href={`/admin/support-chat?chatId=${typeof form.chatId === 'string' ? form.chatId : (form.chatId?._id || form.chatId?.toString() || '')}`}
                                                             className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
                                                             title="View Chat"
                                                         >
@@ -308,7 +404,7 @@ const ContactFormManagement = () => {
                                             <div className="col-span-2">
                                                 <label className="text-sm font-medium text-gray-500">Chat</label>
                                                 <a
-                                                    href={`/admin/support-chat?chatId=${form.chatId}`}
+                                                    href={`/admin/support-chat?chatId=${typeof form.chatId === 'string' ? form.chatId : (form.chatId?._id || form.chatId?.toString() || '')}`}
                                                     className="text-primary-500 hover:underline"
                                                 >
                                                     View Chat Conversation
@@ -332,6 +428,19 @@ const ContactFormManagement = () => {
                     </div>
                 )}
             </div>
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setFormToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Contact Form"
+                message="Are you sure you want to delete this contact form? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

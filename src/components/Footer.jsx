@@ -231,6 +231,13 @@ const Footer = () => {
             </Link>
             <span className="text-gray-600">•</span>
             <Link
+              to="/help-center"
+              className="text-gray-400 hover:text-white transition-colors duration-200"
+            >
+              Help Center
+            </Link>
+            <span className="text-gray-600">•</span>
+            <Link
               to="/privacy-policy"
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >

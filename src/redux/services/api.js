@@ -1,8 +1,8 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Use environment variable or default to port 3000 (matching server)
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Use environment variable or default to port 4000 (matching server)
+// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 const BASE_URL = import.meta.env.VITE_API_URL || "https://sello-backend.onrender.com/api";
 
 export const api = createApi({
@@ -12,12 +12,16 @@ export const api = createApi({
             const baseResult = await fetchBaseQuery({
                 baseUrl: BASE_URL,
                 credentials: "include",
-                prepareHeaders: (headers) => {
+                prepareHeaders: (headers, { extra, endpoint }) => {
                     const token = localStorage.getItem("token");
                     if (token) {
                         headers.set("Authorization", `Bearer ${token}`);
                     }
-                    headers.set("Content-Type", "application/json");
+                    // Don't set Content-Type for FormData - browser will set it with boundary
+                    // Check if body is FormData instance
+                    if (!(args?.body instanceof FormData)) {
+                        headers.set("Content-Type", "application/json");
+                    }
                     return headers;
                 },
             })(args, api, extraOptions);
@@ -229,6 +233,17 @@ export const api = createApi({
         updateProfile: builder.mutation({
             query: (formData) => ({
                 url: "/users/profile",
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["User"],
+            transformResponse: (response) => {
+                return response?.data || response;
+            },
+        }),
+        updateDealerProfile: builder.mutation({
+            query: (formData) => ({
+                url: "/users/dealer-profile",
                 method: "PUT",
                 body: formData,
             }),
@@ -596,6 +611,7 @@ export const api = createApi({
                 const searchParams = new URLSearchParams();
                 if (params.isActive !== undefined) searchParams.append('isActive', params.isActive);
                 if (params.featured !== undefined) searchParams.append('featured', params.featured);
+                if (params.createdBy) searchParams.append('createdBy', params.createdBy);
                 const queryString = searchParams.toString();
                 return `/testimonials${queryString ? `?${queryString}` : ''}`;
             },
@@ -720,7 +736,13 @@ export const api = createApi({
                 url: "/subscriptions/plans",
                 method: "GET",
             }),
-            transformResponse: (response) => response?.data || response,
+            transformResponse: (response) => {
+                // Preserve paymentSystemEnabled flag
+                return {
+                    data: response?.data || response,
+                    paymentSystemEnabled: response?.paymentSystemEnabled !== undefined ? response.paymentSystemEnabled : true
+                };
+            },
         }),
         getMySubscription: builder.query({
             query: () => ({
@@ -802,6 +824,7 @@ export const {
     useResetPasswordMutation,
     useGetMeQuery,
     useUpdateProfileMutation,
+    useUpdateDealerProfileMutation,
     useRequestSellerMutation,
     useRequestDealerMutation,
     useSaveCarMutation,

@@ -15,6 +15,7 @@ import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
 import { FiMessageSquare, FiSend, FiClock, FiCheckCircle, FiXCircle, FiSearch, FiPlus, FiTrash2, FiEdit2 } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import ConfirmModal from "../../components/admin/ConfirmModal";
 
 const Chatbot = () => {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -25,6 +26,8 @@ const Chatbot = () => {
     const [newQuickReplyTitle, setNewQuickReplyTitle] = useState("");
     const [newQuickReplyMessage, setNewQuickReplyMessage] = useState("");
     const messagesEndRef = useRef(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [quickReplyToDelete, setQuickReplyToDelete] = useState(null);
 
     const { data: stats } = useGetChatbotStatsQuery();
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery(
@@ -131,15 +134,22 @@ const Chatbot = () => {
         }
     };
 
-    const handleDeleteQuickReply = async (replyId) => {
-        if (!window.confirm("Are you sure you want to delete this quick reply?")) return;
+    const handleDeleteQuickReply = (replyId) => {
+        setQuickReplyToDelete(replyId);
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!quickReplyToDelete) return;
         try {
-            await deleteQuickReply(replyId).unwrap();
+            await deleteQuickReply(quickReplyToDelete).unwrap();
             toast.success("Quick reply deleted successfully");
             refetchQuickReplies();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to delete quick reply");
+        } finally {
+            setShowDeleteModal(false);
+            setQuickReplyToDelete(null);
         }
     };
 
@@ -530,6 +540,19 @@ const Chatbot = () => {
                     </div>
                 </div>
             )}
+            {/* Delete Quick Reply Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setQuickReplyToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Quick Reply"
+                message="Are you sure you want to delete this quick reply? This action cannot be undone."
+                confirmText="Delete"
+                variant="danger"
+            />
         </AdminLayout>
     );
 };

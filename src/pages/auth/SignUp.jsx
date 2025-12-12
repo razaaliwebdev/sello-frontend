@@ -13,6 +13,9 @@ import {
 import Spinner from "../../components/Spinner";
 import DealerSignup from "./DealerSignup";
 
+// Check if Google OAuth is configured
+const hasGoogleClientId = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
@@ -158,13 +161,13 @@ const SignUp = () => {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex md:flex-row flex-col h-screen">
         {/* Orange Header */}
         <HeaderLogo />
 
         {/* Main Content - White Panel */}
-        <div className="flex-1 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 md:p-8">
+        <div className="flex-1 flex items-center justify-center px-4 py-8 ">
+          <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-6 md:p-8">
             {/* User Icon */}
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
@@ -214,7 +217,8 @@ const SignUp = () => {
                 />
               </div>
 
-              {/* Password Field */}
+             <div className="flex gap-4 md:flex-row lg:flex-row sm:flex-col flex-col">
+               {/* Password Field */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
@@ -263,6 +267,7 @@ const SignUp = () => {
                   </button>
                 </div>
               </div>
+             </div>
 
               {/* Terms Checkbox */}
               <div className="mb-4">
@@ -331,7 +336,21 @@ const SignUp = () => {
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={(error) => {
+                      // Handle configuration errors gracefully - don't show errors for unconfigured OAuth
+                      if (!hasGoogleClientId) {
+                        // Silently handle - user knows it's not configured from console warning
+                        return;
+                      }
+                      
+                      // Handle actual errors when OAuth IS configured
+                      if (error?.message?.includes("origin is not allowed") || error?.message?.includes("GSI_LOGGER")) {
+                        toast.error("Google Sign-In configuration error. Please use email/password sign-up.");
+                        return;
+                      }
+                      
+                      // Log other errors for debugging (only if configured)
                       console.error("Google OAuth error:", error);
+                      
                       let errorMsg = "Google sign-up failed. ";
                       
                       if (error?.type === "popup_closed_by_user") {
@@ -339,7 +358,7 @@ const SignUp = () => {
                       } else if (error?.type === "popup_failed_to_open") {
                         errorMsg = "Popup blocked. Please allow popups for this site.";
                       } else if (error?.type === "idpiframe_initialization_failed") {
-                        errorMsg = "Google authentication service unavailable. Please check your internet connection.";
+                        errorMsg = "Google authentication service unavailable. Please use email/password sign-up.";
                       } else {
                         errorMsg += "Please try again or use email/password sign-up.";
                       }
@@ -356,17 +375,11 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Sign Up as a Dealer Button */}
-              <button
-                type="button"
-                onClick={() => setShowDealerForm(true)}
-                className="w-full h-12 bg-primary-500 text-white font-semibold rounded hover:bg-primary-600 transition-colors mb-4"
-              >
-                Sign Up as a Dealer
-              </button>
+             
 
               {/* Sign In Link */}
-              <p className="text-center text-gray-600 text-sm">
+             <div className="flex md:flex-row flex-col items-center justify-between">
+               <p className="text-center text-gray-600 text-base">
                 Already have an account?{" "}
                 <Link
                   to={"/login"}
@@ -374,7 +387,17 @@ const SignUp = () => {
                 >
                   Sign in
                 </Link>
+                 
               </p>
+              {/* Sign Up as a Dealer Button */}
+              <button
+                type="button"
+                onClick={() => setShowDealerForm(true)}
+                className="text-primary-500 hover:underline ml-6"
+              >
+                Sign Up as a Dealer
+              </button>
+             </div>
             </form>
           </div>
         </div>

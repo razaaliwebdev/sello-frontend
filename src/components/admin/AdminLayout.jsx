@@ -17,7 +17,9 @@ import {
     FiFileText,
     FiSettings,
     FiGrid,
-    FiDollarSign
+    FiDollarSign,
+    FiStar,
+    FiMail
 } from "react-icons/fi";
 import { images } from "../../assets/assets";
 import { useGetMeQuery, useLogoutMutation } from "../../redux/services/api";
@@ -27,7 +29,7 @@ const AdminLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
-    const { data: user } = useGetMeQuery();
+    const { data: user, isLoading: userLoading, error: userError } = useGetMeQuery();
     const [logout] = useLogoutMutation();
 
     const allMenuItems = [
@@ -37,10 +39,12 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/dealers", icon: FiBriefcase, label: "Dealer Management" },
         { path: "/admin/categories", icon: FiGrid, label: "Categories" },
         { path: "/admin/blogs", icon: FiFileText, label: "Blog Management" },
+        { path: "/admin/testimonials", icon: FiStar, label: "Reviews & Testimonials" },
         { path: "/admin/analytics", icon: FiBarChart2, label: "Reports & Analytics" },
         { path: "/admin/chat", icon: FiMessageSquare, label: "Chat Monitoring" },
         { path: "/admin/chatbot", icon: FiCpu, label: "Support Chatbot" },
         { path: "/admin/customer-requests", icon: FiUser, label: "Customer Request" },
+        { path: "/admin/contact-forms", icon: FiMail, label: "Contact Forms" },
         { path: "/admin/promotions", icon: FiHeart, label: "Promotions" },
         { path: "/admin/payments", icon: FiDollarSign, label: "Payments" },
         { path: "/admin/notifications", icon: FiBell, label: "Notifications" },
@@ -49,7 +53,10 @@ const AdminLayout = ({ children }) => {
 
     // Filter menu items based on user's role
     // Super Admin sees all, team members see only their allowed tabs
-    const menuItems = allMenuItems.filter(item => canAccessMenu(user, item.path));
+    // If user data is loading or there's an error, show all menu items as fallback
+    const menuItems = userLoading || userError 
+        ? allMenuItems 
+        : allMenuItems.filter(item => canAccessMenu(user, item.path));
 
     const handleLogout = async () => {
         try {
@@ -95,7 +102,8 @@ const AdminLayout = ({ children }) => {
                         const isMainItemActive =
                             location.pathname === item.path ||
                             (item.path === "/admin/blogs" && location.pathname.startsWith("/admin/blog")) ||
-                            (item.path === "/admin/categories" && location.pathname.startsWith("/admin/categor"));
+                            (item.path === "/admin/categories" && location.pathname.startsWith("/admin/categor")) ||
+                            (item.path === "/admin/contact-forms" && location.pathname.startsWith("/admin/contact"));
                         
                         return (
                             <Link

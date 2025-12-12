@@ -1,13 +1,50 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import BrandMarquee from "../../BrandMarquee";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { brandsCategory } from "../../../assets/assets";
+import RecentlyViewedCars from "./RecentlyViewedCars";
 // import brands from "../../../assets/carLogos/brands";
 
 const BrandsSection = () => {
+  const navigate = useNavigate();
+
+  const categoryMeta = useMemo(() => ({
+    "Car": {
+      slug: "car",
+      description: "Cars, sedans, SUVs, and other passenger vehicles"
+    },
+    "Bus": {
+      slug: "bus",
+      description: "Buses and commercial passenger vehicles"
+    },
+    "Truck": {
+      slug: "truck",
+      description: "Trucks and heavy-duty vehicles"
+    },
+    "Van": {
+      slug: "van",
+      description: "Vans and utility vehicles"
+    },
+    "Bike": {
+      slug: "bike",
+      description: "Motorcycles and bikes"
+    },
+    "E-Bike": {
+      slug: "e-bike",
+      description: "Electric bikes and scooters"
+    },
+  }), []);
+
+  const handleCategoryClick = (title) => {
+    const meta = categoryMeta[title];
+    if (meta?.slug) {
+      navigate(`/category/${meta.slug}`);
+    }
+  };
+
   return (
-    <section className="md:h-screen bg-[#F5F5F5] w-full px-4 md:px-16 py-8 md:rounded-tl-[80px]">
-      <div className="flex items-center justify-between ">
+    <section className="bg-[#F5F5F5] w-full px-4 md:px-16 md:py-8 md:rounded-tl-[80px]">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold">
           Explore Our Premium Brands
         </h1>
@@ -20,39 +57,51 @@ const BrandsSection = () => {
       </div>
       {/* BrandMarquee will fetch brands from admin categories automatically */}
       <BrandMarquee />
-      <div className="maiBrandsLogos  py-5 flex md:flex-row flex-col items-center justify-between">
-        {/* <div className="nav flex md:gap-10 gap-7 my-2">
-          <button className="">In Stock</button>
-          <button className="">New Cars</button>
-          <button className="">Used Cars</button>
-        </div> */}
-        <div className="grid md:grid-cols-4 grid-cols-2 gap-6 md:w-[70%] w-full">
+      
+      {/* Recently Viewed Cars and Brand Categories Grid */}
+      <div className="py-5">
+        <div className="grid md:grid-cols-4 grid-cols-2 gap-6">
+          {/* Brand Categories */}
           {brandsCategory.map((brand, index) => {
             const isLastItem = index === brandsCategory.length - 1;
             const isOddNumberOfItems = brandsCategory.length % 2 !== 0;
+            const meta = categoryMeta[brand.title];
 
             return (
-              <div
+              <button
+                type="button"
                 className={`
           bg-[#DADADA] flex flex-col items-center justify-center rounded-2xl
           ${isLastItem && isOddNumberOfItems ? "md:col-span-2 col-span-2" : ""}
+          transition shadow-sm hover:shadow-md
         `}
                 key={index}
+                onClick={() => handleCategoryClick(brand.title)}
+                disabled={!meta?.slug}
               >
                 <img
-                  className="h-48 w-48"
+                  className="md:h-28 md:w-28"
                   src={brand.image}
                   alt="brand"
                   loading="lazy"
                 />
-                <span className="pb-4 text-xl">{brand.title}</span>
-              </div>
+                <span className="pb-1 text-xl font-semibold text-gray-800">{brand.title}</span>
+                {meta?.description && (
+                  <span className="pb-3 px-4 text-sm text-gray-600 text-center leading-snug">
+                    {meta.description}
+                  </span>
+                )}
+              </button>
             );
           })}
+          
+          {/* Recently Viewed Cars - Takes 2 columns on desktop */}
+          <RecentlyViewedCars />
         </div>
-        {/* ad */}
-        <div className="ad"></div>
       </div>
+
+      {/* ad */}
+      <div className="ad"></div>
     </section>
   );
 };

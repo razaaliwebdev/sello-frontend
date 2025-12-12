@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGetDashboardStatsQuery } from "../../redux/services/adminApi";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Spinner from "../../components/Spinner";
@@ -30,7 +31,32 @@ import {
 
 const Dashboard = () => {
     const [isCompactView, setIsCompactView] = useState(false);
+    const navigate = useNavigate();
     const { data: stats, isLoading, isError, error } = useGetDashboardStatsQuery();
+
+    // Handle authentication errors - redirect to login
+    useEffect(() => {
+        if (isError && (error?.status === 401 || error?.originalStatus === 401 || error?.status === 403 || error?.originalStatus === 403)) {
+            // Token is invalid or user is not authorized
+            const token = localStorage.getItem("token");
+            const user = localStorage.getItem("user");
+            
+            // Log error details in development only
+            if (process.env.NODE_ENV === 'development') {
+                console.error("⚠️ Dashboard access denied:", {
+                    errorStatus: error?.status || error?.originalStatus,
+                    errorMessage: error?.data?.message || error?.message,
+                });
+            }
+            
+            // Clear token and user data
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            
+            // Use window.location for a hard redirect to ensure all state is cleared
+            window.location.href = '/login';
+        }
+    }, [isError, error, navigate]);
 
     if (isLoading) {
         return (
@@ -43,13 +69,43 @@ const Dashboard = () => {
     }
 
     if (isError) {
+        // Don't show error UI for auth errors (will redirect)
+        if (error?.status === 401 || error?.originalStatus === 401 || error?.status === 403 || error?.originalStatus === 403) {
+            return (
+                <AdminLayout>
+                    <div className="flex justify-center items-center h-64">
+                        <Spinner fullScreen={false} />
+                    </div>
+                </AdminLayout>
+            );
+        }
+
+        // Show error for other types of errors
+        const errorMessage = error?.data?.message || error?.message || "Please try again later";
         return (
             <AdminLayout>
                 <div className="flex flex-col justify-center items-center h-64">
                     <p className="text-red-500 text-lg font-semibold mb-2">Error loading dashboard</p>
                     <p className="text-gray-600 text-sm">
-                        {error?.data?.message || error?.message || "Please try again later"}
+                        {errorMessage}
                     </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    // Ensure we have valid stats data
+    if (!stats) {
+        return (
+            <AdminLayout>
+                <div className="flex flex-col justify-center items-center h-64">
+                    <p className="text-gray-600 text-sm">No data available</p>
                 </div>
             </AdminLayout>
         );
