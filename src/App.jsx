@@ -26,8 +26,8 @@ import Signup from "./pages/auth/SignUp.jsx";
 
 // Lazy load auth pages
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword.jsx"));
+const VerifyOTP = lazy(() => import("./pages/auth/VerifyOTP.jsx"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword.jsx"));
-const VerifyOtp = lazy(() => import("./pages/auth/VerifyOtp.jsx"));
 const ResetSuccess = lazy(() => import("./pages/auth/ResetSuccess.jsx"));
 const AcceptInvite = lazy(() => import("./pages/auth/AcceptInvite.jsx"));
 
@@ -271,8 +271,8 @@ const App = () => {
     "/login",
     "/sign-up",
     "/forgot-password",
-    "/reset-password",
     "/verify-otp",
+    "/reset-password",
     "/reset-success",
     "/accept-invite",
   ];
@@ -316,18 +316,18 @@ const App = () => {
           }
         />
         <Route
-          path="/reset-password"
+          path="/verify-otp"
           element={
             <Suspense fallback={<RouteLoader />}>
-              <ResetPassword />
+              <VerifyOTP />
             </Suspense>
           }
         />
         <Route
-          path="/verify-otp"
+          path="/reset-password"
           element={
             <Suspense fallback={<RouteLoader />}>
-              <VerifyOtp />
+              <ResetPassword />
             </Suspense>
           }
         />

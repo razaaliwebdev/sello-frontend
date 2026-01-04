@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "@redux/config";
+import { api } from "./api";
 import {
   getAccessToken,
   clearTokens,
@@ -371,7 +372,6 @@ export const adminApi = createApi({
         try {
           await queryFulfilled;
           // Manually invalidate public API cache for blogs - this ensures client-side blog pages refresh immediately
-          const { api } = await import("./api");
           dispatch(api.util.invalidateTags(["Blog"]));
         } catch {
           // Error handling is done by the mutation itself
@@ -390,7 +390,6 @@ export const adminApi = createApi({
         try {
           await queryFulfilled;
           // Manually invalidate public API cache for blogs - this ensures client-side blog pages refresh immediately
-          const { api } = await import("./api");
           dispatch(api.util.invalidateTags(["Blog"]));
         } catch {
           // Error handling is done by the mutation itself
@@ -408,7 +407,6 @@ export const adminApi = createApi({
         try {
           await queryFulfilled;
           // Manually invalidate public API cache for blogs using store
-          const { api } = await import("./api");
           dispatch(api.util.invalidateTags(["Blog"]));
         } catch {
           // Error handling is done by the mutation itself

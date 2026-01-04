@@ -159,15 +159,12 @@ const LocationPickerModal = ({
 
     try {
       // Try OpenStreetMap Nominatim first
-      console.log("Searching for:", query);
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           query
         )}&limit=5&addressdetails=1`
       );
-      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Search results:", data);
 
       if (data && data.length > 0) {
         const results = data.map((item) => ({ ...item }));
@@ -268,9 +265,7 @@ const LocationPickerModal = ({
 
   // Handle search result selection
   const handleSelectResult = (result) => {
-    console.log("Selected result:", result);
     const location = { lat: result.lat, lng: result.lon };
-    console.log("Created location object:", location);
     setSelectedLocation(location);
     setMapCenter([result.lat, result.lon]);
     setMapZoom(15);

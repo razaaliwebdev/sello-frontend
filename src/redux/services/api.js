@@ -265,36 +265,26 @@ export const api = createApi({
         body: emailData,
       }),
     }),
-    verifyOtp: builder.mutation({
-      query: (otp) => {
-        const email = localStorage.getItem("email");
-        return {
-          url: "/auth/verify-otp",
-          method: "POST",
-          body: { otp },
-          headers: { email },
-        };
-      },
-      transformResponse: (response) => {
-        return response?.data || response;
-      },
+    verifyOTP: builder.mutation({
+      query: (data) => ({
+        url: "/auth/verify-otp",
+        method: "POST",
+        body: data, // Send email and otp in body
+      }),
+    }),
+    resendOTP: builder.mutation({
+      query: (emailData) => ({
+        url: "/auth/resend-otp",
+        method: "POST",
+        body: emailData,
+      }),
     }),
     resetPassword: builder.mutation({
-      query: ({ password }) => {
-        const email = localStorage.getItem("email");
-        return {
-          url: "/auth/reset-password",
-          method: "POST",
-          body: { newPassword: password },
-          headers: {
-            email,
-            "Content-Type": "application/json",
-          },
-        };
-      },
-      transformResponse: (response) => {
-        return response?.data || response;
-      },
+      query: (data) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: data, // Send email and password in body
+      }),
     }),
     getMe: builder.query({
       query: () => ({
@@ -996,7 +986,8 @@ export const {
   useLoginUserMutation,
   useGoogleLoginMutation,
   useForgotPasswordMutation,
-  useVerifyOtpMutation,
+  useVerifyOTPMutation,
+  useResendOTPMutation,
   useResetPasswordMutation,
   useGetMeQuery,
   useUpdateProfileMutation,

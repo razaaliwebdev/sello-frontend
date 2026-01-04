@@ -300,7 +300,7 @@ const HeroFilter = () => {
           <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row">
             {/* Left Section - Orange Background with Filters */}
             <div className="bg-primary-500 p-4 flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 md:gap-20 gap-3">
                 {/* Vehicle Type Filter */}
                 <FilterSelect
                   label="Vehicle Type"
@@ -470,7 +470,7 @@ const FilterSelect = ({
       {label}
     </label>
     <select
-      className="w-full h-9 px-3 rounded-md bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      className="md:w-[170px] sm:full w-full h-9 px-3 rounded-md bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
