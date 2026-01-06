@@ -4,7 +4,7 @@ import { images } from "../../assets/assets";
 
 const ReviewSectionInUser = () => {
   return (
-    <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
       <div className="reviews h-auto md:h-[60vh] w-full rounded-tr-[60px] rounded-bl-[60px] bg-primary md:py-0 py-12">
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-7 gap-4 md:gap-0">

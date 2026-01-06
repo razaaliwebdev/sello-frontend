@@ -14,7 +14,7 @@ const UserListingPage = () => {
   return (
     <div>
       <UserListingHero />
-      <div className="py-5 px-10">
+      <div className="py-5 px-3 sm:px-4 md:px-6 lg:px-8">
         <div className=" flex items-center justify-between w-full">
           <h2 className="md:text-3xl text-xl font-semibold">
             Explore Our Premium Brands
@@ -33,7 +33,9 @@ const UserListingPage = () => {
       <BannerInUesrListings />
       <Ads />
       <ReviewSectionInUser />
-      <ContactMap />
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
+        <ContactMap />
+      </div>
       <NewsLatter />
     </div>
   );

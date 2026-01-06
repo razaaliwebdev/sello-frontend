@@ -10,7 +10,7 @@ const InpirationSectoin = () => {
     "Diesel",
   ];
   return (
-    <div className="px-4 md:px-16 py-8 bg-[#F5F5F5]">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-8 bg-[#F5F5F5]">
       <h1 className="md:text-4xl text-2xl font-medium">
         Need Some Inspiration?
       </h1>

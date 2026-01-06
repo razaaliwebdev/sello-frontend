@@ -264,7 +264,7 @@ const GetAllCarsSection = () => {
   // Show skeleton loaders while loading
   if (isLoading) {
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+      <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
         <h1 className="md:text-4xl text-2xl font-medium mb-8">
           Explore All Vehicles
         </h1>
@@ -277,7 +277,7 @@ const GetAllCarsSection = () => {
     );
   }
 
-  if (error) {
+  if (error && carsData && carsData.length > 0) {
     // Extract error message from RTK Query error structure
     const errorMessage =
       error?.data?.message ||
@@ -286,7 +286,7 @@ const GetAllCarsSection = () => {
       "Unknown error occurred";
 
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+      <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
         <div className="text-center">
           <h2 className="text-xl text-red-500 mb-4">Error loading cars</h2>
           <p className="text-gray-600 mb-4">{errorMessage}</p>
@@ -302,7 +302,7 @@ const GetAllCarsSection = () => {
   }
 
   return (
-    <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
       <div>
         <h1 className="md:text-4xl text-2xl font-medium">
           Explore All Vehicles

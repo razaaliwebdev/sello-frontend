@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { images } from "../../../assets/assets";
@@ -12,7 +11,7 @@ const BannerInFilter = () => {
   const isCreatePostPage = location.pathname === "/create-post";
 
   return (
-    <div className="my-10 px-4">
+    <div className="my-10">
       <div
         className={`w-full rounded-tl-[40px] rounded-br-[40px] flex flex-col md:flex-row items-center justify-between py-4 px-6 md:px-12 bg-primary-500
         `}

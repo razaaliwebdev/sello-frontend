@@ -4,7 +4,10 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { buildCarUrl } from "../../utils/urlBuilders";
-import { useGetMyCarsQuery, useRelistCarMutation } from "../../redux/services/api";
+import {
+  useGetMyCarsQuery,
+  useRelistCarMutation,
+} from "../../redux/services/api";
 import LazyImage from "../../components/common/LazyImage";
 import { images } from "../../assets/assets";
 import toast from "react-hot-toast";
@@ -12,10 +15,13 @@ import BoostModal from "../listings/BoostModal";
 
 const UserListings = () => {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'sold', 'expired'
-  const { data, isLoading, error, refetch } = useGetMyCarsQuery(
-    statusFilter !== 'all' ? { status: statusFilter } : {}
-  );
+  const [statusFilter, _setStatusFilter] = useState("all"); // 'all', 'active', 'sold', 'expired'
+  const {
+    data,
+    isLoading,
+    error: listingsError,
+    refetch,
+  } = useGetMyCarsQuery(statusFilter !== "all" ? { status: statusFilter } : {});
   const [savedCars, setSavedCars] = useState([]);
   const [updatingCars, setUpdatingCars] = useState(new Set());
   const [boostModalOpen, setBoostModalOpen] = useState(false);
@@ -29,31 +35,41 @@ const UserListings = () => {
   };
 
   const handleMarkAsSold = async (car, isSold) => {
-    if (window.confirm(`Are you sure you want to mark this car as ${isSold ? 'sold' : 'available'}?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to mark this car as ${
+          isSold ? "sold" : "available"
+        }?`
+      )
+    ) {
       try {
-        setUpdatingCars(prev => new Set(prev).add(car._id));
+        setUpdatingCars((prev) => new Set(prev).add(car._id));
         const token = localStorage.getItem("token");
-        const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-        const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
+        const BASE_URL =
+          import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+        const API_URL = BASE_URL.endsWith("/api")
+          ? BASE_URL
+          : `${BASE_URL}/api`;
         const response = await fetch(`${API_URL}/cars/${car._id}/sold`, {
           method: "PUT",
           headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ isSold: !isSold })
+          body: JSON.stringify({ isSold: !isSold }),
         });
         const data = await response.json();
         if (data.success) {
-          toast.success(`Car marked as ${!isSold ? 'sold' : 'available'}`);
+          toast.success(`Car marked as ${!isSold ? "sold" : "available"}`);
           refetch();
         } else {
           toast.error(data.message || "Failed to update status");
         }
-      } catch (error) {
+      } catch (_error) {
+        console.error(_error);
         toast.error("Failed to update car status");
       } finally {
-        setUpdatingCars(prev => {
+        setUpdatingCars((prev) => {
           const newSet = new Set(prev);
           newSet.delete(car._id);
           return newSet;
@@ -64,16 +80,16 @@ const UserListings = () => {
 
   if (isLoading) {
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+      <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
         <h1 className="md:text-4xl text-2xl font-medium mb-8">My Listings</h1>
         <p>Loading your cars...</p>
       </section>
     );
   }
 
-  if (error) {
+  if (listingsError) {
     return (
-      <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+      <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
         <h1 className="md:text-4xl text-2xl font-medium mb-8">My Listings</h1>
         <p className="text-red-500">Error loading your listings</p>
       </section>
@@ -83,7 +99,7 @@ const UserListings = () => {
   const cars = Array.isArray(data?.cars) ? data.cars : [];
 
   return (
-    <section className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <section className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
       <h1 className="md:text-4xl text-2xl font-medium mb-8">My Listings</h1>
 
       {cars.length === 0 ? (
@@ -103,12 +119,14 @@ const UserListings = () => {
                 className="md:px-6 md:py-8 bg-[#D9D9D9] rounded-lg shadow-sm"
                 key={carId}
               >
-                  <div className="w-full h-full border border-gray-100 rounded-bl-2xl rounded-br-2xl md:pb-8 pb-14">
+                <div className="w-full h-full border border-gray-100 rounded-bl-2xl rounded-br-2xl md:pb-8 pb-14">
                   <div className="h-48 relative">
                     <LazyImage
                       src={carImage}
                       alt={`${carMake} ${carModel}`}
-                      className={`rounded-t-lg ${car?.isSold ? 'opacity-60' : ''}`}
+                      className={`rounded-t-lg ${
+                        car?.isSold ? "opacity-60" : ""
+                      }`}
                       width="100%"
                       height="100%"
                     />
@@ -174,7 +192,14 @@ const UserListings = () => {
 
                     <div className="flex items-center justify-between py-4">
                       <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
-                        PKR <h5 className={`price ${car?.isSold ? 'line-through text-gray-500' : ''}`}>{carPrice}</h5>
+                        PKR{" "}
+                        <h5
+                          className={`price ${
+                            car?.isSold ? "line-through text-gray-500" : ""
+                          }`}
+                        >
+                          {carPrice}
+                        </h5>
                       </div>
                       <button
                         onClick={() => car && navigate(buildCarUrl(car))}
@@ -194,21 +219,26 @@ const UserListings = () => {
                             setBoostModalOpen(true);
                           }}
                           className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
-                            car?.isBoosted && new Date(car?.boostExpiry) > new Date()
+                            car?.isBoosted &&
+                            new Date(car?.boostExpiry) > new Date()
                               ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300"
                               : "bg-primary-100 text-primary-500 hover:bg-primary-200 border border-primary-300"
                           }`}
                         >
                           <FiZap size={16} />
-                          {car?.isBoosted && new Date(car?.boostExpiry) > new Date()
-                            ? `Boosted (${Math.ceil((new Date(car.boostExpiry) - new Date()) / (1000 * 60 * 60 * 24))}d left)`
+                          {car?.isBoosted &&
+                          new Date(car?.boostExpiry) > new Date()
+                            ? `Boosted (${Math.ceil(
+                                (new Date(car.boostExpiry) - new Date()) /
+                                  (1000 * 60 * 60 * 24)
+                              )}d left)`
                             : "Boost Listing"}
                         </button>
                       )}
-                      
+
                       {/* Action Buttons */}
                       <div className="flex items-center gap-2">
-                        <button 
+                        <button
                           onClick={() => navigate(`/edit-car/${car._id}`)}
                           disabled={car?.isSold}
                           className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -219,37 +249,46 @@ const UserListings = () => {
                         >
                           {car?.isSold ? "Edit Disabled" : "Edit"}
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleMarkAsSold(car, car?.isSold)}
                           disabled={updatingCars.has(car._id)}
                           className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                            car?.isSold 
-                              ? 'bg-green-500 hover:bg-green-600 text-white' 
-                              : 'bg-primary-500 hover:opacity-90 text-white'
+                            car?.isSold
+                              ? "bg-green-500 hover:bg-green-600 text-white"
+                              : "bg-primary-500 hover:opacity-90 text-white"
                           } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
-                          {updatingCars.has(car._id) 
-                            ? 'Updating...' 
-                            : car?.isSold 
-                              ? 'Mark as Available' 
-                              : 'Mark as Sold'}
+                          {updatingCars.has(car._id)
+                            ? "Updating..."
+                            : car?.isSold
+                            ? "Mark as Available"
+                            : "Mark as Sold"}
                         </button>
                       </div>
-                      
+
                       {/* Relist button for sold/expired listings */}
-                      {(car?.status === 'sold' || car?.status === 'expired') && (
+                      {(car?.status === "sold" ||
+                        car?.status === "expired") && (
                         <button
                           onClick={async () => {
-                            if (window.confirm('Relist this car? A new active listing will be created.')) {
+                            if (
+                              window.confirm(
+                                "Relist this car? A new active listing will be created."
+                              )
+                            ) {
                               try {
-                                setUpdatingCars(prev => new Set(prev).add(car._id));
+                                setUpdatingCars((prev) =>
+                                  new Set(prev).add(car._id)
+                                );
                                 await relistCar(car._id).unwrap();
-                                toast.success('Car relisted successfully!');
+                                toast.success("Car relisted successfully!");
                                 refetch();
                               } catch (error) {
-                                toast.error(error?.data?.message || 'Failed to relist car');
+                                toast.error(
+                                  error?.data?.message || "Failed to relist car"
+                                );
                               } finally {
-                                setUpdatingCars(prev => {
+                                setUpdatingCars((prev) => {
                                   const newSet = new Set(prev);
                                   newSet.delete(car._id);
                                   return newSet;
@@ -260,7 +299,9 @@ const UserListings = () => {
                           disabled={isRelisting || updatingCars.has(car?._id)}
                           className="w-full px-4 py-2 bg-primary-500 hover:opacity-90 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         >
-                          {isRelisting || updatingCars.has(car?._id) ? 'Relisting...' : 'Relist'}
+                          {isRelisting || updatingCars.has(car?._id)
+                            ? "Relisting..."
+                            : "Relist"}
                         </button>
                       )}
                     </div>

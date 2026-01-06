@@ -3,7 +3,7 @@ import { blogAssets } from "../../../assets/blogs/blogAssets";
 
 const BottomReviews = () => {
   return (
-    <div className="w-full">
+    <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-12">
       {/* Review 1 */}
       <div className="flex flex-col md:flex-row p-5 w-full gap-6 md:gap-10">
         {/* Image Section */}

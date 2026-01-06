@@ -3,7 +3,7 @@ import { categoriesBlogs } from "../../../assets/blogs/blogAssets";
 
 const BlogsCates = () => {
   return (
-    <div className="md:h-[50vh] w-full px-5 sm:px-8 md:px-10 py-5">
+    <div className="md:h-[50vh] w-full px-3 sm:px-4 md:px-6 lg:px-8 py-5">
       <div className="">
         <h2 className="text-2xl sm:text-3xl font-semibold">
           All Categories

@@ -50,7 +50,7 @@ const OutStorySection = () => {
   ];
 
   return (
-    <div className="py-20 md:py-28 px-6 md:px-10 lg:px-16 w-full bg-gradient-to-b from-white via-gray-50 to-white">
+    <div className="py-20 md:py-28 px-3 sm:px-4 md:px-6 lg:px-8 w-full bg-white">
       {/* Our Story */}
       <div
         ref={storyRef}
@@ -67,11 +67,11 @@ const OutStorySection = () => {
               Our Journey
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight bg-gradient-to-r from-gray-900 via-primary-500 to-gray-700 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900">
             {ourStoryData.title}
           </h2>
           <div className="flex items-center gap-3">
-            <div className="w-24 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
+            <div className="w-24 h-1.5 bg-primary-500 rounded-full"></div>
             <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
           </div>
           <p className="text-base md:text-lg lg:text-xl mt-8 leading-relaxed text-gray-700 font-medium">
@@ -130,11 +130,11 @@ const OutStorySection = () => {
               Our Group
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight bg-gradient-to-r from-gray-900 via-primary-500 to-gray-700 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900">
             {selloGroupData.title}
           </h2>
           <div className="flex items-center gap-3">
-            <div className="w-24 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
+            <div className="w-24 h-1.5 bg-primary-500 rounded-full"></div>
             <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
           </div>
           <p className="text-base md:text-lg lg:text-xl mt-8 leading-relaxed text-gray-700 font-medium">

@@ -135,16 +135,20 @@ const SupportChatbot = () => {
     const getUserNameFromChat = (chat) => {
         if (!chat) return "Unknown User";
         
+        // Priority 0: Check if backend already identified the customer (most reliable)
+        if (chat.customerName && chat.customerName !== "Unknown User") {
+            return chat.customerName;
+        }
+
         const chatId = chat._id?.toString() || String(chat._id);
         const isSelectedChat = chatId === selectedChatId?.toString() || chatId === selectedChatId;
         
-        // Method 1: Check stored user name from messages (most reliable - cached)
+        // Method 1: Check stored user name from messages (cached)
         if (chatId && chatUserNames[chatId]) {
             return chatUserNames[chatId];
         }
         
-        // Method 2: PRIORITY - Get user name from messages if this is the selected chat
-        // This is the most reliable since messages always have sender populated
+        // Method 2: Get user name from messages if this is the selected chat
         if (isSelectedChat && messages && Array.isArray(messages) && messages.length > 0) {
             // Find first non-admin, non-bot message to get user name
             for (const msg of messages) {
@@ -181,19 +185,16 @@ const SupportChatbot = () => {
         
         // Method 3: Check participants array (if populated with objects)
         if (Array.isArray(chat.participants) && chat.participants.length > 0) {
-            // Find non-admin participant - try multiple strategies
+            // Find non-admin participant
             let userParticipant = null;
             
             // Strategy 1: Find by role (most reliable)
             userParticipant = chat.participants.find(p => {
-                        if (typeof p === 'object' && p !== null) {
-                    // Check if it has role and it's not admin
-                    if (p.role && p.role !== 'admin') {
-                        return true;
-                            }
-                        }
-                        return false;
-                    });
+                if (typeof p === 'object' && p !== null) {
+                    return p.role && p.role !== 'admin';
+                }
+                return false;
+            });
             
             // Strategy 2: If no role found, compare IDs with current admin
             if (!userParticipant && currentUser?._id) {
@@ -207,7 +208,7 @@ const SupportChatbot = () => {
                 });
             }
             
-            // Strategy 3: If still not found, get first participant that has a name and is not the admin
+            // Strategy 3: Get first participant that has a name and is not the admin
             if (!userParticipant) {
                 for (const p of chat.participants) {
                     if (typeof p === 'object' && p !== null && p.name) {
@@ -216,8 +217,8 @@ const SupportChatbot = () => {
                             const participantId = p._id?.toString() || String(p._id);
                             const adminId = currentUser._id?.toString() || String(currentUser._id);
                             if (participantId === adminId) {
-                            continue; // Skip admin
-                        }
+                                continue; // Skip admin
+                            }
                         }
                         userParticipant = p;
                         break;
@@ -228,42 +229,61 @@ const SupportChatbot = () => {
             // If we found a user participant with a name, use it
             if (userParticipant?.name) {
                 const userName = userParticipant.name;
-                        // Store it for future use
+                // Store it for future use
                 if (chatId) {
                     setChatUserNames(prev => ({ ...prev, [chatId]: userName }));
                 }
                 return userName;
             }
         }
-        
+
         // Method 4: Check direct user fields (legacy support)
-        if (chat.user) {
-            if (typeof chat.user === 'object' && chat.user?.name) {
-                if (chat._id) {
-                    setChatUserNames(prev => ({ ...prev, [chat._id]: chat.user.name }));
-                }
-                return chat.user.name;
-            }
-        }
+        if (chat.user && typeof chat.user === 'object' && chat.user.name) return chat.user.name;
+        if (chat.userId && typeof chat.userId === 'object' && chat.userId.name) return chat.userId.name;
+        if (chat.userName && typeof chat.userName === 'string') return chat.userName;
         
-        if (chat.userId) {
-            if (typeof chat.userId === 'object' && chat.userId?.name) {
-                if (chat._id) {
-                    setChatUserNames(prev => ({ ...prev, [chat._id]: chat.userId.name }));
-                }
-                return chat.userId.name;
-            }
-        }
-        
-        if (chat.userName && typeof chat.userName === 'string') {
-            if (chat._id) {
-                setChatUserNames(prev => ({ ...prev, [chat._id]: chat.userName }));
-            }
-            return chat.userName;
-        }
-        
-        // If still unknown, return unknown (will be updated when messages load)
         return "Unknown User";
+    };
+
+    // Helper function to get user avatar from chat
+    const getUserAvatarFromChat = (chat) => {
+        if (!chat) return null;
+
+        const chatId = chat._id?.toString() || String(chat._id);
+
+        // Method 1: Check chat.user (populated by backend helper)
+        if (chat.user && chat.user.avatar) {
+            return chat.user.avatar;
+        }
+
+        // Method 2: Check participants array
+        if (Array.isArray(chat.participants) && chat.participants.length > 0) {
+            // Strategy 1: Find by role
+            const userParticipant = chat.participants.find(p => {
+                if (typeof p === 'object' && p !== null) {
+                    return p.role && p.role !== 'admin';
+                }
+                return false;
+            });
+
+            if (userParticipant?.avatar) return userParticipant.avatar;
+
+            // Strategy 2: First non-admin participant (by ID)
+            if (currentUser?._id) {
+                const participant = chat.participants.find(p => {
+                    if (typeof p === 'object' && p !== null && p._id) {
+                        return p._id.toString() !== currentUser._id.toString();
+                    }
+                    return false;
+                });
+                if (participant?.avatar) return participant.avatar;
+            }
+        }
+
+        // Method 3: Check messages for sender avatar (if available in cached state or messages list)
+        // This is tricky as we don't cache avatars separately, but maybe we should rely on chat.user mainly.
+        
+        return null; 
     };
 
     // Initialize Socket.IO
@@ -827,16 +847,26 @@ const SupportChatbot = () => {
                                                     }`}
                                                 >
                                                     <div className="flex items-start gap-3">
-                                                        <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 relative">
-                                                            <span className="text-base font-semibold text-primary-500">
-                                                                {getUserNameFromChat(chat).charAt(0).toUpperCase()}
-                                                            </span>
-                                                            {chat.unreadCount > 0 && (
-                                                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                                                    {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
-                                                                </span>
-                                                            )}
+                                                    <div className="relative">
+                                                        <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                            {(() => {
+                                                                const avatar = getUserAvatarFromChat(chat);
+                                                                if (avatar) {
+                                                                    return <img src={avatar} alt="User" className="w-full h-full object-cover" />;
+                                                                }
+                                                                return (
+                                                                    <span className="text-base font-semibold text-primary-500">
+                                                                        {getUserNameFromChat(chat).charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                );
+                                                            })()}
                                                         </div>
+                                                        {chat.unreadCount > 0 && (
+                                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+                                                                {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between mb-1">
                                                                 <p className="text-sm font-semibold text-gray-900 truncate">
@@ -901,20 +931,44 @@ const SupportChatbot = () => {
                                     <div className="p-4 border-b border-gray-200 bg-gray-50">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center relative">
-                                                    <span className="text-lg font-bold text-primary-500">
-                                                        {(() => {
-                                                            const selectedChat = chats.find((c) => c._id === selectedChatId || c._id?.toString() === selectedChatId?.toString());
-                                                            const userName = getUserNameFromChat(selectedChat);
-                                                            return userName.charAt(0).toUpperCase();
-                                                        })()}
-                                                    </span>
-                                                    <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary-500 border-2 border-white"></div>
-                                                </div>
+                                                    <div className="relative">
+                                                        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
+                                                            {(() => {
+                                                                const selectedChat = chats.find((c) => c._id === selectedChatId || c._id?.toString() === selectedChatId?.toString());
+                                                                
+                                                                if (!selectedChat) {
+                                                                    const cachedName = chatUserNames[selectedChatId];
+                                                                    return (
+                                                                        <span className="text-lg font-bold text-primary-500">
+                                                                            {cachedName ? cachedName.charAt(0).toUpperCase() : 'U'}
+                                                                        </span>
+                                                                    );
+                                                                }
+
+                                                                const avatar = getUserAvatarFromChat(selectedChat);
+                                                                if (avatar) {
+                                                                    return <img src={avatar} alt="User" className="w-full h-full object-cover" />;
+                                                                }
+
+                                                                const userName = getUserNameFromChat(selectedChat);
+                                                                return (
+                                                                    <span className="text-lg font-bold text-primary-500">
+                                                                        {userName.charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary-500 border-2 border-white"></div>
+                                                    </div>
                                                 <div>
                                                     <p className="text-base font-semibold text-gray-900">
                                                         {(() => {
                                                             const selectedChat = chats.find((c) => c._id === selectedChatId || c._id?.toString() === selectedChatId?.toString());
+                                                            // If chat not found in list, try to get name from chatUserNames directly
+                                                            if (!selectedChat) {
+                                                                if (chatUserNames[selectedChatId]) return chatUserNames[selectedChatId];
+                                                                return "Unknown User";
+                                                            }
                                                             return getUserNameFromChat(selectedChat);
                                                         })()}
                                                     </p>

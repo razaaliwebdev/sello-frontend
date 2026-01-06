@@ -5,7 +5,7 @@ import { FaArrowRight } from "react-icons/fa6";
 
 const PartnerOffersSection = () => {
   return (
-    <div className="px-4 md:px-20 py-12 bg-white">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-white">
       {/* Exclusive Partner Offers */}
       <div className="mb-12">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
@@ -62,8 +62,7 @@ const PartnerOffersSection = () => {
           Expert advice and opinion – as seen, heard and read here (and many
           other places as well!):
         </h2>
-       <div className="flex items-center gap-10">
-
+        <div className="flex items-center gap-10">
           <div className="partenerLogo h-50 w-45">
             <img src={images.servicoLogo} alt="Partener Logo" className="" />
           </div>
@@ -73,28 +72,26 @@ const PartnerOffersSection = () => {
           </div>
 
           <div className="partenerLogo h-50 w-45">
-            <img src={images.wbDigitalLogo} alt="Partener Logo" className="w-full h-full object-cover" />
+            <img
+              src={images.wbDigitalLogo}
+              alt="Partener Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-
-          
-       </div>
+        </div>
       </div>
 
       {/* Sell Your Car Section */}
       <div>
-        
-
-            <div className="btn w-full items-center justify-center">
-                <button className="px-6 py-2 flex items-center text-lg font-semibold hover:opacity-90 gap-2 bg-primary rounded mx-auto">
-                    <img src={images.electricSvg3} alt="electricSvg" className="h-14" />
-                  Sell your car <FaArrowRight /></button>
-              </div>  
-          
-         
+        <div className="btn w-full items-center justify-center">
+          <button className="px-6 py-2 flex items-center text-lg font-semibold hover:opacity-90 gap-2 bg-primary rounded mx-auto">
+            <img src={images.electricSvg3} alt="electricSvg" className="h-14" />
+            Sell your car <FaArrowRight />
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default PartnerOffersSection;
-

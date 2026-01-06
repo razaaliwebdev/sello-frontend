@@ -9,6 +9,7 @@ import BlogsHeroSection from "../../components/sections/blogs/BlogsHeroSection";
 import SEO from "../../components/common/SEO";
 import Spinner from "../../components/Spinner";
 import { buildBlogUrl } from "../../utils/urlBuilders";
+import BlogCommentsSection from "../../components/sections/blogs/BlogCommentsSection";
 
 const BlogDetails = () => {
   const { id } = useParams();
@@ -365,6 +366,9 @@ const BlogDetails = () => {
             ← Back to all blogs
           </Link>
         </div>
+
+        {/* Comments Section */}
+        {blog && <BlogCommentsSection blogId={blog._id} />}
       </div>
     </div>
   );

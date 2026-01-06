@@ -9,7 +9,7 @@ const UserListingHero = () => {
   return (
     <div className="md:h-[80vh] bg-primary flex flex-col md:flex-row items-center justify-between">
       {/* Left Section */}
-      <div className="w-full md:w-[60%] flex items-center px-6 md:px-20 py-10 md:py-0">
+      <div className="w-full md:w-[60%] flex items-center px-3 sm:px-4 md:px-6 lg:px-8 py-10 md:py-0">
         <div>
           <h1 className="text-2xl md:text-5xl font-bold mb-8 md:mb-14">
             Your Listings

@@ -10,7 +10,7 @@ import Ads from "../../components/utils/Ads";
 
 const CarListings = () => {
   return (
-    <div>
+    <div className="w-full">
       <ListingHeroSection />
       <BrowsByTypeSection />
       <GetAllCarsSection />

@@ -59,7 +59,7 @@ import { GoArrowUpRight } from "react-icons/go";
 
 const BannerInUesrListings = () => {
   return (
-    <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
       <div className="w-full h-auto md:h-[55vh] flex flex-col justify-around mb-16 bg-primary rounded-tr-[60px] rounded-bl-[60px] p-7">
         {/* Top Section */}
         <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-0">

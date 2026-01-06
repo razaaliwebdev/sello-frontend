@@ -2,11 +2,19 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetFilteredCarsQuery } from "../../../redux/services/api";
 import { images } from "../../../assets/assets";
-import { IoIosArrowRoundUp, IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import {
+  IoIosArrowRoundUp,
+  IoIosArrowBack,
+  IoIosArrowForward,
+} from "react-icons/io";
 import { FiStar, FiZap } from "react-icons/fi";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import LazyImage from "../../common/LazyImage";
-import { useSaveCarMutation, useUnsaveCarMutation, useGetSavedCarsQuery } from "../../../redux/services/api";
+import {
+  useSaveCarMutation,
+  useUnsaveCarMutation,
+  useGetSavedCarsQuery,
+} from "../../../redux/services/api";
 import toast from "react-hot-toast";
 import { buildCarUrl } from "../../../utils/urlBuilders";
 
@@ -15,7 +23,7 @@ const FeaturedCarsCarousel = () => {
   const sliderRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const token = localStorage.getItem("token");
-  
+
   // Fetch featured cars
   const { data: carsData, isLoading } = useGetFilteredCarsQuery({
     page: 1,
@@ -33,7 +41,7 @@ const FeaturedCarsCarousel = () => {
   // Extract saved car IDs
   const savedCars = React.useMemo(() => {
     if (!savedCarsData || !Array.isArray(savedCarsData)) return [];
-    return savedCarsData.map(car => car._id || car.id).filter(Boolean);
+    return savedCarsData.map((car) => car._id || car.id).filter(Boolean);
   }, [savedCarsData]);
 
   // Filter featured cars
@@ -60,7 +68,7 @@ const FeaturedCarsCarousel = () => {
   // Auto-scroll carousel
   useEffect(() => {
     if (featuredCars.length <= 1) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % featuredCars.length);
     }, 5000); // Change slide every 5 seconds
@@ -82,7 +90,9 @@ const FeaturedCarsCarousel = () => {
   }, [currentIndex]);
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + featuredCars.length) % featuredCars.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + featuredCars.length) % featuredCars.length
+    );
   };
 
   const handleNext = () => {
@@ -117,23 +127,24 @@ const FeaturedCarsCarousel = () => {
         <div className="absolute inset-0">
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary-500/90 via-primary-400/95 to-primary-500/90"></div>
-          
+
           {/* Subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.15]">
-            <div 
+            <div
               className="w-full h-full"
               style={{
-                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px)'
+                backgroundImage:
+                  "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px)",
               }}
             ></div>
           </div>
-          
+
           {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full -ml-40 -mb-40 blur-3xl"></div>
         </div>
 
-        <div className="container mx-auto px-4 md:px-16 relative z-10">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>
@@ -152,33 +163,33 @@ const FeaturedCarsCarousel = () => {
       <div className="absolute inset-0">
         {/* Main gradient overlay for depth */}
         <div className="absolute inset-0"></div>
-        
+
         {/* Subtle diagonal stripe pattern - Flag style */}
         <div className="absolute inset-0 opacity-[0.12]">
-          <div 
-            className="w-full h-full"
-          ></div>
+          <div className="w-full h-full"></div>
         </div>
-        
+
         {/* Soft circular decorative elements with blur */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/15 rounded-full -mr-48 -mt-48 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/15 rounded-full -ml-48 -mb-48 blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-white/10 rounded-full blur-3xl"></div>
-        
+
         {/* Wave effect at bottom */}
-        <div 
+        <div
           className="absolute bottom-0 left-0 right-0 h-40 opacity-20"
           style={{
-            background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.4) 100%)'
+            background:
+              "linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.4) 100%)",
           }}
         ></div>
-        
+
         {/* Additional subtle texture */}
-        <div 
+        <div
           className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.5) 1px, transparent 0)',
-            backgroundSize: '40px 40px'
+            backgroundImage:
+              "radial-gradient(circle at 2px 2px, rgba(255,255,255,0.5) 1px, transparent 0)",
+            backgroundSize: "40px 40px",
           }}
         ></div>
       </div>
@@ -268,7 +279,9 @@ const FeaturedCarsCarousel = () => {
 
                     {/* Vehicle Type Badge */}
                     <div className="absolute top-0 right-0 z-20 bg-primary-500 px-3 py-2 rounded-bl-lg shadow-lg">
-                      <span className="font-semibold text-xs">{carVehicleType}</span>
+                      <span className="font-semibold text-xs">
+                        {carVehicleType}
+                      </span>
                     </div>
 
                     {/* Car Image */}
@@ -282,12 +295,13 @@ const FeaturedCarsCarousel = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
                       {/* Boost Badge */}
-                      {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && (
-                        <div className="absolute bottom-2 left-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg">
-                          <FiZap size={12} />
-                          BOOSTED
-                        </div>
-                      )}
+                      {car?.isBoosted &&
+                        new Date(car?.boostExpiry) > new Date() && (
+                          <div className="absolute bottom-2 left-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg">
+                            <FiZap size={12} />
+                            BOOSTED
+                          </div>
+                        )}
 
                       {/* Save Button */}
                       <button
@@ -367,18 +381,20 @@ const FeaturedCarsCarousel = () => {
           {/* Carousel Indicators */}
           {featuredCars.length > 1 && (
             <div className="flex justify-center gap-2 mt-6">
-              {featuredCars.slice(0, Math.min(5, featuredCars.length)).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentIndex
-                      ? "bg-white w-8"
-                      : "bg-white/50 w-2 hover:bg-white/75"
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
+              {featuredCars
+                .slice(0, Math.min(5, featuredCars.length))
+                .map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentIndex
+                        ? "bg-white w-8"
+                        : "bg-white/50 w-2 hover:bg-white/75"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -398,4 +414,3 @@ const FeaturedCarsCarousel = () => {
 };
 
 export default FeaturedCarsCarousel;
-

@@ -42,6 +42,8 @@ const CreatePostForm = () => {
   const [availableModels, setAvailableModels] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
   const [availableCities, setAvailableCities] = useState([]);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -252,49 +254,8 @@ const CreatePostForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Early validation - check images first (most common issue)
-    if (!formData.images || formData.images.length === 0) {
-      toast.error("Please upload at least one car image");
-      return;
-    }
-
-    // Validate required fields dynamically based on vehicle type
-    const requiredFields = getRequiredFields(formData.vehicleType);
-
-    const missing = requiredFields.filter((key) => {
-      const value = formData[key];
-      return !value || (typeof value === "string" && value.trim() === "");
-    });
-
-    if (missing.length) {
-      toast.error(`Missing required fields: ${missing.join(", ")}`);
-      return;
-    }
-
-    // Validate price
-    const priceNum = parseFloat(formData.price);
-    if (isNaN(priceNum) || priceNum <= 0) {
-      toast.error("Please enter a valid price (must be greater than 0)");
-      return;
-    }
-
-    // Validate year
-    const currentYear = new Date().getFullYear();
-    const yearNum = parseInt(formData.year);
-    if (isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear + 1) {
-      toast.error(`Year must be between 1900 and ${currentYear + 1}`);
-      return;
-    }
-
-    // Validate contact number
-    if (!/^\+?\d{9,15}$/.test(formData.contactNumber)) {
-      toast.error("Invalid contact number. Must be 9-15 digits.");
-      return;
-    }
-    // geoLocation is optional - use default if not provided
+  const prepareFormData = () => {
+    // geolocation logic
     let parsedGeoLocation = null;
     if (formData.geoLocation) {
       try {
@@ -307,11 +268,9 @@ const CreatePostForm = () => {
           parsedGeoLocation = JSON.parse(formData.geoLocation);
         }
       } catch {
-        // Invalid format, will use default
         parsedGeoLocation = null;
       }
 
-      // Validate format if provided
       if (
         parsedGeoLocation &&
         (!Array.isArray(parsedGeoLocation) ||
@@ -321,12 +280,10 @@ const CreatePostForm = () => {
           Number.isNaN(Number(parsedGeoLocation[0])) ||
           Number.isNaN(Number(parsedGeoLocation[1])))
       ) {
-        // Invalid format, use default
         parsedGeoLocation = null;
       }
     }
 
-    // Use default location (Lahore, Pakistan) if not provided
     if (!parsedGeoLocation) {
       parsedGeoLocation = [74.3587, 31.5204]; // [longitude, latitude] for Lahore, Pakistan
     }
@@ -498,6 +455,123 @@ const CreatePostForm = () => {
       }
     });
 
+    return data;
+  };
+
+  const handleForceCreate = async () => {
+    try {
+      const data = prepareFormData();
+      // Send force=true param
+      const res = await createCar({
+        formData: data,
+        params: { force: true },
+      }).unwrap();
+
+      if (res.message && res.message.includes("upgraded")) {
+        toast.success(res.message, { duration: 5000 });
+      } else {
+        toast.success("Car post created successfully!");
+      }
+
+      if (res.data?.user) {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        if (currentUser) {
+          currentUser.role = res.data.user.role;
+          localStorage.setItem("user", JSON.stringify(currentUser));
+        }
+      }
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        vehicleType: "Car",
+        vehicleTypeCategory: "",
+        make: "",
+        model: "",
+        variant: "",
+        year: "",
+        condition: "",
+        price: "",
+        colorExterior: "",
+        colorInterior: "",
+        fuelType: "",
+        engineCapacity: "",
+        transmission: "",
+        mileage: "",
+        features: [],
+        regionalSpec: "",
+        bodyType: "",
+        country: "",
+        city: "",
+        location: "",
+        sellerType: "",
+        carDoors: "",
+        contactNumber: "",
+        geoLocation: "",
+        horsepower: "",
+        warranty: "",
+        numberOfCylinders: "",
+        ownerType: "",
+        batteryRange: "",
+        motorPower: "",
+        images: [],
+      });
+      setAvailableModels([]);
+      setAvailableYears([]);
+      setAvailableCities([]);
+      setShowDuplicateWarning(false);
+      setDuplicateInfo(null);
+      navigate(`/my-listings`);
+    } catch (err) {
+      toast.error(err?.data?.message || err?.message || "Failed to create post");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Early validation - check images first (most common issue)
+    if (!formData.images || formData.images.length === 0) {
+      toast.error("Please upload at least one car image");
+      return;
+    }
+
+    // Validate required fields dynamically based on vehicle type
+    const requiredFields = getRequiredFields(formData.vehicleType);
+
+    const missing = requiredFields.filter((key) => {
+      const value = formData[key];
+      return !value || (typeof value === "string" && value.trim() === "");
+    });
+
+    if (missing.length) {
+      toast.error(`Missing required fields: ${missing.join(", ")}`);
+      return;
+    }
+
+    // Validate price
+    const priceNum = parseFloat(formData.price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      toast.error("Please enter a valid price (must be greater than 0)");
+      return;
+    }
+
+    // Validate year
+    const currentYear = new Date().getFullYear();
+    const yearNum = parseInt(formData.year);
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear + 1) {
+      toast.error(`Year must be between 1900 and ${currentYear + 1}`);
+      return;
+    }
+
+    // Validate contact number
+    if (!/^\+?\d{9,15}$/.test(formData.contactNumber)) {
+      toast.error("Invalid contact number. Must be 9-15 digits.");
+      return;
+    }
+    const data = prepareFormData();
+
     try {
       const res = await createCar(data).unwrap();
 
@@ -560,6 +634,14 @@ const CreatePostForm = () => {
       const errorMessage =
         err?.data?.message || err?.message || "Failed to create car post";
 
+      // Handle duplicate warning (409 Conflict)
+      if (err.status === 409 && err.data?.duplicateWarning) {
+        setDuplicateInfo(err.data);
+        setShowDuplicateWarning(true);
+        // Don't show toast for warning, let modal handle it
+        return;
+      }
+
       // Provide more specific error messages
       if (errorMessage.includes("validation")) {
         toast.error("Please check all required fields and try again");
@@ -583,17 +665,69 @@ const CreatePostForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="px-4 md:px-20 py-8 md:py-10"
+      className="py-8 md:py-10"
       encType="multipart/form-data"
     >
       <h1 className="text-center md:text-3xl font-semibold">Create Post</h1>
+
+      {/* Duplicate Warning Modal */}
+      {showDuplicateWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Similar Listing Found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {duplicateInfo?.message ||
+                "It looks like you have already posted a similar listing recently."}
+            </p>
+
+            {duplicateInfo?.similarListings?.length > 0 && (
+              <div className="mb-4 bg-gray-50 p-3 rounded">
+                <p className="text-xs font-semibold text-gray-500 mb-1">
+                  EXISTING LISTING:
+                </p>
+                {duplicateInfo.similarListings.map((listing) => (
+                  <div key={listing._id} className="text-sm">
+                    <span className="font-medium text-gray-900">
+                      {listing.title}
+                    </span>
+                    <span className="text-gray-500 mx-1">•</span>
+                    <span className="text-primary-600 font-medium">
+                      PKR {listing.price?.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                type="button"
+                onClick={() => setShowDuplicateWarning(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleForceCreate}
+                disabled={isLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                {isLoading ? "Creating..." : "Post Anyway"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Vehicle Type Selection - Top of Form */}
       <div className="mb-6">
         <label className="block mb-3 text-center font-medium">
           Vehicle Type *
         </label>
-        <div className="flex justify-center gap-4 flex-wrap">
+        <div className="flex justify-center gap-3 flex-wrap">
           {["Car", "Bus", "Truck", "Van", "Bike", "E-bike"].map((type) => (
             <button
               key={type}
@@ -607,24 +741,8 @@ const CreatePostForm = () => {
                 // Clear fields that are not visible for the new vehicle type
                 if (!isFieldVisible(newVehicleType, "bodyType")) {
                   handleChange("bodyType", "");
-                }
-                if (!isFieldVisible(newVehicleType, "cylinders")) {
-                  handleChange("numberOfCylinders", "");
-                }
-                if (!isFieldVisible(newVehicleType, "doors")) {
-                  handleChange("carDoors", "");
-                }
-                if (!isFieldVisible(newVehicleType, "horsepower")) {
-                  handleChange("horsepower", "");
-                }
-                if (!isFieldVisible(newVehicleType, "engineCapacity")) {
-                  handleChange("engineCapacity", "");
-                }
-                if (!isFieldVisible(newVehicleType, "batteryRange")) {
-                  handleChange("batteryRange", "");
-                }
-                if (!isFieldVisible(newVehicleType, "motorPower")) {
-                  handleChange("motorPower", "");
+                  setAvailableModels([]);
+                  setAvailableCities([]);
                 }
                 if (!isFieldVisible(newVehicleType, "fuelType")) {
                   handleChange("fuelType", "");
@@ -636,10 +754,10 @@ const CreatePostForm = () => {
                   handleChange("regionalSpec", "");
                 }
               }}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
+              className={`group relative px-5 py-1.5 rounded font-semibold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 ${
                 formData.vehicleType === type
-                  ? "bg-primary-500 text-white shadow-lg"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary-500 text-black shadow-lg shadow-primary-500/25 ring-2 ring-primary-500 ring-offset-2"
+                  : "bg-white text-gray-700 border-2 border-gray-200 hover:border-primary-500 hover:shadow-md hover:bg-primary-50"
               }`}
             >
               {type}
@@ -1049,11 +1167,11 @@ const CreatePostForm = () => {
           />
         </div>
 
-        <div>
+        <div className="p-6">
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-primary-500 text-white px-4 my-5 py-2 rounded hover:opacity-90 transition-colors w-full text-xl shadow-lg shadow-gray-400 font-semibold disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="bg-primary-500 text-white px-8 py-2 rounded-lg hover:bg-opacity-90 transition-colors w-full text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-md"
           >
             {isLoading && (
               <svg

@@ -21,7 +21,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#050B20] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 mx-auto py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 lg:gap-12 mb-16">
           {footerData.map((section, index) => (
@@ -76,8 +76,8 @@ const Footer = () => {
               </h4>
               <div className="space-y-3 text-sm text-gray-300">
                 <p>
-                  <span className="font-medium text-white">Address:</span>{" "}
-                  Sello Head Office, Gulberg, Lahore, Pakistan
+                  <span className="font-medium text-white">Address:</span> Sello
+                  Head Office, Gulberg, Lahore, Pakistan
                 </p>
                 <p>
                   <span className="font-medium text-white">Phone:</span>{" "}
@@ -94,7 +94,8 @@ const Footer = () => {
                     href="mailto:info@sello.ae"
                     className="hover:text-white transition-colors duration-200"
                   >
-                    {import.meta.env.VITE_SUPPORT_EMAIL || 'support@example.com'}
+                    {import.meta.env.VITE_SUPPORT_EMAIL ||
+                      "support@example.com"}
                   </a>
                 </p>
               </div>
@@ -213,34 +214,34 @@ const Footer = () => {
         </div>
 
         {/* Copyright & Legal */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/10 pt-8 pb-20 md:pb-24 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()}{" "}
+            &copy; {new Date().getFullYear()}{" "}
             <a
-              href={import.meta.env.VITE_SITE_URL || 'https://example.com'}
+              href={import.meta.env.VITE_SITE_URL || "https://sello.pk"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-500 hover:text-primary-400 transition-colors duration-200 font-medium"
             >
-              Sello.ae
+              Sello.pk
             </a>
             . All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm">
             <Link
               to="/terms-conditon"
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >
               Terms & Conditions
             </Link>
-            <span className="text-gray-600">•</span>
+            <span className="text-gray-600 hidden sm:inline">•</span>
             <Link
               to="/help-center"
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >
               Help Center
             </Link>
-            <span className="text-gray-600">•</span>
+            <span className="text-gray-600 hidden sm:inline">•</span>
             <Link
               to="/privacy-policy"
               className="text-gray-400 hover:text-white transition-colors duration-200"

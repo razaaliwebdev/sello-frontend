@@ -2,7 +2,7 @@ import React from "react";
 
 const NeedInspiration = () => {
   return (
-    <div className="bg-[#F5F5F5] px-4 md:px-16 py-12">
+    <div className="bg-[#F5F5F5] px-3 sm:px-4 md:px-6 lg:px-8 py-12">
       <h1 className="md:text-4xl text-2xl font-medium">
         Need Some Inspiration
       </h1>

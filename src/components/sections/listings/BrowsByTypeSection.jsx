@@ -6,20 +6,20 @@ import { FaShuttleVan } from "react-icons/fa";
 import BuySellCards from "../../utils/BuySellCards";
 
 const categoryIcons = {
-    Car: FaCar,
-    Bus: FaBus,
-    Truck: FaTruck,
-    Van: FaShuttleVan,
-    Bike: FaMotorcycle,
-    "E-bike": FaBolt,
+  Car: FaCar,
+  Bus: FaBus,
+  Truck: FaTruck,
+  Van: FaShuttleVan,
+  Bike: FaMotorcycle,
+  "E-bike": FaBolt,
 };
 
 const fallbackDescriptions = {
-  "Car": "Cars, sedans, SUVs, and other passenger vehicles",
-  "Bus": "Buses and commercial passenger vehicles",
-  "Truck": "Trucks and heavy-duty vehicles",
-  "Van": "Vans and utility vehicles",
-  "Bike": "Motorcycles and bikes",
+  Car: "Cars, sedans, SUVs, and other passenger vehicles",
+  Bus: "Buses and commercial passenger vehicles",
+  Truck: "Trucks and heavy-duty vehicles",
+  Van: "Vans and utility vehicles",
+  Bike: "Motorcycles and bikes",
   "E-bike": "Electric bikes and scooters",
 };
 
@@ -28,42 +28,43 @@ const BrowsByTypeSection = () => {
 
   // Default categories if none are loaded
   const defaultCategories = [
-    { 
-      name: "Car", 
+    {
+      name: "Car",
       slug: "car",
-      description: "Cars, sedans, SUVs, and other passenger vehicles"
+      description: "Cars, sedans, SUVs, and other passenger vehicles",
     },
-    { 
-      name: "Bus", 
+    {
+      name: "Bus",
       slug: "bus",
-      description: "Buses and commercial passenger vehicles"
+      description: "Buses and commercial passenger vehicles",
     },
-    { 
-      name: "Truck", 
+    {
+      name: "Truck",
       slug: "truck",
-      description: "Trucks and heavy-duty vehicles"
+      description: "Trucks and heavy-duty vehicles",
     },
-    { 
-      name: "Van", 
+    {
+      name: "Van",
       slug: "van",
-      description: "Vans and utility vehicles"
+      description: "Vans and utility vehicles",
     },
-    { 
-      name: "Bike", 
+    {
+      name: "Bike",
       slug: "bike",
-      description: "Motorcycles and bikes"
+      description: "Motorcycles and bikes",
     },
-    { 
-      name: "E-bike", 
+    {
+      name: "E-bike",
       slug: "e-bike",
-      description: "Electric bikes and scooters"
+      description: "Electric bikes and scooters",
     },
   ];
 
-  const displayCategories = categories.length > 0 ? categories : defaultCategories;
+  const displayCategories =
+    categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white py-12 px-4 md:px-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white py-12 px-3 sm:px-4 md:px-6 lg:px-8">
       {/* Section Header */}
       <div className="mb-10">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-2">
@@ -77,7 +78,8 @@ const BrowsByTypeSection = () => {
       {/* Categories Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 max-w-7xl mx-auto">
         {displayCategories.map((category) => {
-          const description = category.description || fallbackDescriptions[category.name];
+          const description =
+            category.description || fallbackDescriptions[category.name];
           const Icon = categoryIcons[category.name] || FaCar;
           return (
             <Link

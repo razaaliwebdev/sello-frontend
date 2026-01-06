@@ -267,8 +267,8 @@ const HeroFilter = () => {
   ];
 
   return (
-    <div className=" flex items-center md:w-[96%] justify-center">
-      <div className="w-full max-w-[95rem] mx-auto">
+    <div className="flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="w-full mx-auto">
         {/* Main Filter Container */}
         <div className=" rounded-xl shadow-2xl overflow-hidden border-4  bg-primary-500">
           {/* Header Section */}
@@ -300,7 +300,7 @@ const HeroFilter = () => {
           <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row">
             {/* Left Section - Orange Background with Filters */}
             <div className="bg-primary-500 p-4 flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 md:gap-20 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                 {/* Vehicle Type Filter */}
                 <FilterSelect
                   label="Vehicle Type"
@@ -327,7 +327,7 @@ const HeroFilter = () => {
 
                 {/* Make Filter */}
                 <FilterSelect
-                  label="Select make"
+                  label="Make"
                   value={filters.make}
                   onChange={(v) => {
                     handleChange("make", v);
@@ -347,7 +347,7 @@ const HeroFilter = () => {
 
                 {/* Model Filter */}
                 <FilterSelect
-                  label="Select model"
+                  label="Model"
                   value={filters.model}
                   onChange={(v) => handleChange("model", v)}
                   options={["", ...modelOptions]}
@@ -371,7 +371,7 @@ const HeroFilter = () => {
 
                 {/* Engine Filter */}
                 <FilterSelect
-                  label="Select engine"
+                  label="Engine"
                   value={filters.engine}
                   onChange={(v) => handleChange("engine", v)}
                   options={engineOptions}
@@ -470,7 +470,7 @@ const FilterSelect = ({
       {label}
     </label>
     <select
-      className="md:w-[170px] sm:full w-full h-9 px-3 rounded-md bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-9 px-3 rounded-md bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}

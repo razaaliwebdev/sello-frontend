@@ -10,12 +10,12 @@ import FindOutMore from "../../components/sections/createPost/FindOutMore";
 
 const CreatePost = () => {
   return (
-    <div>
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8">
       <CreatePostForm />
       <WhyChooseUsUtility />
       <InpirationSectoin />
       <BannerInFilter />
-      <div className="px-4 md:px-16 py-12 bg-[#F5F5F5]">
+      <div className="py-12 bg-[#F5F5F5]">
         <div className="flex items-center justify-between">
           <h2 className="md:text-4xl text-2xl font-semibold">
             Explore Our Premium Brands

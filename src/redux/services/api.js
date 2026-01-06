@@ -453,9 +453,22 @@ export const api = createApi({
 
     // ✅ Create Car Endpoint
     createCar: builder.mutation({
-      query: (formData) => {
+      query: (arg) => {
+        // Support both direct FormData or object with formData and params
+        const formData = arg instanceof FormData ? arg : arg.formData;
+        const params = arg instanceof FormData ? {} : arg.params || {};
+
+        // Build query string
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, value);
+          }
+        });
+        const queryString = queryParams.toString();
+
         return {
-          url: "/cars",
+          url: `/cars${queryString ? `?${queryString}` : ""}`,
           method: "POST",
           body: formData,
           // Important: Don't set Content-Type header for FormData
@@ -711,6 +724,30 @@ export const api = createApi({
       transformResponse: (response) => response?.data || response,
       // Refetch when component mounts or args change to ensure fresh data after admin updates
       refetchOnMountOrArgChange: true,
+    }),
+
+
+
+    // Blog Comments (Public/User)
+    getBlogComments: builder.query({
+      query: ({ blogId, page = 1, limit = 10 }) => 
+        `/blogs/${blogId}/comments?page=${page}&limit=${limit}`,
+      providesTags: ["Comment"],
+    }),
+    createComment: builder.mutation({
+      query: ({ blogId, content }) => ({
+        url: `/blogs/${blogId}/comments`,
+        method: "POST",
+        body: { content },
+      }),
+      invalidatesTags: ["Comment"],
+    }),
+    deleteComment: builder.mutation({
+      query: (commentId) => ({
+        url: `/blogs/comments/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Comment"],
     }),
 
     // Banners (Public)
@@ -1052,4 +1089,7 @@ export const {
   useCreateReportMutation,
   useCreateDeletionRequestMutation,
   useGetDeletionRequestStatusQuery,
+  useGetBlogCommentsQuery,
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
 } = api;

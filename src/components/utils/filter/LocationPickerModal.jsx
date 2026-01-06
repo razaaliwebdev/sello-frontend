@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
+import { FiMapPin } from "react-icons/fi";
 
 // Fix leaflet icon issues
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -167,40 +168,18 @@ const LocationPickerModal = ({
       const data = await response.json();
 
       if (data && data.length > 0) {
-        const results = data.map((item) => ({ ...item }));
-
-        const handleSelectResult = (result) => {
-          setSelectedLocation(result);
-          setMapCenter([result.lat, result.lon]);
-          setMapZoom(15);
-        };
-
-        // Fallback to Google Places API if available
-        const googleApiKey =
-          import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY ||
-          import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (googleApiKey) {
-          const googleResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-              query
-            )}&key=${googleApiKey}`
-          );
-          const googleData = await googleResponse.json();
-
-          if (googleData.status === "OK" && googleData.results.length > 0) {
-            const results = googleData.results.map((item) => ({
-              display_name: item.formatted_address,
-              lat: item.geometry.location.lat,
-              lon: item.geometry.location.lng,
-            }));
-            setSearchResults(results);
-          } else {
-            setSearchResults([]);
-            toast.error("No locations found");
-          }
-        } else {
-          setSearchResults(results);
-        }
+        const results = data.map((item) => ({
+          display_name: item.display_name,
+          lat: item.lat,
+          lon: item.lon,
+          address: item.display_name,
+          backendFormat: {
+            type: "Point",
+            coordinates: [item.lon, item.lat],
+          },
+        }));
+        setSearchResults(results);
+        console.log("Search results:", results); // Debug log
       } else {
         // Fallback to Google Places API if available
         const googleApiKey =
@@ -219,8 +198,17 @@ const LocationPickerModal = ({
               display_name: item.formatted_address,
               lat: item.geometry.location.lat,
               lon: item.geometry.location.lng,
+              address: item.formatted_address,
+              backendFormat: {
+                type: "Point",
+                coordinates: [
+                  item.geometry.location.lng,
+                  item.geometry.location.lat,
+                ],
+              },
             }));
             setSearchResults(results);
+            console.log("Google search results:", results); // Debug log
           } else {
             setSearchResults([]);
             toast.error("No locations found");
@@ -279,24 +267,38 @@ const LocationPickerModal = ({
   // Handle confirm
   const handleConfirm = async () => {
     if (selectedLocation) {
+      console.log("Selected location:", selectedLocation); // Debug log
+
       // Get address if not already set
       if (!address) {
         await reverseGeocode(selectedLocation.lat, selectedLocation.lng);
       }
 
-      onSelect({
-        coordinates: selectedLocation,
+      const locationData = {
+        coordinates: {
+          lat: selectedLocation.lat,
+          lng: selectedLocation.lon,
+        },
         address:
           address ||
+          selectedLocation.display_name ||
           `Location (${selectedLocation.lat.toFixed(
             6
           )}, ${selectedLocation.lng.toFixed(6)})`,
         formatted:
           address ||
+          selectedLocation.display_name ||
           `Location (${selectedLocation.lat.toFixed(
             6
           )}, ${selectedLocation.lng.toFixed(6)})`,
-      });
+        backendFormat: selectedLocation.backendFormat || {
+          type: "Point",
+          coordinates: [selectedLocation.lng, selectedLocation.lat],
+        },
+      };
+
+      console.log("Location data to save:", locationData); // Debug log
+      onSelect(locationData);
 
       // Stop watching position
       if (watchIdRef.current !== null) {
@@ -332,8 +334,8 @@ const LocationPickerModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col relative z-[100000] overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
           <h2 className="text-xl font-semibold">Enter Address</h2>
@@ -345,121 +347,126 @@ const LocationPickerModal = ({
           </button>
         </div>
 
-        {/* Search and Controls */}
-        <div className="p-4 border-b space-y-3">
-          {/* Search Input */}
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Enter text to search"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10"
-            />
-            {isSearching && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
-              </div>
-            )}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Search and Controls */}
+          <div className="p-4 border-b space-y-3">
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Enter text to search"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10"
+              />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
+                </div>
+              )}
 
-            {/* Search Results */}
-            {searchResults.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {searchResults.map((result, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleSelectResult(result)}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                  >
-                    <p className="text-sm text-gray-700">
-                      {result.display_name}
-                    </p>
-                  </div>
-                ))}
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div className="mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {searchResults.map((result, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleSelectResult(result)}
+                      className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                    >
+                      <p className="text-sm text-gray-700">
+                        {result.display_name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selected Location Info */}
+            {selectedLocation && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Selected Location:
+                </p>
+                <p className="text-xs text-gray-600">
+                  {address ||
+                    `Lat: ${selectedLocation.lat.toFixed(
+                      6
+                    )}, Lng: ${selectedLocation.lng.toFixed(6)}`}
+                </p>
+                {locationMode === "auto" && (
+                  <p className="text-xs text-primary-600 mt-1">
+                    📍 Live tracking active
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          {/* Selected Location Info */}
-          {selectedLocation && (
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700 mb-1">
-                Selected Location:
-              </p>
-              <p className="text-xs text-gray-600">
-                {address ||
-                  `Lat: ${selectedLocation.lat.toFixed(
-                    6
-                  )}, Lng: ${selectedLocation.lng.toFixed(6)}`}
-              </p>
-              {locationMode === "auto" && (
-                <p className="text-xs text-primary-600 mt-1">
-                  📍 Live tracking active
-                </p>
+          {/* Map */}
+          <div className="relative h-[45vh] min-h-[280px] md:h-[400px]">
+            <MapContainer
+              center={mapCenter}
+              zoom={mapZoom}
+              style={{ height: "100%", width: "100%" }}
+              scrollWheelZoom={true}
+              key={`map-${mapCenter[0]}-${mapCenter[1]}`}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MapUpdater center={mapCenter} zoom={mapZoom} />
+              <MapEvents onMapClick={handleMapClick} />
+
+              {/* Current location marker (if auto mode) */}
+              {currentLocation && locationMode === "auto" && (
+                <Marker
+                  position={[currentLocation.lat, currentLocation.lng]}
+                  icon={createLocationIcon(true)}
+                />
               )}
-            </div>
-          )}
-        </div>
 
-        {/* Map */}
-        <div className="flex-1 relative min-h-[400px]">
-          <MapContainer
-            center={mapCenter}
-            zoom={mapZoom}
-            style={{ height: "400px", width: "100%" }}
-            scrollWheelZoom={true}
-            key={`map-${mapCenter[0]}-${mapCenter[1]}`}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <MapUpdater center={mapCenter} zoom={mapZoom} />
-            <MapEvents onMapClick={handleMapClick} />
+              {/* Selected location marker */}
+              {selectedLocation && (
+                <Marker
+                  position={[selectedLocation.lat, selectedLocation.lng]}
+                  icon={createLocationIcon(false)}
+                />
+              )}
+            </MapContainer>
 
-            {/* Current location marker (if auto mode) */}
-            {currentLocation && locationMode === "auto" && (
-              <Marker
-                position={[currentLocation.lat, currentLocation.lng]}
-                icon={createLocationIcon(true)}
-              />
+            {/* Instructions overlay */}
+            {!selectedLocation && searchResults.length === 0 && (
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-200 z-[100001]">
+                <p className="text-sm text-gray-700 flex items-center gap-2">
+                  <FiMapPin className="w-4 h-4 text-primary-500" />
+                  <span className="font-semibold">Click on the map</span> to
+                  select a location, or search above
+                </p>
+              </div>
             )}
-
-            {/* Selected location marker */}
-            {selectedLocation && (
-              <Marker
-                position={[selectedLocation.lat, selectedLocation.lng]}
-                icon={createLocationIcon(false)}
-              />
-            )}
-          </MapContainer>
-
-          {/* Instructions overlay */}
-          {!selectedLocation && (
-            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-200 z-[10]">
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">💡 Click on the map</span> to
-                select a location, or search above
-              </p>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t flex justify-end gap-3">
-          <button
-            onClick={handleClose}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={!selectedLocation}
-            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            SELECT
-          </button>
+        <div className="p-6 border-t bg-gray-50">
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={handleClose}
+              className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!selectedLocation}
+              className="px-8 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md"
+            >
+              Select Location
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { newTechnology } from "../../../assets/blogs/blogAssets";
 
 const NewTechnology = () => {
   return (
-    <div className="md:h-[80vh] w-full px-5 sm:px-8 md:px-10 py-5">
+    <div className="md:h-[80vh] w-full px-3 sm:px-4 md:px-6 lg:px-8 py-5">
       <div className="md:flex items-center justify-between">
         <h2 className="text-2xl sm:text-3xl font-semibold">
           New Technology

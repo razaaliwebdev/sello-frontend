@@ -27,14 +27,8 @@ const reviews = [
 
 const CustomerReviews = () => {
   return (
-    <div className="bg-gradient-to-b from-[#272525] to-[#1f1f1f] relative overflow-hidden">
-      {/* Decorative Background */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-400 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative bg-gradient-to-br from-gray-50 via-white to-gray-50 px-6 md:px-10 lg:px-16 py-16 md:py-20 w-full rounded-tr-[60px] md:rounded-tr-[80px]">
+    <div className="bg-gray-50 relative overflow-hidden">
+      <div className="relative bg-white px-3 sm:px-4 md:px-6 lg:px-8 py-16 md:py-20 w-full rounded-tr-[60px] md:rounded-tr-[80px] shadow-lg">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <div className="inline-block mb-4">
@@ -103,7 +97,11 @@ const CustomerReviews = () => {
                   </div>
                   <div className="flex items-center gap-1 text-primary-400">
                     {[...Array(review.rating)].map((_, i) => (
-                      <FiStar key={i} className="w-6 h-6 md:w-7 md:h-7 drop-shadow-lg" fill="currentColor" />
+                      <FiStar
+                        key={i}
+                        className="w-6 h-6 md:w-7 md:h-7 drop-shadow-lg"
+                        fill="currentColor"
+                      />
                     ))}
                   </div>
                 </div>

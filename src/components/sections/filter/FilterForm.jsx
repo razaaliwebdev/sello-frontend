@@ -614,16 +614,16 @@ const FilterForm = ({ onFilter }) => {
           <label className="block mb-3 text-center font-medium text-gray-700">
             Vehicle Type
           </label>
-          <div className="flex justify-center gap-4 flex-wrap">
-            {["Car", "Bus", "Truck", "Van", "Bike", "E-bike"].map((type) => (
+          <div className="flex justify-center gap-3 flex-wrap">
+            {vehicleTypeOptions.map((type) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => handleChange("vehicleType", type)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`group relative px-5 py-1.5 rounded font-semibold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 ${
                   filters.vehicleType === type
-                    ? "bg-primary-500 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-primary-500 text-black shadow-lg shadow-primary-500/25 ring-2 ring-primary-500 ring-offset-2"
+                    : "bg-white text-gray-700 border-2 border-gray-200 hover:border-primary-500 hover:shadow-md hover:bg-primary-50"
                 }`}
               >
                 {type}
@@ -1164,149 +1164,6 @@ const FilterForm = ({ onFilter }) => {
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Location Radius Filter - Styled like reference */}
-        <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
-            📍 Find Cars Near Me
-          </label>
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => {
-                if (!navigator.geolocation) {
-                  toast.error("Geolocation is not supported by your browser.");
-                  return;
-                }
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    handleChange("userLat", lat.toString());
-                    handleChange("userLng", lng.toString());
-                    toast.success("Location captured! Now select a radius.");
-                  },
-                  () => {
-                    toast.error(
-                      "Failed to get your location. Please allow location access."
-                    );
-                  },
-                  {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                  }
-                );
-              }}
-              className={`w-full px-4 py-3 flex items-center justify-between transition-all ${
-                filters.userLat && filters.userLng
-                  ? "bg-green-50 border-l-4 border-green-500"
-                  : "hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    filters.userLat && filters.userLng
-                      ? "bg-green-100"
-                      : "bg-primary-100"
-                  }`}
-                >
-                  {filters.userLat && filters.userLng ? (
-                    <svg
-                      className="w-5 h-5 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-5 h-5 text-primary-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <div className="text-left">
-                  <div
-                    className={`text-sm font-medium ${
-                      filters.userLat && filters.userLng
-                        ? "text-green-700"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {filters.userLat && filters.userLng
-                      ? "Location Captured"
-                      : "Where are you?"}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {filters.userLat && filters.userLng
-                      ? "Select radius below"
-                      : "Tap to use your current location"}
-                  </div>
-                </div>
-              </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-
-            {filters.userLat && filters.userLng && (
-              <div className="border-t border-gray-200 p-3 bg-gray-50">
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Search Radius
-                </label>
-                <select
-                  value={filters.radius}
-                  onChange={(e) => handleChange("radius", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
-                >
-                  <option value="">Select distance</option>
-                  <option value="5">Within 5 km</option>
-                  <option value="10">Within 10 km</option>
-                  <option value="25">Within 25 km</option>
-                  <option value="50">Within 50 km</option>
-                  <option value="100">Within 100 km</option>
-                </select>
-                {filters.radius && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    ✓ Will show cars within {filters.radius} km of your location
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Location Picker */}

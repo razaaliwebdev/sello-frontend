@@ -6,10 +6,13 @@ import {
     useGetAllDealersQuery,
     useVerifyDealerMutation,
     useGetUserByIdQuery,
+    useDeleteUserMutation,
 } from "../../redux/services/adminApi";
+import ConfirmModal from "../../components/admin/ConfirmModal";
+import { notifyActionSuccess, notifyActionError } from "../../utils/notifications";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSearch, FiGrid, FiCheckCircle, FiXCircle, FiEye, FiEdit2, FiX } from "react-icons/fi";
+import { FiSearch, FiGrid, FiCheckCircle, FiXCircle, FiEye, FiEdit2, FiX, FiTrash2 } from "react-icons/fi";
 
 const Dealers = () => {
     const navigate = useNavigate();
@@ -23,6 +26,10 @@ const Dealers = () => {
         search 
     });
     const [verifyDealer] = useVerifyDealerMutation();
+    const [deleteUser] = useDeleteUserMutation();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [dealerToDelete, setDealerToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const { data: dealerDetails, isLoading: detailsLoading } = useGetUserByIdQuery(
         selectedDealer,
         { skip: !selectedDealer }
@@ -43,6 +50,27 @@ const Dealers = () => {
             refetch();
         } catch (error) {
             toast.error(error?.data?.message || "Failed to update dealer");
+        }
+    };
+
+    const handleDelete = (dealerId) => {
+        setDealerToDelete(dealerId);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!dealerToDelete) return;
+        setIsDeleting(true);
+        try {
+            await deleteUser(dealerToDelete).unwrap();
+            notifyActionSuccess('deleted', 'Dealer');
+            refetch();
+        } catch (error) {
+            notifyActionError('delete', 'dealer', error);
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+            setDealerToDelete(null);
         }
     };
 
@@ -251,6 +279,14 @@ const Dealers = () => {
                                                     >
                                                         <FiEdit2 size={18} aria-hidden="true" />
                                                     </button>
+                                                    <button
+                                                        onClick={() => handleDelete(dealer._id)}
+                                                        className="text-red-600 hover:text-red-700 transition-colors"
+                                                        title="Delete"
+                                                        aria-label={`Delete dealer ${dealer.dealerInfo?.businessName || dealer.name}`}
+                                                    >
+                                                        <FiTrash2 size={18} aria-hidden="true" />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -285,6 +321,21 @@ const Dealers = () => {
                         </button>
                     </div>
                 )}
+            
+                {/* Delete Confirmation Modal */}
+                <ConfirmModal
+                    isOpen={showDeleteModal}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setDealerToDelete(null);
+                    }}
+                    onConfirm={handleDeleteConfirm}
+                    title="Delete Dealer"
+                    message="Are you sure you want to delete this dealer? This action cannot be undone and will remove all their listings."
+                    confirmText="Delete"
+                    variant="danger"
+                    isLoading={isDeleting}
+                />
 
                 {/* Dealer Details Modal */}
                 {showDetailsModal && selectedDealer && (

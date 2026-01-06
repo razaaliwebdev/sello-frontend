@@ -40,7 +40,7 @@ const Home = () => {
         <FeaturedCarsCarousel />
         <ShopBoxCar />
         <GetAllCarsSection />
-        <CustomerReview />
+        <CustomerReview key="customer-review" />
         <BlogSection />
         <BuySellCards />
         <NewsLatter />

@@ -783,6 +783,41 @@ export const adminApi = createApi({
       invalidatesTags: ["Banners"], // Will also invalidate public API cache
     }),
 
+    // Comments
+    getBlogCommentsAdmin: builder.query({
+      query: (blogId) => `/blogs/${blogId}/comments`, // Public endpoint lists approved, admin needs all? Wait, we made a specific admin route
+    }),
+    getAllComments: builder.query({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams(params).toString();
+        return `/blogs/comments/all?${searchParams}`;
+      },
+      providesTags: ["Comments"],
+      transformResponse: (response) => response?.data || response,
+    }),
+    updateCommentStatus: builder.mutation({
+      query: ({ commentId, status }) => ({
+        url: `/blogs/comments/${commentId}/status`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Comments", "Blog"],
+    }),
+    deleteComment: builder.mutation({
+      query: (commentId) => ({
+        url: `/blogs/comments/${commentId}/admin`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Comments", "Blog"],
+    }),
+
+
+
+    // Blog Analytics
+    getBlogAnalytics: builder.query({
+      query: ({ blogId, days = 30 }) => `/blogs/${blogId}/analytics?days=${days}`,
+    }),
+
     // Testimonials
     getAllTestimonials: builder.query({
       query: (params = {}) => {
@@ -1024,6 +1059,11 @@ export const {
   useCreateBlogMutation,
   useUpdateBlogMutation,
   useDeleteBlogMutation,
+  useGetBlogCommentsAdminQuery,
+  useGetAllCommentsQuery,
+  useUpdateCommentStatusMutation,
+  useDeleteCommentMutation,
+  useGetBlogAnalyticsQuery,
   useGetAllNotificationsQuery,
   useCreateNotificationMutation,
   useDeleteNotificationMutation,
