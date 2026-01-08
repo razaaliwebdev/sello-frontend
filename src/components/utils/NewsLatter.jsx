@@ -38,7 +38,8 @@ const NewsLatter = () => {
       <div className="text-white md:py-10 py-5">
         <h2 className="md:text-4xl text-3xl py-4">Join Sello</h2>
         <p className="">
-          Receive car listings alerts, market trends & exclusive deals.
+          Get your car prices, advice from the experts, and new cars for sale
+          updates in one place.
         </p>
       </div>
       <div className="md:py-10 py-5">

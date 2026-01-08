@@ -9,8 +9,20 @@ const ContactInformation = () => {
       icon: FiMail,
       title: "Email Address",
       items: [
-        { label: "General Inquiries", value: import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com"}` },
-        { label: "Support", value: import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com", link: `mailto:${import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"}` },
+        {
+          label: "General Inquiries",
+          value: import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com",
+          link: `mailto:${
+            import.meta.env.VITE_SUPPORT_EMAIL || "info@example.com"
+          }`,
+        },
+        {
+          label: "Support",
+          value: import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com",
+          link: `mailto:${
+            import.meta.env.VITE_SUPPORT_EMAIL || "support@example.com"
+          }`,
+        },
       ],
       color: "bg-primary-50 text-primary-600",
     },
@@ -18,8 +30,16 @@ const ContactInformation = () => {
       icon: FiPhone,
       title: "Phone Number",
       items: [
-        { label: "Main Office", value: "+92 42 1234567", link: "tel:+92421234567" },
-        { label: "Support Line", value: "+92 300 1234567", link: "tel:+923001234567" },
+        {
+          label: "Main Office",
+          value: "+923134211023",
+          link: "tel:+923134211023",
+        },
+        {
+          label: "Support Line",
+          value: "+923134211023",
+          link: "tel:+923134211023",
+        },
       ],
       color: "bg-green-50 text-green-600",
     },
@@ -27,7 +47,11 @@ const ContactInformation = () => {
       icon: FiMapPin,
       title: "Office Address",
       items: [
-        { label: "Head Office", value: "Sello Head Office, Gulberg, Lahore, Pakistan", link: null },
+        {
+          label: "Head Office",
+          value: "Sello Head Office, Gulberg, Lahore, Pakistan",
+          link: null,
+        },
       ],
       color: "bg-purple-50 text-purple-600",
     },
@@ -50,7 +74,8 @@ const ContactInformation = () => {
           Contact Information
         </h2>
         <p className="text-gray-600 mb-8">
-          Reach out to us through any of these channels. We're here to help you with any questions or concerns.
+          We are with you at every step of the way. Our team will guide you for
+          any of your questions or concerns.
         </p>
 
         <div className="space-y-6">
@@ -87,7 +112,9 @@ const ContactInformation = () => {
                               <span className="text-sm font-medium text-gray-500 block mb-1">
                                 {item.label}:
                               </span>
-                              <span className="text-base text-gray-700">{item.value}</span>
+                              <span className="text-base text-gray-700">
+                                {item.value}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -102,17 +129,17 @@ const ContactInformation = () => {
       </div>
 
       {/* Quick Help Section */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-xl p-8 text-white">
-        <h3 className="text-xl font-bold mb-3">Need Immediate Assistance?</h3>
+      <div className="bg-gradient-to-r from-primary-500 to-primary-400 rounded-2xl shadow-xl p-8 text-white">
+        <h3 className="text-xl font-bold mb-3">24/7 Support Available</h3>
         <p className="text-primary-100 mb-4">
-          Our support team is available 24/7 to help you with any urgent matters.
+          Get support as soon as you need it.
         </p>
         <a
-          href="tel:+97145061300"
+          href="tel:+923134211023"
           className="inline-flex items-center gap-2 bg-white text-primary-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
         >
           <FiPhone size={20} />
-          Call Now: +971 45 061 300
+          Call Now: +923134211023
         </a>
       </div>
     </div>

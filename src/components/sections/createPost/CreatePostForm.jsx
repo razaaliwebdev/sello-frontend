@@ -68,7 +68,6 @@ const CreatePostForm = () => {
     country: "",
     city: "",
     location: "",
-    sellerType: "",
     carDoors: "",
     contactNumber: "",
     geoLocation: "",
@@ -81,17 +80,17 @@ const CreatePostForm = () => {
     images: [],
   });
 
-  // Filter categories by selected vehicle type (must be after formData declaration)
+  // Get categories - always fetch all car categories to get years
   const {
     makes,
     models,
-    getModelsByMake,
     years,
     countries,
     cities,
+    getModelsByMake,
     getCitiesByCountry,
     isLoading: categoriesLoading,
-  } = useCarCategories(formData.vehicleType);
+  } = useCarCategories(null); // Always pass null to get all years
 
   const [createCar, { isLoading }] = useCreateCarMutation();
 
@@ -111,33 +110,10 @@ const CreatePostForm = () => {
     }
   }, [formData.make, makes, models, getModelsByMake]);
 
-  // Initialize available years - optimized
-  // Years can be independent or tied to models
+  // Initialize available years - years are now independent
   useEffect(() => {
-    if (!formData.model || availableModels.length === 0) {
-      // Show all years when no model is selected
-      setAvailableYears(years);
-      return;
-    }
-
-    const selectedModelObj = availableModels.find(
-      (m) => m.name === formData.model
-    );
-    if (selectedModelObj) {
-      // Filter years by model if they have parentCategory
-      const modelYears = years.filter((y) => {
-        if (!y.parentCategory) return true; // Include independent years
-        const parentId =
-          typeof y.parentCategory === "object"
-            ? y.parentCategory._id
-            : y.parentCategory;
-        return parentId === selectedModelObj._id;
-      });
-      setAvailableYears(modelYears.length > 0 ? modelYears : years);
-    } else {
-      setAvailableYears(years);
-    }
-  }, [formData.model, availableModels, years]);
+    setAvailableYears(years);
+  }, [years]);
 
   // Initialize available cities - optimized
   useEffect(() => {
@@ -198,31 +174,11 @@ const CreatePostForm = () => {
         }
       }
 
-      // When model changes, update available years
+      // When model changes, years are independent - don't filter years
       if (field === "model") {
-        const selectedModelObj = availableModels.find((m) => m.name === value);
-        if (selectedModelObj) {
-          // Filter years by model if they have parentCategory, include independent years
-          const modelYears = years.filter((y) => {
-            if (!y.parentCategory) return true; // Include independent years
-            const parentId =
-              typeof y.parentCategory === "object"
-                ? y.parentCategory._id
-                : y.parentCategory;
-            return parentId === selectedModelObj._id;
-          });
-          setAvailableYears(modelYears.length > 0 ? modelYears : years);
-          // Reset year if it's not available for the new model
-          if (
-            formData.year &&
-            modelYears.length > 0 &&
-            !modelYears.find((y) => y.name === formData.year.toString())
-          ) {
-            setFormData((prev) => ({ ...prev, year: "" }));
-          }
-        } else {
-          setAvailableYears(years);
-        }
+        // Years are now independent - always show all years
+        setAvailableYears(years);
+        // No need to reset year since all years are available for all models
       }
 
       // When country changes, update available cities
@@ -354,7 +310,6 @@ const CreatePostForm = () => {
       "country",
       "city",
       "location",
-      "sellerType",
       "carDoors",
       "contactNumber",
       "geoLocation",
@@ -432,8 +387,9 @@ const CreatePostForm = () => {
         ) {
           shouldSend = false;
         } else if (
-          (key === "sellerType" || key === "warranty" || key === "ownerType") &&
-          formData.vehicleType !== "Car"
+          (key === "warranty" || key === "ownerType") &&
+          formData.vehicleType !== "Car" &&
+          formData.vehicleType !== "Motorcycle"
         ) {
           shouldSend = false;
         } else if (
@@ -505,7 +461,6 @@ const CreatePostForm = () => {
         country: "",
         city: "",
         location: "",
-        sellerType: "",
         carDoors: "",
         contactNumber: "",
         geoLocation: "",
@@ -524,7 +479,9 @@ const CreatePostForm = () => {
       setDuplicateInfo(null);
       navigate(`/my-listings`);
     } catch (err) {
-      toast.error(err?.data?.message || err?.message || "Failed to create post");
+      toast.error(
+        err?.data?.message || err?.message || "Failed to create post"
+      );
     }
   };
 
@@ -613,7 +570,6 @@ const CreatePostForm = () => {
         country: "",
         city: "",
         location: "",
-        sellerType: "",
         carDoors: "",
         contactNumber: "",
         geoLocation: "",
@@ -861,7 +817,7 @@ const CreatePostForm = () => {
 
         {/* Price - Full Width */}
         <div className="mb-2 pl-2">
-          <label className="block mb-1">Price</label>
+          <label className="block mb-1">Price (PKR)</label>
           <Input
             inputType="number"
             value={formData.price}
@@ -871,23 +827,8 @@ const CreatePostForm = () => {
           />
         </div>
 
-        {/* Seller Type, Contact Number, Mileage in same row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2 pl-2">
-          {formData.vehicleType === "Car" && (
-            <div>
-              <label className="block mb-1">Seller Type</label>
-              <select
-                value={formData.sellerType}
-                onChange={(e) => handleChange("sellerType", e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select</option>
-                <option value="individual">Individual</option>
-                <option value="dealer">Dealer</option>
-              </select>
-            </div>
-          )}
+        {/* Contact Number, Mileage in same row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2 pl-2">
           <div
             className={formData.vehicleType === "Car" ? "" : "md:col-span-3"}
           >

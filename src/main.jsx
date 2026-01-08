@@ -7,6 +7,7 @@ import { store } from "./redux/store.js";
 import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SupportChatProvider } from "./contexts/SupportChatContext.jsx";
+import { SocketProvider } from "./contexts/SocketContext.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import AppRoot from "./AppRoot.jsx";
 import "leaflet/dist/leaflet.css";
@@ -33,9 +34,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <BrowserRouter>
           <ErrorBoundary>
             <GoogleOAuthProvider clientId={googleClientId}>
-              <SupportChatProvider>
-                <App />
-              </SupportChatProvider>
+              <SocketProvider>
+                <SupportChatProvider>
+                  <App />
+                </SupportChatProvider>
+              </SocketProvider>
             </GoogleOAuthProvider>
           </ErrorBoundary>
         </BrowserRouter>

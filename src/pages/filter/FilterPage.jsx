@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import FilterForm from "../../components/sections/filter/FilterForm";
 import GridCars from "../../components/sections/filter/GridCars";
-import LoanCalculator from "../../components/sections/filter/LoanCalculator";
 import BannerInFilter from "../../components/sections/filter/BannerInFilter";
 import BlogSection from "../../components/sections/home/BlogSection";
 import { useGetFilteredCarsQuery } from "../../redux/services/api";
@@ -63,29 +62,18 @@ const FilterPage = () => {
       return;
     }
 
-    if (filteredCars?.data) {
-      const carsData = filteredCars.data;
-      const cars = Array.isArray(carsData.cars) ? carsData.cars : [];
-      const total = carsData.total || 0;
-
-      // Only navigate if we have results or explicit empty result
-      if (cars.length > 0 || total === 0) {
-        const formattedData = {
-          cars,
-          total,
-          data: cars,
-        };
-
-        navigate("/search-results", {
-          state: {
-            filteredCars: formattedData,
-            isLoading: false,
-            filters: currentFilters,
-          },
-          replace: true, // Use replace to avoid back button issues
-        });
-        hasNavigated.current = true;
-      }
+    if (filteredCars) {
+      // Data is already normalized by the API transformResponse
+      // Only navigate if we're not loading (handled by the if statement above)
+      navigate("/search-results", {
+        state: {
+          filteredCars: filteredCars,
+          isLoading: false,
+          filters: currentFilters,
+        },
+        replace: true, // Use replace to avoid back button issues
+      });
+      hasNavigated.current = true;
     }
   }, [
     filteredCars,
@@ -122,7 +110,6 @@ const FilterPage = () => {
         </div>
       </div>
       <GridCars />
-      <LoanCalculator />
       <BannerInFilter />
       <BlogSection />
     </div>

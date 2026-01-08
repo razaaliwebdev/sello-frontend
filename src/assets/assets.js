@@ -872,14 +872,14 @@ export const goThemBuyOrSell = [
     image: electricSvg,
     redirect: "/cars",
     description:
-      "Find the best cars for sale in Pakistan without the hassle. Browse verified listings, trusted sellers, and competitive deals across Karachi, Islamabad, Lahore, and all major cities. Whether you're searching for a new ride or used cars for sale in Pakistan, we make it easy to compare, choose, and buy your perfect car.",
+      "Discover the most available car for sale in Pakistan through Sello.pk. We have what you are looking for from our trusted sellers’ certified listings. Also Sello.pk presents to you a wide range of competitive cars for sale in Karachi, Islamabad, Lahore and other large cities. No matter if you are looking for a car for sale in Pakistan or a person that is into used cars for sale in Pakistan, Sello.pk helps you out in your search and gives you the confidence to choose the best.",
   },
   {
     title: "Do You Want to Sell a Car?",
     image: electricSvg2,
     redirect: "/create-post",
     description:
-      "Turn your car into cash quickly. List your vehicle in minutes and reach thousands of genuine buyers looking for cars for sale across Pakistan. Whether your car is in Karachi, Islamabad, or Lahore, our platform helps you sell smarter with maximum visibility and reliable customer support.",
+      "Sell into the large market by putting your car for sale in Pakistan on our nationwide trusted platform. We put you in front of thousands of serious buyers looking for cars for sale in Pakistan which includes in Karachi, Islamabad and the used car for sale in Lahore. List in minutes, we give you maximum exposure and support you to sell out with reliable support at each step.",
   },
 ];
 

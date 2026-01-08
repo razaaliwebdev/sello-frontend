@@ -5,6 +5,7 @@ import FilterResultsSection from "../../components/sections/filter/FilterResults
 import SortAndViewOptions from "../../components/listings/SortAndViewOptions";
 import { FiX, FiFilter } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
+import { useGetCarsQuery } from "../../redux/services/api";
 
 const FilteredResults = () => {
   const location = useLocation();
@@ -13,16 +14,31 @@ const FilteredResults = () => {
   const { filteredCars, isLoading, filters } = location.state || {};
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
-  const [showFilters, setShowFilters] = useState(false);
 
   const searchTerm = searchParams.get("search") || filters?.search || "";
 
+  // Fetch search results from API if no location.state (direct navigation)
+  const { data: searchResults, isLoading: isSearchLoading } = useGetCarsQuery(
+    {
+      search: searchTerm,
+      limit: 50,
+      page: 1,
+    },
+    {
+      skip: !!location.state, // Skip if we have location.state data
+    }
+  );
+
+  // Use location.state data if available, otherwise use API results
+  const carsData = location.state ? filteredCars : searchResults;
+  const carsLoading = location.state ? isLoading : isSearchLoading;
+
   // Sort cars based on selected option
   const sortedCars = useMemo(() => {
-    if (!filteredCars?.cars || !Array.isArray(filteredCars.cars)) return [];
-    
-    const cars = [...filteredCars.cars];
-    
+    if (!carsData?.cars || !Array.isArray(carsData.cars)) return [];
+
+    const cars = [...carsData.cars];
+
     switch (sortBy) {
       case "price-low":
         return cars.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -37,48 +53,69 @@ const FilteredResults = () => {
       case "mileage-high":
         return cars.sort((a, b) => (b.mileage || 0) - (a.mileage || 0));
       case "oldest":
-        return cars.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+        return cars.sort(
+          (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+        );
       case "newest":
       default:
-        return cars.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        return cars.sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        );
     }
-  }, [filteredCars?.cars, sortBy]);
+  }, [carsData?.cars, sortBy]);
 
-  const activeFilters = filters ? Object.entries(filters).filter(([_, value]) => value) : [];
-  const totalResults = sortedCars.length || filteredCars?.total || 0;
+  const activeFilters = filters
+    ? Object.entries(filters).filter(([, value]) => value)
+    : [];
+  const totalResults = sortedCars.length || carsData?.total || 0;
+
+  // Show loading while search is loading (for direct navigation)
+  if (carsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading search results...</p>
+        </div>
+      </div>
+    );
+  }
 
   const breadcrumbItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Search Results', path: '/search-results' }
+    { label: "Home", path: "/" },
+    { label: "Search Results", path: "/search-results" },
   ];
 
   const removeFilter = (key) => {
     // Navigate to filter page with updated filters
     const newFilters = { ...filters };
     delete newFilters[key];
-    
+
     // Build URL params from remaining filters
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([k, v]) => {
       if (v) params.set(k, v);
     });
-    
-    navigate(`/filter?${params.toString()}`, { replace: true });
+
+    navigate(`/filter?${params.toString()}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Breadcrumb items={breadcrumbItems} />
-      
+
       <div className="container mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {searchTerm ? `Search Results for "${searchTerm}"` : "Search Results"}
+            {searchTerm
+              ? `Search Results for "${searchTerm}"`
+              : "Search Results"}
           </h1>
           {searchTerm && (
             <p className="text-gray-600">
-              Found {totalResults} {totalResults === 1 ? "car" : "cars"} matching your search
+              Found {totalResults} {totalResults === 1 ? "car" : "cars"}{" "}
+              matching your search
             </p>
           )}
         </div>
@@ -92,7 +129,7 @@ const FilteredResults = () => {
                 Active Filters
               </h3>
               <button
-                onClick={() => navigate("/filter", { replace: true })}
+                onClick={() => navigate("/filter")}
                 className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 Clear All
@@ -104,7 +141,9 @@ const FilteredResults = () => {
                   key={key}
                   className="inline-flex items-center gap-2 bg-primary-50 text-primary-500 px-3 py-1 rounded-full text-sm font-medium"
                 >
-                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}: {value}</span>
+                  <span className="capitalize">
+                    {key.replace(/([A-Z])/g, " $1").trim()}: {value}
+                  </span>
                   <button
                     onClick={() => removeFilter(key)}
                     className="hover:text-primary-500"
@@ -129,9 +168,9 @@ const FilteredResults = () => {
         )}
 
         {/* Results */}
-        <FilterResultsSection 
-          filteredCars={{ ...filteredCars, cars: sortedCars }} 
-          isLoading={isLoading}
+        <FilterResultsSection
+          filteredCars={{ ...carsData, cars: sortedCars }}
+          isLoading={carsLoading}
           viewMode={viewMode}
         />
       </div>
@@ -140,4 +179,3 @@ const FilteredResults = () => {
 };
 
 export default FilteredResults;
-

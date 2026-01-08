@@ -4,20 +4,20 @@
  * @returns {string} Formatted price string
  */
 export const formatPrice = (price) => {
-  if (price === null || price === undefined) return 'N/A';
-  
+  if (price === null || price === undefined) return "N/A";
+
   // Convert to number if it's a string
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+
   // Check if the conversion was successful
-  if (isNaN(numPrice)) return 'N/A';
-  
-  // Format the number with commas and 2 decimal places
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  if (isNaN(numPrice)) return "N/A";
+
+  // Format the number with commas and 2 decimal places for PKR
+  return new Intl.NumberFormat("en-PK", {
+    style: "currency",
+    currency: "PKR",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 0,
   }).format(numPrice);
 };
 
@@ -27,8 +27,8 @@ export const formatPrice = (price) => {
  * @returns {string} Formatted mileage string
  */
 export const formatMileage = (mileage) => {
-  if (mileage === null || mileage === undefined) return 'N/A';
-  return mileage.toLocaleString('en-US') + ' km';
+  if (mileage === null || mileage === undefined) return "N/A";
+  return mileage.toLocaleString("en-US") + " km";
 };
 
 /**
@@ -37,16 +37,16 @@ export const formatMileage = (mileage) => {
  * @returns {string} Formatted date string
  */
 export const formatDate = (date) => {
-  if (!date) return 'N/A';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
 export default {
   formatPrice,
   formatMileage,
-  formatDate
+  formatDate,
 };

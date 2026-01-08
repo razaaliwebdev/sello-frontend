@@ -6,7 +6,6 @@ import NeedInspiration from "../../components/sections/listings/NeedInspiration"
 import BlogSection from "../../components/sections/home/BlogSection";
 import ExploreBrands from "../../components/sections/listings/ExploreBrands";
 import PartnerOffersSection from "../../components/sections/listings/PartnerOffersSection";
-import Ads from "../../components/utils/Ads";
 
 const CarListings = () => {
   return (
@@ -14,7 +13,6 @@ const CarListings = () => {
       <ListingHeroSection />
       <BrowsByTypeSection />
       <GetAllCarsSection />
-      <Ads />
       <NeedInspiration />
       <BlogSection />
       <ExploreBrands />

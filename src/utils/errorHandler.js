@@ -92,10 +92,7 @@ export const handleApiError = (error, options = {}) => {
 
   // Log error to console (only in development)
   if (import.meta.env.DEV) {
-    console.error(`API Error: ${endpoint || "Unknown"}`, error, {
-      endpoint,
-      ...metadata,
-    });
+    // API Error logged for development
   }
 
   return errorMessage;

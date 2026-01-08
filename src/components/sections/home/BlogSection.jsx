@@ -4,13 +4,26 @@ import { useGetBlogsQuery } from "../../../redux/services/api";
 import { MdArrowRightAlt } from "react-icons/md";
 
 const BlogSection = () => {
-  const { data, isLoading } = useGetBlogsQuery({
+  const { data, isLoading: featuredLoading } = useGetBlogsQuery({
     limit: 6,
     status: "published",
     isFeatured: true,
   });
 
-  const blogs = data?.blogs || [];
+  // Fallback to all published blogs if no featured blogs exist
+  const { data: allBlogsData, isLoading: allLoading } = useGetBlogsQuery(
+    {
+      limit: 6,
+      status: "published",
+    },
+    {
+      skip: !!(data?.blogs && data.blogs.length > 0), // Only fetch all blogs if no featured blogs found
+    }
+  );
+
+  const blogs =
+    data?.blogs?.length > 0 ? data.blogs : allBlogsData?.blogs || [];
+  const isLoading = featuredLoading || (!data?.blogs?.length && allLoading);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";

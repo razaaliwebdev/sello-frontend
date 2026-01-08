@@ -49,4 +49,4 @@ const Home = () => {
   );
 };
 
-export default memo(Home);
+export default Home;

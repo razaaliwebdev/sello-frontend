@@ -32,6 +32,8 @@ const CarDetails = () => {
     error,
   } = useGetSingleCarQuery(extractedCarId, {
     skip: !extractedCarId,
+    // Force refetch when the car ID changes
+    refetchOnMountOrArgChange: true,
   });
   const { addRecentlyViewed } = useRecentlyViewedCars();
 
@@ -71,45 +73,6 @@ const CarDetails = () => {
     };
   }, []);
 
-  // CRITICAL: Get actual URL from window to verify route
-  const actualPath =
-    typeof window !== "undefined"
-      ? window.location.pathname
-      : location.pathname;
-
-  // ABSOLUTE CHECK - If we're on home route, return null immediately
-  // Check both location.pathname AND window.location.pathname
-  if (
-    location.pathname === "/" ||
-    location.pathname === "/home" ||
-    actualPath === "/" ||
-    actualPath === "/home"
-  ) {
-    return null;
-  }
-
-  // Double check - ensure we're on a valid car route
-  // Use actualPath for verification
-  const pathToCheck = actualPath || location.pathname;
-  const pathParts = pathToCheck.split("/").filter(Boolean);
-
-  const isValidCarRoute =
-    pathToCheck.startsWith("/cars/") &&
-    pathToCheck !== "/cars" &&
-    pathParts.length === 2 &&
-    pathParts[0] === "cars" &&
-    pathParts[1] &&
-    pathParts[1].trim() !== "" &&
-    routeParam &&
-    typeof routeParam === "string" &&
-    routeParam.trim() !== "" &&
-    routeParam === pathParts[1];
-
-  // If not valid, return null immediately
-  if (!isValidCarRoute) {
-    return null;
-  }
-
   const breadcrumbItems = [
     { label: "Home", path: "/" },
     { label: "Cars", path: "/cars" },
@@ -122,7 +85,7 @@ const CarDetails = () => {
   ];
 
   if (error) {
-    console.error("Car details error:", error);
+    // Car details error
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -131,10 +94,29 @@ const CarDetails = () => {
             {error?.data?.message || error?.message || "Please try again later"}
           </p>
           <button
-            onClick={() => navigate(0)}
+            onClick={() => navigate("/cars")}
             className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
           >
-            Retry
+            Back to Cars
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!extractedCarId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-2">Invalid car URL</p>
+          <p className="text-gray-600 text-sm mb-4">
+            The car ID is missing or invalid.
+          </p>
+          <button
+            onClick={() => navigate("/cars")}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
+          >
+            Browse Cars
           </button>
         </div>
       </div>
@@ -150,15 +132,21 @@ const CarDetails = () => {
             The car listing you're looking for doesn't exist or has been
             removed.
           </p>
+          <button
+            onClick={() => navigate("/cars")}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
+          >
+            Browse Other Cars
+          </button>
         </div>
       </div>
     );
   }
 
   // Wait for car data before rendering
-  if (isLoading || !car) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-primary-500 mx-auto mb-4"></div>
           <div className="text-gray-500 text-sm">Loading car details...</div>

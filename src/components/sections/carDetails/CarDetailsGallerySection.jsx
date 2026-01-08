@@ -32,6 +32,7 @@ const CarDetailsGallerySection = () => {
     error,
   } = useGetSingleCarQuery(extractedCarId, {
     skip: !extractedCarId,
+    refetchOnMountOrArgChange: true,
   });
 
   const token = localStorage.getItem("token");

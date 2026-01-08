@@ -38,7 +38,22 @@ const LatestBlogsSection = () => {
   }
 
   if (blogs.length === 0) {
-    return null;
+    return (
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 mx-auto py-8 md:py-12">
+        <div className="text-center py-12">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            Latest Blog Posts
+          </h2>
+          <p className="text-gray-500 mb-6">No blog posts available yet.</p>
+          <Link
+            to="/blog"
+            className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:opacity-90 transition-colors"
+          >
+            Browse Blog Archive
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

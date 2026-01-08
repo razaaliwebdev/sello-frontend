@@ -5,7 +5,6 @@ import {
   useGetMeQuery,
   useMarkCarAsSoldMutation,
 } from "../../../redux/services/api";
-import { images } from "../../../assets/assets";
 import MapView from "./MapLocation";
 import CarChatWidget from "../../carChat/CarChatWidget";
 import toast from "react-hot-toast";
@@ -106,7 +105,7 @@ const CarDetailsEtc = () => {
     { label: "Regional Specs", value: car.regionalSpec },
     { label: "Cylinders", value: car.numberOfCylinders },
     { label: "Seats", value: car.seats || "4" },
-    { label: "Seller Type", value: car.sellerType },
+    { label: "Seller Type", value: car.ownerType },
     { label: "Warranty", value: car.warranty },
     {
       label: "Horsepower",
@@ -466,7 +465,6 @@ const CarDetailsEtc = () => {
         currentUser._id !== car.postedBy?._id && (
           <CarChatWidget
             carId={car._id}
-            sellerId={car.postedBy?._id || car.postedBy}
             carTitle={`${car.make} ${car.model} - ${car.year}`}
             onClose={() => setShowChat(false)}
           />

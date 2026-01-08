@@ -837,14 +837,8 @@ const UserRolesTab = () => {
                             // Construct invite URL
                             const frontendUrl =
                               import.meta.env.VITE_FRONTEND_URL ||
-                              (typeof window !== "undefined"
-                                ? window.location.origin
-                                : "") ||
-                              import.meta.env.VITE_API_URL?.replace(
-                                "/api",
-                                ""
-                              ) ||
-                              "http://localhost:5173";
+                              import.meta.env.VITE_SITE_URL ||
+                              "https://yourdomain.com";
                             const inviteUrl = invite.token
                               ? `${frontendUrl}/accept-invite/${invite.token}`
                               : null;

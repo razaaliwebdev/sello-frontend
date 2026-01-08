@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { io } from "socket.io-client";
 import {
@@ -6,300 +7,104 @@ import {
     useGetSupportChatMessagesAdminQuery,
     useSendAdminResponseMutation,
     useUpdateSupportChatStatusMutation,
+    useGetChatbotStatsQuery,
+    useGetQuickRepliesQuery,
+    useUseQuickReplyMutation
 } from "../../redux/services/adminApi";
 import { useGetMeQuery } from "../../redux/services/api";
 import Spinner from "../../components/Spinner";
 import toast from "react-hot-toast";
-import { FiSend, FiUser, FiClock, FiAlertTriangle, FiCheckCircle, FiSearch, FiArrowLeft, FiMessageSquare, FiPaperclip, FiX, FiTrendingDown, FiTrendingUp } from "react-icons/fi";
+import { 
+    FiSend, 
+    FiPaperclip, 
+    FiSearch, 
+    FiClock, 
+    FiCheckCircle, 
+    FiMessageSquare, 
+    FiCpu,
+    FiPlus,
+    FiMoreVertical,
+    FiAlertCircle
+} from "react-icons/fi";
 import { IoMdCheckmark, IoMdDoneAll } from "react-icons/io";
 import { formatDistanceToNow } from "date-fns";
-import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { SOCKET_BASE_URL } from "../../redux/config";
 
 const SupportChatbot = () => {
+    const { chatId: chatIdFromParams } = useParams();
     const navigate = useNavigate();
-    const { chatId: chatIdFromRoute } = useParams();
-    const [searchParams] = useSearchParams();
-    const chatIdFromQuery = searchParams.get('chatId');
-    // Support both route params and query params
-    const chatIdFromUrl = chatIdFromRoute || chatIdFromQuery;
     
     const [socket, setSocket] = useState(null);
-    const [selectedChatId, setSelectedChatId] = useState(chatIdFromUrl || null);
-    const [message, setMessage] = useState("");
+    const [selectedChatId, setSelectedChatId] = useState(chatIdFromParams || null);
+    const [messageInput, setMessageInput] = useState("");
     const [messages, setMessages] = useState([]);
-    const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState("all");
     const [socketConnected, setSocketConnected] = useState(false);
-    const [typingUsers, setTypingUsers] = useState([]);
-    const [isAdminTyping] = useState(false);
+    
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
-    const typingTimeoutRef = useRef(null);
+    const fileInputRef = useRef(null);
     const shouldAutoScrollRef = useRef(true);
-    const [chatUserNames, setChatUserNames] = useState({}); // Store user names by chatId
 
     const token = localStorage.getItem("token");
-    
-    // Get current admin user
-    const { data: currentUser } = useGetMeQuery(undefined, { skip: !token });
+    const { data: adminUser } = useGetMeQuery();
+    const adminId = adminUser?._id;
 
+    // Queries
+    const { data: stats } = useGetChatbotStatsQuery(undefined, { pollingInterval: 10000 });
+    const { data: quickReplies } = useGetQuickRepliesQuery({ isActive: true });
+    
     const { data: chatsData, isLoading: chatsLoading, refetch: refetchChats } = useGetAllSupportChatsQuery({
-        status: activeTab === "all" ? undefined : activeTab,
+        status: filterStatus === "all" ? undefined : filterStatus,
+        search: searchQuery || undefined,
     }, {
+        pollingInterval: 5000,
         refetchOnMountOrArgChange: true
     });
 
     const { data: messagesData, isLoading: messagesLoading, refetch: refetchMessages } = useGetSupportChatMessagesAdminQuery(
         selectedChatId,
-        {
+        { 
             skip: !selectedChatId,
+            pollingInterval: 3000,
             refetchOnMountOrArgChange: true
         }
     );
 
-    const [sendAdminResponse, { isLoading: isSendingMessage }] = useSendAdminResponseMutation();
-    const [updateChatStatus] = useUpdateSupportChatStatusMutation();
+    // Mutations
+    const [sendResponse] = useSendAdminResponseMutation();
+    const [updateStatus] = useUpdateSupportChatStatusMutation();
+    const [useQuickReply] = useUseQuickReplyMutation();
 
-    const chats = chatsData?.chats || [];
-    const chatMessages = messages;
-    
-    // Extract user names from all chats when chats data loads
+    // Memoized chats
+    const chats = React.useMemo(() => {
+        if (!chatsData) return [];
+        if (chatsData.chats && Array.isArray(chatsData.chats)) return chatsData.chats;
+        if (Array.isArray(chatsData)) return chatsData;
+        return [];
+    }, [chatsData]);
+
+    const selectedChatData = React.useMemo(() => {
+        if (!selectedChatId) return null;
+        return chats.find(c => String(c._id) === String(selectedChatId));
+    }, [chats, selectedChatId]);
+
+    // Update selectedChatId when URL params change
     useEffect(() => {
-        if (chats.length > 0) {
-            const newUserNames = {};
-            
-            chats.forEach(chat => {
-                if (!chat._id) return;
-                
-                // Skip if we already have the name cached
-                if (chatUserNames[chat._id]) return;
-                
-                // Try to get name from participants
-                if (Array.isArray(chat.participants) && chat.participants.length > 0) {
-                    // Find non-admin participant - try multiple strategies
-                    let userParticipant = null;
-                    
-                    // Strategy 1: Find by role (most reliable)
-                    userParticipant = chat.participants.find(p => {
-                        if (typeof p === 'object' && p !== null) {
-                            return p.role && p.role !== 'admin';
-                        }
-                        return false;
-                    });
-                    
-                    // Strategy 2: Compare IDs with current admin
-                    if (!userParticipant && currentUser?._id) {
-                        userParticipant = chat.participants.find(p => {
-                            if (typeof p === 'object' && p !== null && p._id) {
-                                const participantId = p._id?.toString() || String(p._id);
-                                const adminId = currentUser._id?.toString() || String(currentUser._id);
-                                return participantId !== adminId;
-                        }
-                        return false;
-                    });
-                    }
-                    
-                    // Strategy 3: Get first participant with name that's not admin
-                    if (!userParticipant) {
-                        for (const p of chat.participants) {
-                            if (typeof p === 'object' && p !== null && p.name) {
-                                // Skip if it's the current admin
-                                if (currentUser?._id && p._id) {
-                                    const participantId = p._id?.toString() || String(p._id);
-                                    const adminId = currentUser._id?.toString() || String(currentUser._id);
-                                    if (participantId === adminId) {
-                                    continue; // Skip admin
-                                }
-                                }
-                                userParticipant = p;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (userParticipant?.name) {
-                        newUserNames[chat._id] = userParticipant.name;
-                    }
-                }
-            });
-            
-            // Update state with all found names
-            if (Object.keys(newUserNames).length > 0) {
-                setChatUserNames(prev => ({ ...prev, ...newUserNames }));
-            }
+        if (chatIdFromParams && chatIdFromParams !== selectedChatId) {
+            setSelectedChatId(chatIdFromParams);
         }
-    }, [chats, currentUser]);
+    }, [chatIdFromParams]);
 
-    // Helper function to get user name from chat - with comprehensive fallbacks
-    const getUserNameFromChat = (chat) => {
-        if (!chat) return "Unknown User";
-        
-        // Priority 0: Check if backend already identified the customer (most reliable)
-        if (chat.customerName && chat.customerName !== "Unknown User") {
-            return chat.customerName;
-        }
-
-        const chatId = chat._id?.toString() || String(chat._id);
-        const isSelectedChat = chatId === selectedChatId?.toString() || chatId === selectedChatId;
-        
-        // Method 1: Check stored user name from messages (cached)
-        if (chatId && chatUserNames[chatId]) {
-            return chatUserNames[chatId];
-        }
-        
-        // Method 2: Get user name from messages if this is the selected chat
-        if (isSelectedChat && messages && Array.isArray(messages) && messages.length > 0) {
-            // Find first non-admin, non-bot message to get user name
-            for (const msg of messages) {
-                if (msg.isBot) continue;
-                
-                const isAdmin = msg.sender === 'admin' || 
-                               msg.isAdminResponse === true || 
-                               (currentUser?._id && (
-                                   msg.senderId?.toString() === currentUser._id.toString() ||
-                                   (typeof msg.sender === 'object' && msg.sender?._id?.toString() === currentUser._id.toString())
-                               )) ||
-                               (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
-                
-                if (!isAdmin && msg.sender) {
-                    // Check if sender is an object with name (populated)
-                    if (typeof msg.sender === 'object' && msg.sender?.name) {
-                        const userName = msg.sender.name;
-                        // Store it immediately for future use
-                        if (chatId) {
-                            setChatUserNames(prev => ({ ...prev, [chatId]: userName }));
-                        }
-                        return userName;
-                    }
-                    // Check if sender is populated in a different way
-                    if (msg.senderName) {
-                        if (chatId) {
-                            setChatUserNames(prev => ({ ...prev, [chatId]: msg.senderName }));
-                        }
-                        return msg.senderName;
-                    }
-                }
-            }
-        }
-        
-        // Method 3: Check participants array (if populated with objects)
-        if (Array.isArray(chat.participants) && chat.participants.length > 0) {
-            // Find non-admin participant
-            let userParticipant = null;
-            
-            // Strategy 1: Find by role (most reliable)
-            userParticipant = chat.participants.find(p => {
-                if (typeof p === 'object' && p !== null) {
-                    return p.role && p.role !== 'admin';
-                }
-                return false;
-            });
-            
-            // Strategy 2: If no role found, compare IDs with current admin
-            if (!userParticipant && currentUser?._id) {
-                userParticipant = chat.participants.find(p => {
-                    if (typeof p === 'object' && p !== null && p._id) {
-                        const participantId = p._id?.toString() || String(p._id);
-                        const adminId = currentUser._id?.toString() || String(currentUser._id);
-                        return participantId !== adminId;
-                    }
-                    return false;
-                });
-            }
-            
-            // Strategy 3: Get first participant that has a name and is not the admin
-            if (!userParticipant) {
-                for (const p of chat.participants) {
-                    if (typeof p === 'object' && p !== null && p.name) {
-                        // Skip if it's the current admin
-                        if (currentUser?._id && p._id) {
-                            const participantId = p._id?.toString() || String(p._id);
-                            const adminId = currentUser._id?.toString() || String(currentUser._id);
-                            if (participantId === adminId) {
-                                continue; // Skip admin
-                            }
-                        }
-                        userParticipant = p;
-                        break;
-                    }
-                }
-            }
-            
-            // If we found a user participant with a name, use it
-            if (userParticipant?.name) {
-                const userName = userParticipant.name;
-                // Store it for future use
-                if (chatId) {
-                    setChatUserNames(prev => ({ ...prev, [chatId]: userName }));
-                }
-                return userName;
-            }
-        }
-
-        // Method 4: Check direct user fields (legacy support)
-        if (chat.user && typeof chat.user === 'object' && chat.user.name) return chat.user.name;
-        if (chat.userId && typeof chat.userId === 'object' && chat.userId.name) return chat.userId.name;
-        if (chat.userName && typeof chat.userName === 'string') return chat.userName;
-        
-        return "Unknown User";
-    };
-
-    // Helper function to get user avatar from chat
-    const getUserAvatarFromChat = (chat) => {
-        if (!chat) return null;
-
-        const chatId = chat._id?.toString() || String(chat._id);
-
-        // Method 1: Check chat.user (populated by backend helper)
-        if (chat.user && chat.user.avatar) {
-            return chat.user.avatar;
-        }
-
-        // Method 2: Check participants array
-        if (Array.isArray(chat.participants) && chat.participants.length > 0) {
-            // Strategy 1: Find by role
-            const userParticipant = chat.participants.find(p => {
-                if (typeof p === 'object' && p !== null) {
-                    return p.role && p.role !== 'admin';
-                }
-                return false;
-            });
-
-            if (userParticipant?.avatar) return userParticipant.avatar;
-
-            // Strategy 2: First non-admin participant (by ID)
-            if (currentUser?._id) {
-                const participant = chat.participants.find(p => {
-                    if (typeof p === 'object' && p !== null && p._id) {
-                        return p._id.toString() !== currentUser._id.toString();
-                    }
-                    return false;
-                });
-                if (participant?.avatar) return participant.avatar;
-            }
-        }
-
-        // Method 3: Check messages for sender avatar (if available in cached state or messages list)
-        // This is tricky as we don't cache avatars separately, but maybe we should rely on chat.user mainly.
-        
-        return null; 
-    };
-
-    // Initialize Socket.IO
+    // Initialize Socket
     useEffect(() => {
         if (!token) return;
 
         const newSocket = io(SOCKET_BASE_URL, {
             auth: { token },
             query: { token },
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
-            reconnectionAttempts: 10,
-            timeout: 20000,
-            randomizationFactor: 0.5
+            transports: ['websocket', 'polling']
         });
 
         newSocket.on('connect', () => {
@@ -310,879 +115,389 @@ const SupportChatbot = () => {
             }
         });
 
-        newSocket.on('disconnect', (reason) => {
-            setSocketConnected(false);
-            // Attempt to reconnect
-            if (reason === 'io server disconnect') {
-                // Server disconnected, attempt to reconnect
-                newSocket.connect();
-            }
-        });
-
-        newSocket.on('connect_error', () => {
-            toast.error('Connection failed. Retrying...');
-        });
-
-        newSocket.on('connect_timeout', () => {
-            toast.error('Connection timeout. Retrying...');
-        });
-
-        newSocket.on('error', () => {
-            toast.error('Connection error occurred');
-        });
-
-        newSocket.on('joined-chat', () => {
-        });
-
         newSocket.on('new-message', (data) => {
-            const messageChatId = data.chatId || data.chat?._id;
-            if (messageChatId === selectedChatId || messageChatId?.toString() === selectedChatId?.toString()) {
+            const incomingChatId = data.chatId || data.chat?._id;
+            if (String(incomingChatId) === String(selectedChatId)) {
                 setMessages(prev => {
-                    // Check if message already exists
-                    const exists = prev.some(msg => msg._id === data.message._id);
-                    if (exists) return prev;
-                    
-                    // Remove temporary message if it exists (optimistic update replaced by real message)
-                    const filteredMessages = prev.filter(msg => 
-                        !(msg._id?.startsWith('temp-') && msg.message === data.message.message)
-                    );
-                    return [...filteredMessages, data.message];
+                    if (prev.find(m => m._id === data.message._id)) return prev;
+                    return [...prev, data.message];
                 });
-                
-                // Extract user name from message if it's from a user (not admin/bot)
-                if (data.message && !data.message.isBot) {
-                    const isAdmin = data.message.sender === 'admin' || 
-                                   data.message.isAdminResponse === true || 
-                                   (currentUser?._id && (
-                                       data.message.senderId?.toString() === currentUser._id.toString() ||
-                                       (typeof data.message.sender === 'object' && data.message.sender?._id?.toString() === currentUser._id.toString())
-                                   )) ||
-                                   (typeof data.message.sender === 'object' && data.message.sender?.role === 'admin');
-                    
-                    if (!isAdmin && data.message.sender) {
-                        const chatId = (data.chatId || data.chat?._id)?.toString();
-                        if (chatId) {
-                            // Extract name from sender object
-                            if (typeof data.message.sender === 'object' && data.message.sender?.name) {
-                                setChatUserNames(prev => ({
-                                    ...prev,
-                                    [chatId]: data.message.sender.name
-                                }));
-                            } else if (data.message.senderName) {
-                                setChatUserNames(prev => ({
-                                    ...prev,
-                                    [chatId]: data.message.senderName
-                                }));
-                            }
-                        }
-                    }
-                }
-                
-                // Only auto-scroll if user is near bottom
-                if (shouldAutoScrollRef.current && messagesContainerRef.current) {
-                    setTimeout(() => {
-                        const container = messagesContainerRef.current;
-                        if (container) {
-                            container.scrollTop = container.scrollHeight;
-                        }
-                    }, 100);
-                }
             }
-            // Refetch chats to update unread counts
             refetchChats();
         });
 
-        newSocket.on('typing', (data) => {
-            if (data.chatId === selectedChatId) {
-                setTypingUsers(data.userNames || []);
-            }
-        });
-
-        newSocket.on('message-deleted', (data) => {
-            if (data.chatId === selectedChatId) {
-                setMessages(prev => prev.filter(msg => msg._id !== data.messageId));
-            }
-        });
-
-        newSocket.on('message-seen', (data) => {
-            // Update message seen status
-            setMessages(prev => prev.map(msg => 
-                msg._id === data.messageId 
-                    ? { ...msg, seenBy: data.seenBy, isRead: true }
-                    : msg
-            ));
-        });
+        newSocket.on('disconnect', () => setSocketConnected(false));
 
         setSocket(newSocket);
-
-        return () => {
-            newSocket.close();
-        };
+        return () => newSocket.close();
     }, [token, selectedChatId]);
 
-    // Load messages when chat is selected or messagesData changes
+    // Load messages from query
     useEffect(() => {
-        if (selectedChatId && messagesData) {
-            const messagesArray = Array.isArray(messagesData) 
-                ? messagesData 
-                : (messagesData?.data || []);
-            // Replace messages completely when loading new chat data
-            // Keep only temporary messages for current chat (optimistic updates)
-            const tempMessages = messages.filter(msg => 
-                msg._id?.startsWith('temp-')
-            );
-            // Remove duplicates by _id
-            const seenIds = new Set();
-            const uniqueMessages = messagesArray.filter(msg => {
-                if (seenIds.has(msg._id)) return false;
-                seenIds.add(msg._id);
-                return true;
-            });
-            
-            // Extract user name from messages and store it immediately - PRIORITY
-            // This is the most reliable source since messages always have sender populated
-            if (selectedChatId && uniqueMessages.length > 0) {
-                // Only extract if we don't already have the name cached
-                if (!chatUserNames[selectedChatId]) {
-                    // Find first non-admin, non-bot message to get user name
-                    for (const msg of uniqueMessages) {
-                        if (msg.isBot) continue;
-                        
-                        const isAdmin = msg.sender === 'admin' || 
-                                       msg.isAdminResponse === true || 
-                                       (currentUser?._id && (
-                                           msg.senderId?.toString() === currentUser._id.toString() ||
-                                           (typeof msg.sender === 'object' && msg.sender?._id?.toString() === currentUser._id.toString())
-                                       )) ||
-                                       (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
-                        
-                        if (!isAdmin && msg.sender) {
-                            // Check if sender is an object with name (populated)
-                            if (typeof msg.sender === 'object' && msg.sender?.name) {
-                                const userName = msg.sender.name;
-                                setChatUserNames(prev => ({
-                                    ...prev,
-                                    [selectedChatId]: userName
-                                }));
-                                break; // Found it, stop searching
-                            }
-                            // Check if sender is populated in a different way
-                            if (msg.senderName) {
-                                setChatUserNames(prev => ({
-                                    ...prev,
-                                    [selectedChatId]: msg.senderName
-                                }));
-                                break; // Found it, stop searching
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Sort messages by createdAt
-            const sortedMessages = [...uniqueMessages, ...tempMessages].sort((a, b) => {
-                const timeA = new Date(a.createdAt || 0).getTime();
-                const timeB = new Date(b.createdAt || 0).getTime();
-                return timeA - timeB;
-            });
-            setMessages(sortedMessages);
-            
-            // Extract user name from messages and store it
-            if (selectedChatId && messagesArray.length > 0) {
-                // Find first non-admin, non-bot message to get user name
-                const userMessage = messagesArray.find(msg => {
-                    if (msg.isBot) return false;
-                    const isAdmin = msg.sender === 'admin' || 
-                                   msg.isAdminResponse === true || 
-                                   msg.senderId === currentUser?._id ||
-                                   (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
-                    return !isAdmin && msg.sender;
-                });
-                
-                if (userMessage && typeof userMessage.sender === 'object' && userMessage.sender?.name) {
-                    setChatUserNames(prev => ({
-                        ...prev,
-                        [selectedChatId]: userMessage.sender.name
-                    }));
-                }
-            }
+        if (messagesData) {
+            const messagesArray = Array.isArray(messagesData) ? messagesData : (messagesData?.data || []);
+            setMessages(messagesArray);
+            shouldAutoScrollRef.current = true;
         } else {
             setMessages([]);
         }
-        // Reset auto-scroll when switching chats or loading new messages
-        shouldAutoScrollRef.current = true;
-    }, [messagesData, selectedChatId, currentUser]);
+    }, [messagesData, selectedChatId]);
 
-    // Select chat from URL on mount or when chats load
-    useEffect(() => {
-        if (chatIdFromUrl && chatIdFromUrl !== selectedChatId) {
-            // Wait for chats to load if they're still loading
-            if (chatsLoading) {
-                return;
-            }
-            // Check if chat exists in the list
-            const chatExists = chats.find(c => c._id === chatIdFromUrl || c._id?.toString() === chatIdFromUrl);
-            if (chatExists || chats.length === 0) {
-            handleSelectChat(chatIdFromUrl);
-        }
-        }
-    }, [chatIdFromUrl, chats, chatsLoading]);
-
-    // Track user scroll to determine if we should auto-scroll
+    // Auto-scroll logic
     useEffect(() => {
         const container = messagesContainerRef.current;
         if (!container) return;
 
         const handleScroll = () => {
             const { scrollTop, scrollHeight, clientHeight } = container;
-            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-            shouldAutoScrollRef.current = isNearBottom;
+            shouldAutoScrollRef.current = scrollHeight - scrollTop - clientHeight < 100;
         };
 
         container.addEventListener('scroll', handleScroll);
         return () => container.removeEventListener('scroll', handleScroll);
     }, [selectedChatId]);
 
-    // Auto-scroll to bottom only if user is near bottom
     useEffect(() => {
-        const container = messagesContainerRef.current;
-        if (!container || chatMessages.length === 0) return;
-        
-        if (shouldAutoScrollRef.current) {
-            requestAnimationFrame(() => {
-                container.scrollTop = container.scrollHeight;
-            });
+        if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
-    }, [chatMessages, typingUsers]);
+    }, [messages]);
 
     const handleSelectChat = (chatId) => {
-        if (!chatId) return;
-        
-        // Update URL to reflect selected chat (use route param format)
-        const chatIdString = chatId.toString();
-        navigate(`/admin/support-chatbot/${chatIdString}`, { replace: true });
-        
-        setSelectedChatId(chatIdString);
-        // Clear all messages when switching chats
-        setMessages([]);
-        // Reset auto-scroll when switching chats
-        shouldAutoScrollRef.current = true;
-        
-        if (socket) {
-            socket.emit('join-chat', chatIdString);
-        }
-        
-        // Refetch messages for the new chat
-        setTimeout(() => {
-            refetchMessages();
-        }, 100);
+        setSelectedChatId(chatId);
+        navigate(`/admin/support-chatbot/${chatId}`);
     };
 
-    const handleTyping = () => {
-        if (!socket || !selectedChatId) return;
+    const handleSendMessage = async (customMessage) => {
+        const text = (customMessage || messageInput).trim();
+        if (!text || !selectedChatId) return;
 
-        socket.emit('typing', { chatId: selectedChatId, isTyping: true });
-
-        if (typingTimeoutRef.current) {
-            clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = setTimeout(() => {
-            socket.emit('typing', { chatId: selectedChatId, isTyping: false });
-        }, 1000);
-    };
-
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-        if (!message.trim() || !selectedChatId) return;
-
-        const messageText = message.trim();
-        setMessage("");
+        if (!customMessage) setMessageInput("");
 
         try {
-            if (socket && socket.connected) {
-                // Send via socket for real-time delivery
-                socket.emit('send-message', {
-                    chatId: selectedChatId,
-                    message: messageText,
-                    messageType: 'text',
-                    isAdminResponse: true
-                });
-                // Optimistically add the message to UI with unique temporary ID
-                const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                const tempMessage = {
-                    _id: tempId,
-                    message: messageText,
-                    sender: 'admin',
-                    isAdminResponse: true,
-                    createdAt: new Date()
-                };
-                setMessages(prev => [...prev, tempMessage]);
-                // Only auto-scroll if user is near bottom
-                if (shouldAutoScrollRef.current && messagesContainerRef.current) {
-                    setTimeout(() => {
-                        const container = messagesContainerRef.current;
-                        if (container) {
-                            container.scrollTop = container.scrollHeight;
-                        }
-                    }, 100);
-                }
-            } else {
-                // Fallback to HTTP if socket not connected
-                const result = await sendAdminResponse({
-                    chatId: selectedChatId,
-                    message: messageText,
-                }).unwrap();
-                
-                // Add message to state
-                if (result?.data) {
-                    setMessages(prev => [...prev, result.data]);
-                }
-                
-                refetchMessages();
-                toast.success("Message sent");
-            }
+            await sendResponse({
+                chatId: selectedChatId,
+                message: text,
+            }).unwrap();
+            
+            refetchMessages();
+            refetchChats();
         } catch (error) {
-            // Error handled by toast
             toast.error(error?.data?.message || "Failed to send message");
         }
     };
 
-    const handleStatusChange = async (chatId, status, priority) => {
+    const handleFileUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0 || !selectedChatId) return;
+
         try {
-            await updateChatStatus({ chatId, status, priority }).unwrap();
-            toast.success("Chat status updated");
+            await sendResponse({
+                chatId: selectedChatId,
+                message: '📎 Attachment',
+                attachments: files
+            }).unwrap();
+            refetchMessages();
             refetchChats();
+            toast.success("File uploaded");
         } catch (error) {
-            toast.error(error?.data?.message || "Failed to update status");
+            toast.error("Failed to upload file");
         }
     };
 
-    // Statistics
-    const stats = {
-        open: chats.filter(c => c.status === "open").length,
-        pending: chats.filter(c => c.status === "pending").length,
-        resolved: chats.filter(c => c.status === "resolved").length,
-        urgent: chats.filter(c => c.priority === "urgent").length,
+    const handleStatusChange = async (status) => {
+        if (!selectedChatId) return;
+        try {
+            await updateStatus({ chatId: selectedChatId, status }).unwrap();
+            toast.success("Status updated");
+            refetchChats();
+        } catch (error) {
+            toast.error("Failed to update status");
+        }
+    };
+
+    const handleQuickReply = async (reply) => {
+        try {
+            await useQuickReply(reply._id).unwrap();
+            handleSendMessage(reply.message);
+        } catch (error) {
+            toast.error("Failed to use quick reply");
+        }
+    };
+
+    const getUserName = (chat) => {
+        if (!chat) return "User";
+        if (chat.customerName && chat.customerName !== "Unknown User") return chat.customerName;
+        const customer = chat.participants?.find(p => p.role !== 'admin');
+        return customer?.name || "User";
+    };
+
+    const getUserAvatar = (chat) => {
+        if (!chat) return null;
+        const customer = chat.participants?.find(p => p.role !== 'admin');
+        return customer?.avatar || null;
     };
 
     return (
         <AdminLayout>
-            <div className="p-6 bg-gray-50 min-h-screen">
-                {/* Header */}
-                <div className="mb-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/admin/chat-monitoring')}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                title="Back to Chat History"
-                            >
-                                <FiArrowLeft size={24} className="text-gray-600" />
-                            </button>
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Live Support Chat</h2>
-                                <p className="text-sm text-gray-500 mt-1">
-                                    Chat with customers in real-time • WhatsApp-style messaging
-                                </p>
-                            </div>
-                        </div>
-                        {/* Connection Status */}
-                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
-                            <div className={`w-2 h-2 rounded-full ${
-                                socketConnected ? 'bg-primary-500 animate-pulse' : 'bg-red-500'
-                            }`}></div>
-                            <span className="text-sm font-medium text-gray-700">
-                                {socketConnected ? '🟢 Live Connected' : '🔴 Disconnected'}
-                            </span>
-                        </div>
-                    </div>
+            <div className="flex flex-col h-[calc(100vh-100px)] space-y-4">
+                {/* Stats Header */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <StatCard 
+                        label="Active Support" 
+                        value={stats?.activeChats || 0} 
+                        icon={<FiMessageSquare className="text-blue-500" />} 
+                        bg="bg-blue-50"
+                    />
+                    <StatCard 
+                        label="Pending" 
+                        value={stats?.pending || 0} 
+                        icon={<FiClock className="text-yellow-500" />} 
+                        bg="bg-yellow-50"
+                    />
+                    <StatCard 
+                        label="Resolved Today" 
+                        value={stats?.resolvedToday || stats?.resolved || 0} 
+                        icon={<FiCheckCircle className="text-green-500" />} 
+                        bg="bg-green-50"
+                    />
+                    <StatCard 
+                        label="Avg. Response" 
+                        value={stats?.avgResponseTime || "5m"} 
+                        icon={<FiClock className="text-purple-500" />} 
+                        bg="bg-purple-50"
+                    />
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    {/* Open */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Open Chats</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.open}</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                <FiClock className="text-primary-500" size={20} />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-2">
-                            <FiTrendingUp size={12} className="text-green-500" />
-                            <span className="text-xs font-medium text-green-600">+12%</span>
-                            <span className="text-xs text-gray-500">vs last hour</span>
-                        </div>
-                    </div>
-
-                    {/* Pending */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Pending</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                <FiClock className="text-primary-600" size={20} />
+                {/* Main Chat Interface */}
+                <div className="flex-1 flex bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    
+                    {/* Chat List Sidebar */}
+                    <div className="w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3">
+                            <h2 className="text-lg font-bold flex items-center gap-2">
+                                <FiCpu className="text-primary-500" />
+                                Chats
+                            </h2>
+                            <div className="relative">
+                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input 
+                                    type="text"
+                                    placeholder="Search..."
+                                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 mt-2">
-                            <FiTrendingUp size={12} className="text-green-500" />
-                            <span className="text-xs font-medium text-green-600">+5%</span>
-                            <span className="text-xs text-gray-500">vs last hour</span>
-                        </div>
-                    </div>
-
-                    {/* Resolved */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Resolved</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.resolved}</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                <FiCheckCircle className="text-green-600" size={20} />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-2">
-                            <FiTrendingUp size={12} className="text-green-500" />
-                            <span className="text-xs font-medium text-green-600">+8%</span>
-                            <span className="text-xs text-gray-500">vs last hour</span>
-                        </div>
-                    </div>
-
-                    {/* Urgent */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Urgent</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.urgent}</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                                <FiAlertTriangle className="text-red-600" size={20} />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-2">
-                            <FiTrendingDown size={12} className="text-red-500" />
-                            <span className="text-xs font-medium text-red-600">-3%</span>
-                            <span className="text-xs text-gray-500">vs last hour</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* WhatsApp-Style Chat Interface */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Chat List - Left Side */}
-                    <div className="lg:col-span-4">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-[700px] flex flex-col">
-                            {/* Search and Tabs */}
-                            <div className="p-4 border-b border-gray-200 bg-gray-50">
-                                <div className="relative mb-3">
-                                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search conversations..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                                    />
-                                    {searchQuery && (
-                                        <button 
-                                            onClick={() => setSearchQuery('')}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            <FiX size={16} />
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="flex gap-2">
-                                    {["all", "active", "urgent"].map((tab) => (
-                                        <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                                activeTab === tab
-                                                    ? "bg-primary-500 text-white shadow-sm"
-                                                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                                            }`}
-                                        >
-                                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            {/* Chat List */}
-                            <div className="flex-1 overflow-y-auto">
-                                <div className="divide-y divide-gray-100">
-                                    {chatsLoading ? (
-                                        <div className="flex justify-center py-12">
-                                            <Spinner fullScreen={false} />
-                                        </div>
-                                    ) : chats.length === 0 ? (
-                                        <div className="text-center py-12">
-                                            <FiMessageSquare className="mx-auto text-gray-300 mb-3" size={48} />
-                                            <p className="text-gray-500 text-sm">No support chats yet</p>
-                                            <p className="text-gray-400 text-xs mt-1">Chats will appear here when customers request support</p>
-                                        </div>
-                                    ) : (
-                                        chats
-                                            .filter((chat) =>
-                                                searchQuery
-                                                    ? getUserNameFromChat(chat).toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                                      chat.subject?.toLowerCase().includes(searchQuery.toLowerCase())
-                                                    : true
-                                            )
-                                            .map((chat) => (
-                                                <div
-                                                    key={chat._id}
-                                                    onClick={() => handleSelectChat(chat._id)}
-                                                    className={`p-4 cursor-pointer transition-all ${
-                                                        selectedChatId === chat._id
-                                                            ? "bg-primary-50 border-l-4 border-l-primary-500"
-                                                            : "hover:bg-gray-50"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                    <div className="relative">
-                                                        <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                                            {(() => {
-                                                                const avatar = getUserAvatarFromChat(chat);
-                                                                if (avatar) {
-                                                                    return <img src={avatar} alt="User" className="w-full h-full object-cover" />;
-                                                                }
-                                                                return (
-                                                                    <span className="text-base font-semibold text-primary-500">
-                                                                        {getUserNameFromChat(chat).charAt(0).toUpperCase()}
-                                                                    </span>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                        {chat.unreadCount > 0 && (
-                                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
-                                                                {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between mb-1">
-                                                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                                                    {getUserNameFromChat(chat)}
-                                                                </p>
-                                                                <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                                                                    {chat.lastMessageAt
-                                                                        ? formatDistanceToNow(new Date(chat.lastMessageAt), { addSuffix: false })
-                                                                        : ""}
-                                                                </span>
-                                                            </div>
-                                                            <p className="text-xs text-gray-600 font-medium truncate mb-1">
-                                                                {chat.subject || "Support Request"}
-                                                            </p>
-                                                            <div className="flex items-center justify-between">
-                                                                <p className="text-xs text-gray-500 truncate flex-1">
-                                                                    {chat.lastMessage || "No messages yet"}
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className={`text-xs px-2 py-0.5 rounded-full ${{
-                                                                    open: 'bg-primary-100 text-primary-800',
-                                                                    pending: 'bg-primary-100 text-primary-500',
-                                                                    resolved: 'bg-gray-100 text-gray-800'
-                                                                }[chat.status] || 'bg-gray-100 text-gray-800'}
-                                                                `}>
-                                                                    {{open: 'Open', pending: 'Pending', resolved: 'Resolved'}[chat.status] || chat.status}
-                                                                </span>
-                                                                {chat.priority === 'urgent' && (
-                                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800">
-                                                                        Urgent
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Chat Window - Right Side (WhatsApp Style) */}
-                    <div className="lg:col-span-8">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 h-[700px] flex flex-col">
-                            {!selectedChatId ? (
-                                <div className="flex-1 flex items-center justify-center bg-gray-50">
-                                    <div className="text-center">
-                                        <div className="w-32 h-32 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
-                                            <FiMessageSquare className="text-primary-500" size={64} />
-                                        </div>
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">WhatsApp-Style Live Chat</h3>
-                                        <p className="text-gray-500 text-sm">Select a conversation from the list to start chatting with customers</p>
-                                        <p className="text-gray-400 text-xs mt-2">Messages are delivered in real-time via Socket.IO</p>
-                                    </div>
-                                </div>
+                        
+                        <div className="flex-1 overflow-y-auto">
+                            {chatsLoading ? (
+                                <div className="p-4 flex justify-center"><Spinner fullScreen={false} /></div>
+                            ) : chats.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500 text-sm">No chats found</div>
                             ) : (
-                                <>
-                                    {/* Chat Header - WhatsApp Style */}
-                                    <div className="p-4 border-b border-gray-200 bg-gray-50">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                    <div className="relative">
-                                                        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
-                                                            {(() => {
-                                                                const selectedChat = chats.find((c) => c._id === selectedChatId || c._id?.toString() === selectedChatId?.toString());
-                                                                
-                                                                if (!selectedChat) {
-                                                                    const cachedName = chatUserNames[selectedChatId];
-                                                                    return (
-                                                                        <span className="text-lg font-bold text-primary-500">
-                                                                            {cachedName ? cachedName.charAt(0).toUpperCase() : 'U'}
-                                                                        </span>
-                                                                    );
-                                                                }
-
-                                                                const avatar = getUserAvatarFromChat(selectedChat);
-                                                                if (avatar) {
-                                                                    return <img src={avatar} alt="User" className="w-full h-full object-cover" />;
-                                                                }
-
-                                                                const userName = getUserNameFromChat(selectedChat);
-                                                                return (
-                                                                    <span className="text-lg font-bold text-primary-500">
-                                                                        {userName.charAt(0).toUpperCase()}
-                                                                    </span>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary-500 border-2 border-white"></div>
-                                                    </div>
-                                                <div>
-                                                    <p className="text-base font-semibold text-gray-900">
-                                                        {(() => {
-                                                            const selectedChat = chats.find((c) => c._id === selectedChatId || c._id?.toString() === selectedChatId?.toString());
-                                                            // If chat not found in list, try to get name from chatUserNames directly
-                                                            if (!selectedChat) {
-                                                                if (chatUserNames[selectedChatId]) return chatUserNames[selectedChatId];
-                                                                return "Unknown User";
-                                                            }
-                                                            return getUserNameFromChat(selectedChat);
-                                                        })()}
-                                                    </p>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-primary-500"></div>
-                                                        <p className="text-xs text-gray-600">
-                                                            {typingUsers.length > 0 ? `${typingUsers.join(', ')} typing...` : 'Online'}
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        {chats.find((c) => c._id === selectedChatId)?.subject || "Support Request"}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <select
-                                                    value={chats.find((c) => c._id === selectedChatId)?.status || 'open'}
-                                                    onChange={(e) =>
-                                                        handleStatusChange(selectedChatId, e.target.value, undefined)
-                                                    }
-                                                    className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
-                                                >
-                                                    <option value="open">🟢 Open</option>
-                                                    <option value="pending">🟡 Pending</option>
-                                                    <option value="resolved">✅ Resolved</option>
-                                                </select>
-                                                <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-                                                    <FiSearch size={18} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Messages - WhatsApp Style Background */}
-                                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ECE5DD] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern id=%22grid%22 width=%2260%22 height=%2260%22 patternUnits=%22userSpaceOnUse%22%3E%3Cpath d=%22M 60 0 L 0 0 0 60%22 fill=%22none%22 stroke=%22%23d4d4d4%22 stroke-width=%221%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22url(%23grid)%22 opacity=%220.1%22/%3E%3C/svg%3E')]">
-                                        {messagesLoading ? (
-                                            <div className="flex justify-center py-12">
-                                                <Spinner fullScreen={false} />
-                                            </div>
-                                        ) : chatMessages.length === 0 ? (
-                                            <div className="text-center py-12">
-                                                <div className="bg-white rounded-lg shadow-sm p-6 max-w-sm mx-auto">
-                                                    <FiMessageSquare className="mx-auto text-primary-500 mb-3" size={40} />
-                                                    <p className="text-gray-700 font-medium">No messages yet</p>
-                                                    <p className="text-gray-500 text-sm mt-1">Start the conversation with this customer</p>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            chatMessages.map((msg) => {
-                                                // Check if message is from admin - check multiple conditions
-                                                const isAdmin = msg.sender === 'admin' || 
-                                                               msg.isAdminResponse === true || 
-                                                               msg.senderId === currentUser?._id ||
-                                                               (typeof msg.sender === 'object' && msg.sender?.role === 'admin');
-                                                const isBot = msg.isBot;
-                                                const timeStr = msg.createdAt
-                                                    ? new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-                                                    : '';
-                                                
-                                                return (
-                                                    <div
-                                                        key={msg._id}
-                                                        className={`flex ${
-                                                            isAdmin ? "justify-end" : "justify-start"
-                                                        }`}
-                                                    >
-                                                        {!isAdmin && !isBot && (
-                                                            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-2 flex-shrink-0 self-end">
-                                                                <span className="text-xs font-semibold text-primary-500">
-                                                                    {(msg.sender?.name || 'U').charAt(0).toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                        <div
-                                                            className={`max-w-md px-3 py-2 rounded-lg shadow-md ${
-                                                                isAdmin
-                                                                    ? "bg-primary-500 text-white rounded-tr-none"
-                                                                    : isBot
-                                                                    ? "bg-gray-200 text-gray-800 rounded-tl-none"
-                                                                    : "bg-white text-gray-900 rounded-tl-none"
-                                                            }`}
-                                                        >
-                                                            {isBot && (
-                                                                <p className="text-xs font-semibold mb-1 text-gray-700">🤖 AI Assistant</p>
-                                                            )}
-                                                            {!isAdmin && !isBot && (
-                                                                <p className="text-xs font-semibold mb-1 text-gray-700">
-                                                                    {msg.sender?.name || 'Customer'}
-                                                                </p>
-                                                            )}
-                                                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
-                                                            {msg.attachments && msg.attachments.length > 0 && (
-                                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                                    {msg.attachments.map((attachment, idx) => (
-                                                                        <div key={idx} className="relative group">
-                                                                            <img 
-                                                                                src={attachment} 
-                                                                                alt="Attachment" 
-                                                                                className="w-24 h-24 object-cover rounded-lg border border-gray-200"
-                                                                            />
-                                                                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                                <FiSearch className="text-white" size={20} />
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                            <div className="flex items-center justify-end gap-1 mt-1">
-                                                                <span
-                                                                    className={`text-xs ${
-                                                                        isAdmin
-                                                                            ? "text-primary-100"
-                                                                            : "text-gray-500"
-                                                                    }`}
-                                                                >
-                                                                    {timeStr}
-                                                                </span>
-                                                                {isAdmin && (
-                                                                    msg.isRead || msg.seenBy?.length > 0 ? (
-                                                                        <IoMdDoneAll className={msg.seenBy?.length > 0 ? "text-primary-300" : "text-white opacity-70"} size={16} />
-                                                                    ) : (
-                                                                        <IoMdCheckmark className="text-white opacity-70" size={16} />
-                                                                    )
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })
-                                        )}
-                                        {/* Typing indicator - WhatsApp Style */}
-                                        {typingUsers.length > 0 && (
-                                            <div className="flex justify-start items-end">
-                                                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-2">
-                                                    <span className="text-xs font-semibold text-primary-500">...</span>
-                                                </div>
-                                                <div className="bg-white px-4 py-2 rounded-lg rounded-tl-none shadow-md">
-                                                    <div className="flex gap-1">
-                                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-1">{typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div ref={messagesEndRef} />
-                                    </div>
-
-                                    {/* Message Input - WhatsApp Style */}
-                                    <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-gray-50">
-                                        <div className="flex gap-3 items-center mb-2">
-                                            <button 
-                                                type="button"
-                                                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors"
-                                                title="Attach file"
-                                            >
-                                                <FiPaperclip size={20} />
-                                            </button>
-                                            <input
-                                                type="text"
-                                                value={message}
-                                                onChange={(e) => {
-                                                    setMessage(e.target.value);
-                                                    handleTyping();
-                                                }}
-                                                placeholder="Type a message..."
-                                                className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-sm"
-                                                onKeyPress={(e) => {
-                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                        e.preventDefault();
-                                                        handleSendMessage(e);
-                                                    }
-                                                }}
-                                            />
-                                            <button
-                                                type="submit"
-                                                disabled={!message.trim() || isSendingMessage}
-                                                className="p-3 bg-primary-500 text-white rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center"
-                                                title="Send message"
-                                            >
-                                                {isSendingMessage ? (
-                                                    <Spinner fullScreen={false} />
+                                chats.map((chat) => (
+                                    <div 
+                                        key={chat._id}
+                                        onClick={() => handleSelectChat(chat._id)}
+                                        className={`p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition ${
+                                            String(selectedChatId) === String(chat._id) ? 'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-l-primary-500' : ''
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold overflow-hidden">
+                                                {getUserAvatar(chat) ? (
+                                                    <img src={getUserAvatar(chat)} className="w-full h-full object-cover" alt="" />
                                                 ) : (
-                                                    <FiSend size={20} />
+                                                    getUserName(chat).charAt(0).toUpperCase()
                                                 )}
-                                            </button>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start">
+                                                    <p className="font-semibold text-sm truncate">{getUserName(chat)}</p>
+                                                    <span className="text-[10px] text-gray-500">{formatDistanceToNow(new Date(chat.updatedAt || Date.now()), { addSuffix: false })}</span>
+                                                </div>
+                                                <p className="text-xs text-gray-500 truncate">{chat.lastMessage || chat.subject || "No message"}</p>
+                                            </div>
                                         </div>
-                                        {isAdminTyping && (
-                                            <p className="text-xs text-gray-500 mt-2 ml-4">Admin is typing...</p>
-                                        )}
-                                    </form>
-                                </>
+                                    </div>
+                                ))
                             )}
                         </div>
                     </div>
-                </div>
 
-                {/* Quick Replies Section */}
-                <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Quick Replies</h3>
-                        <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:opacity-90 flex items-center gap-2 text-sm">
-                            <span className="text-lg">+</span>
-                            New
-                        </button>
-                    </div>
-                    <div className="text-center py-12">
-                        <p className="text-gray-500">No templates yet</p>
+                    {/* Chat Window */}
+                    <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900/50">
+                        {selectedChatId ? (
+                            <>
+                                {/* Chat Header */}
+                                <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-primary-500 text-white flex items-center justify-center font-bold">
+                                            {getUserAvatar(selectedChatData) ? (
+                                                <img src={getUserAvatar(selectedChatData)} className="w-full h-full rounded-full object-cover" alt="" />
+                                            ) : (
+                                                getUserName(selectedChatData).charAt(0).toUpperCase()
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-800 dark:text-white leading-tight">
+                                                {getUserName(selectedChatData)}
+                                            </p>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-500' : 'bg-gray-400 animate-pulse'}`}></span>
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">
+                                                    {socketConnected ? 'Connected' : 'Reconnecting...'} • {selectedChatData?.status || 'Open'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <select 
+                                            className="text-xs border rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                                            value={selectedChatData?.status || 'open'}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                        >
+                                            <option value="open">Open</option>
+                                            <option value="resolved">Resolved</option>
+                                            <option value="closed">Closed</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Messages Area */}
+                                <div className="flex-1 overflow-y-auto p-6 space-y-4" ref={messagesContainerRef}>
+                                    {messagesLoading ? (
+                                        <div className="flex justify-center h-full items-center"><Spinner fullScreen={false} /></div>
+                                    ) : messages.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-2">
+                                            <FiMessageSquare size={48} className="opacity-20" />
+                                            <p className="text-sm">No conversation history found</p>
+                                        </div>
+                                    ) : (
+                                        messages.map((msg, idx) => {
+                                            const isAdmin = msg.sender?.role === 'admin' || String(msg.sender?._id || msg.sender) === String(adminId);
+                                            const isBot = msg.isBot;
+                                            
+                                            return (
+                                                <div key={msg._id || idx} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`flex flex-col max-w-[75%] ${isAdmin ? 'items-end' : 'items-start'}`}>
+                                                        <div className={`px-4 py-2.5 rounded-2xl shadow-sm relative ${
+                                                            isAdmin 
+                                                                ? 'bg-primary-500 text-white rounded-tr-none' 
+                                                                : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-gray-700'
+                                                        }`}>
+                                                            {msg.attachments && msg.attachments.length > 0 && (
+                                                                <div className="space-y-2 mb-2">
+                                                                    {msg.attachments.map((url, idx) => (
+                                                                        <img
+                                                                            key={idx}
+                                                                            src={url}
+                                                                            alt="Attachment"
+                                                                            className="max-w-full rounded-lg"
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.message}</p>
+                                                            <div className={`flex items-center gap-1 mt-1.5 opacity-60 ${isAdmin ? 'justify-end' : ''}`}>
+                                                                <span className="text-[9px] font-medium uppercase">
+                                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                                {isAdmin && (
+                                                                    <span className="text-[10px]">
+                                                                        {msg.seenBy?.length > 0 ? <IoMdDoneAll /> : <IoMdCheckmark />}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Quick Replies bar */}
+                                {quickReplies?.length > 0 && (
+                                    <div className="px-4 py-2 flex gap-2 overflow-x-auto bg-white/50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 no-scrollbar">
+                                        {quickReplies.map(reply => (
+                                            <button 
+                                                key={reply._id}
+                                                onClick={() => handleQuickReply(reply)}
+                                                className="whitespace-nowrap px-3 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full text-xs hover:border-primary-500 hover:text-primary-500 transition shadow-sm font-medium"
+                                            >
+                                                {reply.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Message Input */}
+                                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        onChange={handleFileUpload} 
+                                        className="hidden" 
+                                        multiple 
+                                    />
+                                    <div className="flex gap-3 items-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded-xl focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
+                                        <button 
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="p-2 text-gray-400 hover:text-primary-500 transition"
+                                        >
+                                            <FiPaperclip size={20} />
+                                        </button>
+                                        <input 
+                                            type="text" 
+                                            value={messageInput}
+                                            onChange={(e) => setMessageInput(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            placeholder="Type your response here..."
+                                            className="flex-1 bg-transparent border-none outline-none text-sm dark:text-white px-2"
+                                        />
+                                        <button 
+                                            onClick={() => handleSendMessage()}
+                                            disabled={!messageInput.trim()}
+                                            className="bg-primary-500 text-white p-2.5 rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:grayscale transition shadow-md"
+                                        >
+                                            <FiSend size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="m-auto text-center space-y-4 max-w-sm px-6">
+                                <div className="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <FiCpu size={40} className="text-primary-500" />
+                                </div>
+                                <h3 className="text-xl font-bold dark:text-white font-outfit">Ready to Assist</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-inter">
+                                    Select a conversation from the list to start responding. You can use Quick Replies to speed up your support.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
         </AdminLayout>
     );
 };
+
+const StatCard = ({ label, value, icon, bg }) => (
+    <div className={`p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 bg-white dark:bg-gray-800 transition-all hover:shadow-md`}>
+        <div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center text-xl`}>
+            {icon}
+        </div>
+        <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+            <p className="text-xl font-black font-outfit dark:text-white">{value}</p>
+        </div>
+    </div>
+);
 
 export default SupportChatbot;

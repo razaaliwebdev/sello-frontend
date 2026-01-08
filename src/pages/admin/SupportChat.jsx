@@ -410,9 +410,11 @@ const SupportChat = () => {
     };
 
     const getUserName = (chat) => {
-        if (!chat || !chat.participants) return "User";
-        const user = chat.participants.find(p => p.role !== 'admin');
-        return user?.name || "User";
+        if (!chat) return "User";
+        if (chat.customerName && chat.customerName !== "Unknown User") return chat.customerName;
+        if (!chat.participants) return "User";
+        const user = chat.participants.find(p => p.role && p.role !== 'admin');
+        return user?.name || chat.participants.find(p => p.name && p.role !== 'admin')?.name || "User";
     };
 
     const getUserAvatar = (chat) => {
@@ -640,10 +642,11 @@ const SupportChat = () => {
                                             const isCurrentAdmin = currentAdminId && msgSenderId && 
                                                                    currentAdminId === msgSenderId;
                                             
-                                            // Check if message sender is a user (not admin, not bot)
-                                            const isUserMessage = msgSenderId && msg.sender?.role !== 'admin' && !msg.isBot;
-                                            const senderUser = isUserMessage ? getUserById(msg.sender._id) : null;
                                             const isBot = msg.isBot;
+                                            
+                                            // Check if message sender is a user (not admin, not bot)
+                                            const isUserMessage = msgSenderId && msgSenderId !== currentAdminId && !isBot;
+                                            const senderUser = isUserMessage ? getUserById(msgSenderId) : null;
                                             
                                             // In admin view: only admin can edit/delete their own messages
                                             // Users edit/delete from their own widget (SupportChatWidget)
@@ -688,19 +691,12 @@ const SupportChat = () => {
                                                     className={`rounded-lg px-3 py-2 ${
                                                         isCurrentAdmin
                                                             ? "bg-primary-100 dark:bg-primary-900/30 rounded-tr-none"
-                                                            : isBot
-                                                            ? "bg-gray-200 dark:bg-gray-700 rounded-tl-none"
                                                             : "bg-white dark:bg-gray-800 rounded-tl-none"
                                                     } shadow-sm`}
                                                     >
-                                                        {!isCurrentAdmin && !isBot && (
+                                                        {!isCurrentAdmin && (
                                                             <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                                                                 {msg.sender?.name || 'User'}
-                                                            </p>
-                                                        )}
-                                                        {isBot && (
-                                                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                                                🤖 AI Assistant
                                                             </p>
                                                         )}
                                                         {msg.attachments && msg.attachments.length > 0 && (

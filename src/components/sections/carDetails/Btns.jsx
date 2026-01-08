@@ -67,7 +67,7 @@ const Btns = () => {
         navigator.clipboard.writeText(currentUrl);
         toast.success("Link copied to clipboard!");
       }
-    } catch (error) {
+    } catch {
       // Share failed
     }
   };
@@ -111,10 +111,10 @@ const Btns = () => {
 
     try {
       if (isSaved) {
-        await unsaveCar(id).unwrap();
+        await unsaveCar(extractedCarId).unwrap();
         toast.success("Listing removed from saved");
       } else {
-        await saveCar(id).unwrap();
+        await saveCar(extractedCarId).unwrap();
         toast.success("Listing saved successfully");
       }
     } catch (error) {
@@ -212,7 +212,6 @@ const Btns = () => {
       {showChat && car && currentUser && (
         <CarChatWidget
           carId={car._id}
-          sellerId={car.postedBy?._id || car.postedBy}
           carTitle={`${car.make} ${car.model} - ${car.year}`}
           onClose={() => setShowChat(false)}
         />

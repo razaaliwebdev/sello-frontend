@@ -186,16 +186,10 @@ const HeroFilter = () => {
   // Navigate to results when search completes
   useEffect(() => {
     if (filteredCars && !isSearching && queryParams) {
-      // Format the data structure expected by FilteredResults component
-      const formattedData = {
-        cars: Array.isArray(filteredCars) ? filteredCars : [],
-        total: Array.isArray(filteredCars) ? filteredCars.length : 0,
-        data: Array.isArray(filteredCars) ? filteredCars : [],
-      };
-
+      // Use the normalized data directly from RTK Query
       navigate("/search-results", {
         state: {
-          filteredCars: formattedData,
+          filteredCars: filteredCars, // Already formatted as { cars, total, ... }
           isLoading: isSearching,
           filters: queryParams,
         },
@@ -267,7 +261,7 @@ const HeroFilter = () => {
   ];
 
   return (
-    <div className="flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="flex w-full items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="w-full mx-auto">
         {/* Main Filter Container */}
         <div className=" rounded-xl shadow-2xl overflow-hidden border-4  bg-primary-500">

@@ -1,16 +1,17 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { buildCarUrl } from "../../../utils/urlBuilders";
+import { formatPrice } from "../../../utils/format";
 import { images } from "../../../assets/assets";
 import LazyImage from "../../common/LazyImage";
-import { 
+import {
   useGetMeQuery,
   useGetSavedCarsQuery,
   useSaveCarMutation,
-  useUnsaveCarMutation 
+  useUnsaveCarMutation,
 } from "../../../redux/services/api";
 import toast from "react-hot-toast";
 
@@ -35,29 +36,36 @@ const CarCardSkeleton = () => (
   </div>
 );
 
-const FilteredCarsResults = ({ filteredCars, isLoading }) => {
+const FilteredCarsResults = ({
+  filteredCars,
+  isLoading,
+  viewMode = "grid",
+}) => {
   const navigate = useNavigate();
-  
+
   // Get user data and saved cars
   const token = localStorage.getItem("token");
-  const { data: userData, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
-    skip: !token, // Skip if no token
-  });
+  const { data: userData, isLoading: isLoadingUser } = useGetMeQuery(
+    undefined,
+    {
+      skip: !token, // Skip if no token
+    }
+  );
   const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
     skip: !userData || isLoadingUser || !token, // Only fetch if user is logged in
   });
-  const [saveCar, { isLoading: isSaving }] = useSaveCarMutation();
-  const [unsaveCar, { isLoading: isUnsaving }] = useUnsaveCarMutation();
+  const [saveCar] = useSaveCarMutation();
+  const [unsaveCar] = useUnsaveCarMutation();
 
   // Extract saved car IDs
   const savedCars = useMemo(() => {
     if (!savedCarsData || !Array.isArray(savedCarsData)) return [];
-    return savedCarsData.map(car => car._id || car.id).filter(Boolean);
+    return savedCarsData.map((car) => car._id || car.id).filter(Boolean);
   }, [savedCarsData]);
 
   const toggleSave = async (carId, e) => {
     e?.stopPropagation();
-    
+
     // Check token first - this is the most reliable check
     const token = localStorage.getItem("token");
     if (!token) {
@@ -80,11 +88,14 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
       // Check if it's an authentication error
       const errorStatus = error?.status || error?.data?.status;
       const errorMessage = error?.data?.message || error?.message || "";
-      
-      if (errorStatus === 401 || errorStatus === 403 || 
-          errorMessage.toLowerCase().includes("auth") || 
-          errorMessage.toLowerCase().includes("login") ||
-          errorMessage.toLowerCase().includes("unauthorized")) {
+
+      if (
+        errorStatus === 401 ||
+        errorStatus === 403 ||
+        errorMessage.toLowerCase().includes("auth") ||
+        errorMessage.toLowerCase().includes("login") ||
+        errorMessage.toLowerCase().includes("unauthorized")
+      ) {
         toast.error("Your session has expired. Please login again.");
         // Only clear token and redirect if it's actually an auth error
         setTimeout(() => {
@@ -98,20 +109,30 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
     }
   };
 
-  // Normalize cars data
-  const cars = Array.isArray(filteredCars?.data)
+  // Normalize cars data - prioritizing the 'cars' property from the new normalized structure
+  const cars = Array.isArray(filteredCars?.cars)
+    ? filteredCars.cars
+    : Array.isArray(filteredCars?.data)
     ? filteredCars.data
     : Array.isArray(filteredCars)
     ? filteredCars
     : [];
 
+  const isGrid = viewMode === "grid";
+
   return (
     <section className="py-2">
       {/* Loading State */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[...Array(3)].map((_, idx) => (
-            <CarCardSkeleton key={idx} />
+        <div
+          className={
+            isGrid
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "space-y-3"
+          }
+        >
+          {[...Array(6)].map((_, idx) => (
+            <CarCardSkeleton key={idx} isGrid={isGrid} />
           ))}
         </div>
       ) : (
@@ -120,151 +141,166 @@ const FilteredCarsResults = ({ filteredCars, isLoading }) => {
             <h2 className="text-xl font-semibold text-gray-800 mb-4 px-2">
               {cars.length} {cars.length === 1 ? "Car Found" : "Cars Found"}
             </h2>
-            <div className="space-y-3">
+            <div
+              className={
+                isGrid
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-4"
+              }
+            >
               {cars.map((car, index) => {
                 const carId = car?._id || index;
                 const carImage = car?.images?.[0] || images.carPlaceholder;
                 const carMake = car?.make || "Unknown Make";
                 const carModel = car?.model || "Unknown Model";
                 const carYear = car?.year || "N/A";
-                const carPrice = car?.price?.toLocaleString() || "N/A";
+                const carPrice = formatPrice(car?.price);
 
                 return (
                   <div
                     key={carId}
-                    className="flex flex-col md:flex-row gap-6 p-5 border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 bg-white"
+                    className={`group border border-gray-100 rounded-xl hover:shadow-xl transition-all duration-300 bg-white overflow-hidden flex ${
+                      isGrid ? "flex-col" : "flex-col md:flex-row gap-6 p-5"
+                    }`}
                   >
-                    {/* Car Image */}
-                    <div className="md:w-52 h-40 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center relative">
+                    {/* Car Image container */}
+                    <div
+                      className={`relative flex items-center justify-center bg-gray-50 shrink-0 ${
+                        isGrid
+                          ? "h-52 w-full"
+                          : "md:w-64 h-44 rounded-lg overflow-hidden"
+                      }`}
+                    >
                       <LazyImage
                         src={carImage}
                         alt={`${carMake} ${carModel}`}
-                        className={`w-full h-full object-cover ${car?.isSold ? 'opacity-60' : ''}`}
-                        width={208}
-                        height={160}
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105`}
+                        width={isGrid ? 400 : 256}
+                        height={isGrid ? 208 : 176}
                       />
-                      {/* Boost Badge */}
-                      {car?.isBoosted && new Date(car?.boostExpiry) > new Date() && !car?.isSold && (
-                        <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10 flex items-center gap-1 shadow-lg">
-                          <FiZap size={10} />
-                          BOOSTED
-                        </div>
-                      )}
-                      {/* Sold Badge */}
-                      {car?.isSold && (
-                        <div className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
-                          SOLD
-                        </div>
-                      )}
-                      {/* Featured Badge */}
-                      {car?.featured && !car?.isSold && (
-                        <div className="absolute top-3 left-3 bg-primary-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
-                          FEATURED
-                        </div>
-                      )}
+                      {/* Badges and Save button (keep existing positions) */}
+                      <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                        {car?.isBoosted &&
+                          new Date(car?.boostExpiry) > new Date() && (
+                            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-lg">
+                              <FiZap size={10} /> BOOSTED
+                            </div>
+                          )}
+                        {car?.featured && (
+                          <div className="bg-primary-500 text-white px-2 py-1 rounded-full text-[10px] font-bold shadow-lg text-center">
+                            FEATURED
+                          </div>
+                        )}
+                      </div>
                       <button
                         onClick={(e) => toggleSave(carId, e)}
-                        disabled={isSaving || isUnsaving}
-                        className="absolute top-3 right-3 bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors disabled:opacity-50 z-10"
-                        title={savedCars.includes(carId) ? "Remove from saved" : "Save car"}
+                        className="absolute top-3 right-3 bg-white/95 p-2 rounded-full shadow-md hover:bg-white hover:scale-110 transition-all z-10"
                       >
                         {savedCars.includes(carId) ? (
                           <BsBookmarkFill className="text-primary-500 text-lg" />
                         ) : (
-                          <BsBookmark className="text-gray-400 text-lg hover:text-primary-500 transition-colors" />
+                          <BsBookmark className="text-gray-400 text-lg" />
                         )}
                       </button>
                     </div>
 
-                    {/* Car Details */}
-                    <div className="flex-1 flex flex-col justify-between py-1">
+                    {/* Content */}
+                    <div
+                      className={`flex-1 flex flex-col ${
+                        isGrid ? "p-5" : "justify-between"
+                      }`}
+                    >
                       <div>
-                        <div className="flex items-start justify-between">
+                        <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h3 className="text-xl font-semibold text-gray-900">
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-500 transition-colors">
                               {carMake} {carModel}
                             </h3>
-                            <p className="text-gray-500 text-sm mt-1">
+                            <p className="text-gray-500 text-sm font-medium">
                               {carYear}
                             </p>
                           </div>
+                          {isGrid && (
+                            <div className="text-right">
+                              <p
+                                className={`text-lg font-bold ${
+                                  car?.isSold
+                                    ? "text-gray-400 line-through"
+                                    : "text-primary-500"
+                                }`}
+                              >
+                                {carPrice}
+                              </p>
+                            </div>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-6 mt-4">
-                          <div className="flex flex-col items-center gap-1.5 p-2 bg-gray-50 rounded-lg min-w-[80px]">
-                            <LazyImage
-                              src={images.milesIcon}
-                              alt="Mileage"
-                              className="w-3 h-3 opacity-70"
-                            />
-                            <span className="text-xs font-medium text-gray-700">
-                              {car?.mileage
+                        {/* Stats Row */}
+                        <div
+                          className={`grid grid-cols-3 gap-2 mt-4 pb-4 ${
+                            !isGrid ? "max-w-md" : ""
+                          }`}
+                        >
+                          {[
+                            {
+                              icon: images.milesIcon,
+                              val: car?.mileage
                                 ? `${car.mileage.toLocaleString()} km`
-                                : "N/A"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Mileage
-                            </span>
-                          </div>
-
-                          <div className="flex flex-col items-center gap-1.5 p-2 bg-gray-50 rounded-lg min-w-[80px]">
-                            <LazyImage
-                              src={images.fuelTypeIcon}
-                              alt="Fuel"
-                              className="w-3 h-3 opacity-70"
-                            />
-                            <span className="text-xs font-medium text-gray-700">
-                              {car?.fuelType || "N/A"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Fuel Type
-                            </span>
-                          </div>
-
-                          <div className="flex flex-col items-center gap-1.5 p-2 bg-gray-50 rounded-lg min-w-[80px]">
-                            <LazyImage
-                              src={images.transmissionIcon}
-                              alt="Transmission"
-                              className="w-3 h-3 opacity-70"
-                            />
-                            <span className="text-xs font-medium text-gray-700">
-                              {car?.transmission || "N/A"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Transmission
-                            </span>
-                          </div>
+                                : "N/A",
+                              label: "Mileage",
+                            },
+                            {
+                              icon: images.fuelTypeIcon,
+                              val: car?.fuelType || "N/A",
+                              label: "Fuel",
+                            },
+                            {
+                              icon: images.transmissionIcon,
+                              val: car?.transmission || "N/A",
+                              label: "Trans",
+                            },
+                          ].map((stat, i) => (
+                            <div
+                              key={i}
+                              className="flex flex-col items-center gap-1 p-2 bg-gray-50 rounded-lg"
+                            >
+                              <img
+                                src={stat.icon}
+                                alt=""
+                                className="w-3.5 h-3.5 opacity-60"
+                              />
+                              <span className="text-[10px] font-bold text-gray-700 whitespace-nowrap">
+                                {stat.val}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
-                      <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-100">
-                        <div>
-                          <div className="text-sm text-gray-500">
-                            Starting from
+                      {/* Footer / CTA Group */}
+                      <div
+                        className={`flex items-center justify-between mt-auto pt-4 border-t border-gray-100 ${
+                          !isGrid ? "w-full" : ""
+                        }`}
+                      >
+                        {!isGrid && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-400 font-medium">
+                              Starting from
+                            </span>
+                            <span
+                              className={`text-xl font-black text-primary-500`}
+                            >
+                              {carPrice}
+                            </span>
                           </div>
-                          <div className={`text-xl font-bold ${car?.isSold ? 'line-through text-gray-400' : 'text-primary-500'}`}>
-                            PKR {carPrice}
-                          </div>
-                          {car?.isSold && (
-                            <div className="text-sm text-red-600 font-medium mt-1">Sold Out</div>
-                          )}
-                        </div>
+                        )}
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!car?.isSold) {
-                              navigate(buildCarUrl(car));
-                            }
-                          }}
-                          disabled={car?.isSold}
-                          className={`flex items-center text-sm font-medium px-4 py-2.5 rounded-lg transition-colors ${
-                            car?.isSold 
-                              ? 'bg-gray-400 cursor-not-allowed text-white' 
-                              : 'bg-primary-500 hover:opacity-90 text-white'
-                          }`}
+                          onClick={() => navigate(buildCarUrl(car))}
+                          className={`flex items-center gap-2 text-xs font-bold px-5 py-2.5 rounded-lg transition-all bg-gray-900 text-white hover:bg-primary-500 shadow-sm hover:shadow-lg`}
                         >
-                          {car?.isSold ? 'Sold Out' : 'View Details'}
-                          {!car?.isSold && <IoIosArrowRoundUp className="ml-1 transform rotate-90 text-base" />}
+                          VIEW DETAILS
+                          <IoIosArrowRoundUp className="text-xl rotate-45" />
                         </button>
                       </div>
                     </div>

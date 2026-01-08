@@ -553,11 +553,7 @@ const SupportChatWidget = () => {
                                 {msg.sender?.name || "User"}
                               </p>
                             )}
-                            {isBot && (
-                              <p className="text-xs font-medium mb-1 text-gray-700">
-                                🤖 AI Assistant
-                              </p>
-                            )}
+                            {/* Removed AI Assistant header */}
                             {editingMessageId === msg._id ? (
                               <div className="space-y-2">
                                 <input

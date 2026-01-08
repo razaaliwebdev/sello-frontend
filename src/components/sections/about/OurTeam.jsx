@@ -23,7 +23,7 @@ const OurTeam = () => {
   ];
 
   return (
-    <div className="bg-white py-20 lg:py-32 px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="py-16 lg:py-28 px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -68,7 +68,7 @@ const OurTeam = () => {
                   {member.name}
                 </h3>
                 <div className="inline-block px-3 py-1 bg-primary-50 rounded-full mb-4">
-                  <p className="text-sm font-semibold text-primary-600 uppercase tracking-wide">
+                  <p className="text-sm font-semibold text-primary-500 uppercase tracking-wide">
                     {member.position}
                   </p>
                 </div>

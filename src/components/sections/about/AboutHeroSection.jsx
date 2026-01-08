@@ -1,42 +1,55 @@
-import React from "react";
-import { aboutImages } from "../../../assets/about/aboutAssets";
+import { useNavigate } from "react-router-dom";
+import { images } from "../../../assets/assets";
 
 const AboutHeroSection = () => {
+  const navigate = useNavigate();
   return (
-    <section className="relative w-full h-[80vh] overflow-hidden bg-[#845D16] flex flex-col md:flex-row items-center md:items-start">
-      {/* Dark rotated top panel */}
-      <div
-        className="absolute inset-x-0 top-0 h-[40vh] md:h-[60vh] -rotate-2 origin-top-left bg-[#272525]
-                   rounded-bl-[40px] z-20 pointer-events-none"
-      />
-
-      {/* Text Content */}
-      <div className="relative z-30 w-full md:w-1/2 px-6 md:px-12 py-8 md:py-16">
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight text-white">
-          About Us
-        </h1>
-        <div className="mt-3 text-sm md:text-base lg:text-lg text-gray-300 leading-relaxed max-w-xl space-y-4">
-          <p>
-            At Sello, we are building Pakistan's most trusted and transparent online car marketplace. Our mission is to make it simple, safe, and reliable to buy and sell cars online in Pakistan. Whether you're searching for used cars for sale, new cars in Pakistan, or looking to sell your vehicle quickly, Sello connects buyers and sellers with confidence.
+    <div className="md:h-[80vh] bg-[#272525] flex flex-col md:flex-row items-center justify-between">
+      {/* Left Side */}
+      <div className="w-full md:w-[60%]  px-3 sm:px-4 md:px-6 lg:px-8 py-10 md:py-0 ">
+        <div className="">
+          <h1 className="md:text-5xl mb-16 text-3xl font-bold text-white">
+            About Us
+          </h1>
+          <p className="text-lg text-gray-300 my-4">
+            Sello has created a platform which makes it easy for Pakistan to buy
+            and sell cars. We aim to present a very trusted and transparent
+            online marketplace in which to find your perfect car or to sell the
+            one you have.
           </p>
-          <p>
-            We help customers find the best car deals in Pakistan by offering verified listings from trusted dealers and individual sellers. Our platform provides detailed car information, competitive pricing, and easy-to-use tools so buyers can make informed decisions without hassle.
+          <p className="text-lg text-gray-300 my-4">
+            As for used cars in Pakistan that you’re looking to purchase or new
+            vehicles you’re in the market for, at Sello we connect you with the
+            seller through our verified listings and transparent info. We at
+            Sello focus on fair prices, in depth car info, and user friendly
+            tools which in turn helps our customers make sure footed decisions
+            free from stress and sales pressure.
           </p>
         </div>
+        <div className="flex items-center flex-start my-7 gap-5">
+          <button
+            onClick={() => navigate("/create-post")}
+            className="px-6 w-48 py-3 rounded-lg border-[1px] flex items-center justify-center gap-3 bg-black text-white border-transparent hover:bg-white hover:text-black transition-all ease-in "
+          >
+            Sale Your Car
+          </button>
+          <button
+            onClick={() => navigate("/cars")}
+            className="px-6 w-48 py-3 rounded-lg border-[1px] flex items-center justify-center gap-3 border-black text-black hover:bg-black hover:text-white transition-all ease-in bg-white"
+          >
+            Find Your Next Car
+          </button>
+        </div>
       </div>
-
-      {/* Car Image */}
-      <div className="relative z-40 w-full md:w-1/2 flex justify-center md:justify-end px-6 md:px-12 mt-6 md:mt-0">
+      {/* Right Side */}
+      <div className="w-full md:w-[40%] h-64 md:h-full">
         <img
-          src={aboutImages.hero}
-          className="w-full max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl object-contain scale-150 md:scale-100"
-          alt="Car"
+          src={images.userHeroSectionImg}
+          alt="userHero section image"
+          className="h-full rounded-bl-[155px] w-full object-cover"
         />
       </div>
-
-      {/* Decorative gold bottom fade */}
-      <div className="absolute bottom-0 left-0 w-full h-24 md:h-32 bg-gradient-to-t from-[#845D16] to-transparent z-10 rounded-t-[60px] md:rounded-t-[80px] pointer-events-none" />
-    </section>
+    </div>
   );
 };
 

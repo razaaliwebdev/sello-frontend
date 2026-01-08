@@ -179,7 +179,6 @@ const LocationPickerModal = ({
           },
         }));
         setSearchResults(results);
-        console.log("Search results:", results); // Debug log
       } else {
         // Fallback to Google Places API if available
         const googleApiKey =
@@ -208,7 +207,6 @@ const LocationPickerModal = ({
               },
             }));
             setSearchResults(results);
-            console.log("Google search results:", results); // Debug log
           } else {
             setSearchResults([]);
             toast.error("No locations found");
@@ -267,8 +265,6 @@ const LocationPickerModal = ({
   // Handle confirm
   const handleConfirm = async () => {
     if (selectedLocation) {
-      console.log("Selected location:", selectedLocation); // Debug log
-
       // Get address if not already set
       if (!address) {
         await reverseGeocode(selectedLocation.lat, selectedLocation.lng);
@@ -297,7 +293,6 @@ const LocationPickerModal = ({
         },
       };
 
-      console.log("Location data to save:", locationData); // Debug log
       onSelect(locationData);
 
       // Stop watching position
@@ -396,8 +391,8 @@ const LocationPickerModal = ({
                     )}, Lng: ${selectedLocation.lng.toFixed(6)}`}
                 </p>
                 {locationMode === "auto" && (
-                  <p className="text-xs text-primary-600 mt-1">
-                    📍 Live tracking active
+                  <p className="text-xs text-primary-600 mt-1 flex items-center gap-1">
+                    <FiMapPin className="w-3 h-3" /> Live tracking active
                   </p>
                 )}
               </div>

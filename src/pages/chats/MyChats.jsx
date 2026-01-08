@@ -111,8 +111,8 @@ const MyChats = () => {
       });
 
       setSocket(newSocket);
-    } catch (error) {
-      console.error("Error initializing socket:", error);
+    } catch {
+      // Error initializing socket
       setSocketConnected(false);
     }
 
@@ -489,12 +489,18 @@ const MyChats = () => {
                           return (
                             <div
                               key={msg._id}
-                              className={`flex ${
-                                isCurrentUser ? "justify-end" : "justify-start"
+                              className={`flex mb-4 ${
+                                isCurrentUser ? "justify-start" : "justify-end"
                               } group`}
                             >
-                              <div className="flex items-end gap-2 max-w-[70%]">
-                                {!isCurrentUser && (
+                              <div
+                                className={`flex items-end gap-2 max-w-[80%] ${
+                                  isCurrentUser
+                                    ? "flex-row"
+                                    : "flex-row-reverse"
+                                }`}
+                              >
+                                {isCurrentUser && (
                                   <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 overflow-hidden">
                                     {msg.sender?.avatar ? (
                                       <img
@@ -510,14 +516,14 @@ const MyChats = () => {
                                   </div>
                                 )}
                                 <div
-                                  className={`rounded-lg px-3 py-2 ${
+                                  className={`rounded-2xl px-4 py-2 ${
                                     isCurrentUser
-                                      ? "bg-primary-500 text-white rounded-tr-none"
-                                      : "bg-white text-gray-800 rounded-tl-none"
+                                      ? "bg-primary-500 text-white rounded-bl-sm"
+                                      : "bg-white text-gray-800 rounded-br-sm border border-gray-200"
                                   } shadow-sm`}
                                 >
                                   {!isCurrentUser && (
-                                    <p className="text-xs font-medium mb-1 text-gray-700">
+                                    <p className="text-xs font-semibold mb-1 text-gray-700">
                                       {msg.sender?.name || "User"}
                                     </p>
                                   )}
@@ -559,7 +565,9 @@ const MyChats = () => {
                                     </div>
                                   ) : (
                                     <>
-                                      <p className="text-sm">{msg.message}</p>
+                                      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                        {msg.message}
+                                      </p>
                                       {msg.isEdited && (
                                         <p className="text-xs italic mt-1 opacity-75">
                                           (edited)
@@ -567,7 +575,13 @@ const MyChats = () => {
                                       )}
                                     </>
                                   )}
-                                  <div className="flex items-center justify-end gap-1 mt-1">
+                                  <div
+                                    className={`flex items-center gap-1 mt-1 ${
+                                      isCurrentUser
+                                        ? "justify-start"
+                                        : "justify-end"
+                                    }`}
+                                  >
                                     <span
                                       className={`text-xs ${
                                         isCurrentUser
@@ -607,6 +621,21 @@ const MyChats = () => {
                                     )}
                                   </div>
                                 </div>
+                                {!isCurrentUser && (
+                                  <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 overflow-hidden">
+                                    {msg.sender?.avatar ? (
+                                      <img
+                                        src={msg.sender.avatar}
+                                        alt={msg.sender?.name || "User"}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      (msg.sender?.name || "U")
+                                        .charAt(0)
+                                        .toUpperCase()
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           );

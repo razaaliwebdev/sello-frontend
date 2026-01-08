@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import { SOCKET_BASE_URL } from "../../redux/config";
+import { useSocket } from "../../contexts/SocketContext";
 import { FaBell, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { MdNotifications, MdNotificationsActive } from "react-icons/md";
 import {
@@ -17,8 +16,7 @@ const NotificationBell = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const token = localStorage.getItem("token");
+  const { socket } = useSocket();
 
   const { data: notificationsData, refetch } = useGetUserNotificationsQuery(
     { page: 1, limit: 10 },
@@ -35,28 +33,18 @@ const NotificationBell = () => {
     setUnreadCount(totalUnread);
   }, [totalUnread]);
 
-  // Initialize Socket.io for real-time notifications
+  // Store refetch function in ref to prevent infinite re-renders
+  const refetchRef = useRef(refetch);
+
   useEffect(() => {
-    if (!token) return;
+    refetchRef.current = refetch;
+  });
 
-    const newSocket = io(SOCKET_BASE_URL, {
-      auth: { token },
-      query: { token },
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
-    });
+  // Listen for new notifications using centralized socket
+  useEffect(() => {
+    if (!socket) return;
 
-    newSocket.on("connect", () => {
-      // Join user's notification room
-      newSocket.emit("join-notifications");
-    });
-
-    newSocket.on("disconnect", () => {});
-
-    // Listen for new notifications
-    newSocket.on("new-notification", (data) => {
+    const handleNewNotification = (data) => {
       // WhatsApp-style bubble toast (bottom-right, richer preview)
       toast.success(data.message || data.title || "New notification", {
         icon: "🔔",
@@ -65,15 +53,15 @@ const NotificationBell = () => {
       });
 
       // Refetch notifications so the bell counter updates instantly
-      refetch();
-    });
+      refetchRef.current();
+    };
+
+    socket.on("new-notification", handleNewNotification);
 
     return () => {
-      if (newSocket) {
-        newSocket.close();
-      }
+      socket.off("new-notification", handleNewNotification);
     };
-  }, [token, refetch]);
+  }, [socket]); // Removed refetch to prevent infinite loop
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -93,7 +81,7 @@ const NotificationBell = () => {
     if (!notification.isRead) {
       try {
         await markAsRead(notification._id).unwrap();
-        refetch();
+        refetchRef.current();
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
@@ -113,7 +101,7 @@ const NotificationBell = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead().unwrap();
-      refetch();
+      refetchRef.current();
       toast.success("All notifications marked as read");
     } catch {
       toast.error("Failed to mark all as read");
@@ -259,7 +247,7 @@ const NotificationBell = () => {
           {notifications.length > 0 && (
             <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
               <button
-                onClick={() => navigate("/notifications")}
+                onClick={() => navigate("/profile")}
                 className="text-sm text-primary-500 hover:text-primary-500 font-medium"
               >
                 View all notifications

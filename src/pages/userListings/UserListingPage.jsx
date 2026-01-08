@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { GoArrowUpRight } from "react-icons/go";
 import UserListings from "@components/userListings/UsreListings";
 import BannerInUesrListings from "@components/userListings/BannerInUesrListings";
-import Ads from "@components/utils/Ads";
 import ReviewSectionInUser from "@components/userListings/ReviewSectionInUser";
 import ContactMap from "@components/userListings/ContactMap";
 import NewsLatter from "@components/utils/NewsLatter";
@@ -31,7 +30,6 @@ const UserListingPage = () => {
       </div>
       <UserListings />
       <BannerInUesrListings />
-      <Ads />
       <ReviewSectionInUser />
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-12 bg-[#F5F5F5]">
         <ContactMap />

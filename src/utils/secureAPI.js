@@ -45,8 +45,8 @@ class SecureAPIManager {
       const { key, expiresIn } = await response.json();
       this.setAPIKey(service, key, expiresIn);
       return key;
-    } catch (error) {
-      console.error(`Error fetching API key for ${service}:`, error);
+    } catch {
+      // Error fetching API key for service
       return null;
     }
   }

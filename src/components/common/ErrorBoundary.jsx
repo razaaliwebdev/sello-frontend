@@ -121,6 +121,7 @@ class ErrorBoundaryClass extends React.Component {
 // Functional component wrapper for React Router error handling
 export const ErrorPage = () => {
   const error = useRouteError();
+  const navigate = useNavigate();
 
   let errorMessage = "An unexpected error occurred";
   let errorStatus = null;

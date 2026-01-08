@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "recentlyViewedCars";
 const MAX_RECENT_CARS = 10; // Maximum number of recently viewed cars to store
@@ -43,7 +43,7 @@ export const useRecentlyViewedCars = () => {
    * Add a car to recently viewed
    * @param {Object} car - Car object with _id
    */
-  const addRecentlyViewed = (car) => {
+  const addRecentlyViewed = useCallback((car) => {
     if (!car || !car._id) return;
 
     try {
@@ -84,19 +84,19 @@ export const useRecentlyViewedCars = () => {
     } catch (error) {
       console.error("Error saving recently viewed car:", error);
     }
-  };
+  }, []);
 
   /**
    * Clear all recently viewed cars
    */
-  const clearRecentlyViewed = () => {
+  const clearRecentlyViewed = useCallback(() => {
     try {
       localStorage.removeItem(STORAGE_KEY);
       setRecentCars([]);
     } catch (error) {
       console.error("Error clearing recently viewed cars:", error);
     }
-  };
+  }, []);
 
   return {
     recentCars,

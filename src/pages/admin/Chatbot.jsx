@@ -409,9 +409,7 @@ const Chatbot = () => {
                                                                     : "bg-white text-gray-800 border border-gray-200"
                                                             }`}
                                                         >
-                                                            {isBot && (
-                                                                <p className="text-xs font-semibold mb-1 opacity-75">🤖 AI Assistant</p>
-                                                            )}
+                                                            {/* AI Assistant label removed */}
                                                             <p className="text-sm">{msg.message}</p>
                                                             <p className={`text-xs mt-1 ${
                                                                 isAdmin ? 'text-yellow-100' : 'text-gray-500'

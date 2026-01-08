@@ -38,7 +38,7 @@ const Blog = () => {
       <NewTechnology />
       <BlogsCates />
       <ReviewSliderBanner />
-      <BottomReviews />
+      {/* <BottomReviews /> */}
       <NewsLatter />
     </div>
   );

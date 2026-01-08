@@ -11,36 +11,35 @@ import { FaCar } from "react-icons/fa";
 const JoinUsSection = () => {
   const features = [
     {
-      title: "Trusted Car Marketplace in Pakistan",
+      title: "Trusted Platform",
       icon: FiShield,
-      description:
-        "Pakistan's most trusted platform for buying and selling cars",
+      description: "A trustworthy platform for car purchase and sale.",
     },
     {
-      title: "Buy & Sell Used Cars Online",
+      title: "Verified Listings & Fair Prices",
       icon: FaCar,
-      description: "Seamless online experience for all your car transactions",
+      description: "All cars are listed out with open and honest pricing.",
     },
     {
-      title: "Verified Listings & Fair Pricing",
+      title: "Buy & Sell Cars Online",
       icon: FiCheckCircle,
-      description:
-        "Every listing is verified with transparent and fair pricing",
+      description: "Manage your car purchase and sales process online easily",
     },
     {
-      title: "Fast Car Selling for Dealers & Individuals",
+      title: "Fast Selling for Dealers & Individuals",
       icon: FiZap,
-      description: "Quick and efficient selling process for everyone",
+      description:
+        "Sell your car fast whether you are a dealer or private seller.",
     },
     {
-      title: "User-Friendly Platform",
+      title: " Easy-to-Use Platform",
       icon: FiMonitor,
-      description: "Intuitive interface designed for the best user experience",
+      description: "Easy navigation and smart tools for a seamless experience.",
     },
     {
-      title: "Secure & Transparent Transactions",
+      title: " Secure & Transparent Process",
       icon: FiLock,
-      description: "Your safety and security is our top priority",
+      description: "Your safety and trust is what we live for.",
     },
   ];
 
@@ -58,6 +57,10 @@ const JoinUsSection = () => {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
             Why Choose Sello?
           </h2>
+          <p className="my-2 text-gray-600">
+            Sello is to make the process of buying and selling cars easy, safe,
+            and reliable for all in Pakistan.
+          </p>
           <div className="flex items-center justify-center gap-3">
             <div className="w-24 h-1.5 bg-primary-200 rounded-full"></div>
             <div className="w-3 h-3 bg-primary-500 rounded-full"></div>

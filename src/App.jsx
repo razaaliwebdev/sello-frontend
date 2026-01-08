@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, lazy, Suspense } from "react";
+import React, { useEffect, useRef, lazy, Suspense, useMemo } from "react";
 import {
   Route,
   Routes,
   useLocation,
   Navigate,
-  useParams,
   useSearchParams,
   useNavigate,
 } from "react-router-dom";
@@ -23,6 +22,10 @@ import { useSupportChat } from "./contexts/SupportChatContext.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Signup from "./pages/auth/SignUp.jsx";
+import CarListings from "./pages/listings/CarListings.jsx";
+import Blog from "./pages/blog/Blog.jsx";
+import AllBlog from "./pages/blog/AllBlog.jsx";
+import BlogDetails from "./pages/blog/BlogDetails.jsx";
 
 // Lazy load auth pages
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword.jsx"));
@@ -38,8 +41,7 @@ const OurPrivacyPolicy = lazy(() =>
 const TermsCondition = lazy(() =>
   import("./pages/ourPages/TermsCondition.jsx")
 );
-const CarListings = lazy(() => import("./pages/listings/CarListings.jsx"));
-const CarDetails = lazy(() => import("./pages/listings/CarDetails.jsx"));
+import CarDetails from "./pages/listings/CarDetails.jsx";
 const About = lazy(() => import("./pages/about/About.jsx"));
 const Contact = lazy(() => import("./pages/contact/Contact.jsx"));
 const AllBrands = lazy(() => import("./pages/AllBrands.jsx"));
@@ -47,10 +49,6 @@ const FilterPage = lazy(() => import("./pages/filter/FilterPage.jsx"));
 const FilteredResults = lazy(() =>
   import("./pages/listings/FilteredResults.jsx")
 );
-const LoanPlansPage = lazy(() => import("./pages/loanPlans/LoanPlansPage.jsx"));
-const Blog = lazy(() => import("./pages/blog/Blog.jsx"));
-const AllBlog = lazy(() => import("./pages/blog/AllBlog.jsx"));
-const BlogDetails = lazy(() => import("./pages/blog/BlogDetails.jsx"));
 const CategoryPage = lazy(() => import("./pages/categories/CategoryPage.jsx"));
 
 // Lazy load protected pages
@@ -147,6 +145,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 import AdminRoute from "./components/common/AdminRoute.jsx";
 import { ErrorPage } from "./components/common/ErrorBoundary.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 // ScrollToTop component to scroll to top on route change
 const ScrollToTop = () => {
@@ -215,57 +214,14 @@ const SupportRouteRedirect = () => {
   return null;
 };
 
-// Route guard to ensure CarDetails only renders on valid car routes
-const CarDetailsRouteGuard = ({ children }) => {
-  const location = useLocation();
-  const { id } = useParams();
-
-  // CRITICAL: Get current URL from window to verify actual route
-  const actualPath = window.location.pathname;
-
-  // FIRST CHECK: If we're not on a cars route, don't interfere
-  if (!actualPath.startsWith("/cars/") || actualPath === "/cars") {
-    return <>{children}</>;
-  }
-
-  // ABSOLUTE CHECK - If we're on home route, don't render at all
-  // Check both location.pathname AND window.location.pathname for safety
-  if (
-    location.pathname === "/" ||
-    location.pathname === "/home" ||
-    actualPath === "/" ||
-    actualPath === "/home"
-  ) {
-    return null;
-  }
-
-  // Strict validation - only allow rendering on valid car detail routes
-  // Must check actualPath, not just location.pathname
-  const pathToCheck = actualPath || location.pathname;
-  const pathParts = pathToCheck.split("/").filter(Boolean);
-
-  const isValidRoute =
-    pathToCheck.startsWith("/cars/") &&
-    pathToCheck !== "/cars" &&
-    pathParts.length === 2 &&
-    pathParts[0] === "cars" &&
-    pathParts[1] &&
-    pathParts[1].trim() !== "" &&
-    id &&
-    typeof id === "string" &&
-    id.trim() !== "" &&
-    id === pathParts[1];
-
-  // If not valid, don't render
-  if (!isValidRoute) {
-    return null;
-  }
-  return <>{children}</>;
-};
-
 const App = () => {
   const location = useLocation();
   const prevLocationRef = useRef(location.pathname);
+
+  // Create a navigation key that forces re-render on route changes
+  const navigationKey = useMemo(() => {
+    return `${location.pathname}${location.search}${location.hash}`;
+  }, [location.pathname, location.search, location.hash]);
 
   const hideNavbarFooter = [
     "/login",
@@ -299,10 +255,15 @@ const App = () => {
         </>
       )}
 
-      <Routes>
+      <Routes location={location} key={navigationKey}>
         {/* HOME - Exact path match, declared first */}
-        <Route path="/" element={<Home key={location.key} />} />
-        <Route path="/home" element={<Home key={location.key} />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+
+        {/* Car Listings - Use direct import, no Suspense needed */}
+        <Route path="/cars" element={<CarListings />} key="cars-listings" />
+        {/* Car Details - Use direct import, no Suspense needed */}
+        <Route path="/cars/:id" element={<CarDetails />} />
 
         {/* Auth */}
         <Route path="/login" element={<Login />} />
@@ -366,23 +327,6 @@ const App = () => {
           }
         />
         <Route
-          path="/cars"
-          element={
-            <Suspense fallback={<RouteLoader />}>
-              <CarListings />
-            </Suspense>
-          }
-        />
-        {/* Car Details - Only match if path starts with /cars/ and has an ID */}
-        <Route
-          path="/cars/:id"
-          element={
-            <Suspense fallback={<RouteLoader />}>
-              <CarDetails />
-            </Suspense>
-          }
-        />
-        <Route
           path="/category/:slug"
           element={
             <Suspense fallback={<RouteLoader />}>
@@ -429,23 +373,9 @@ const App = () => {
               <FilteredResults />
             </Suspense>
           }
+          key="search-results"
         />
-        <Route
-          path="/loan-plans"
-          element={
-            <Suspense fallback={<RouteLoader />}>
-              <LoanPlansPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blog"
-          element={
-            <Suspense fallback={<RouteLoader />}>
-              <Blog />
-            </Suspense>
-          }
-        />
+        <Route path="/blog" element={<Blog />} key="blog" />
         <Route
           path="/blog/all"
           element={
@@ -453,15 +383,9 @@ const App = () => {
               <AllBlog />
             </Suspense>
           }
+          key="blog-all"
         />
-        <Route
-          path="/blog/:id"
-          element={
-            <Suspense fallback={<RouteLoader />}>
-              <BlogDetails />
-            </Suspense>
-          }
-        />
+        <Route path="/blog/:id" element={<BlogDetails />} />
         <Route
           path="/help-center"
           element={
@@ -667,6 +591,7 @@ const App = () => {
               </Suspense>
             </ProtectedRoute>
           }
+          key="create-post"
         />
         <Route
           path="/edit-car/:id"
@@ -677,6 +602,7 @@ const App = () => {
               </Suspense>
             </ProtectedRoute>
           }
+          key="edit-car"
         />
         <Route
           path="/my-listings"
@@ -687,6 +613,7 @@ const App = () => {
               </Suspense>
             </ProtectedRoute>
           }
+          key="my-listings"
         />
         <Route
           path="/profile"
@@ -697,6 +624,7 @@ const App = () => {
               </Suspense>
             </ProtectedRoute>
           }
+          key="profile"
         />
         <Route
           path="/saved-cars"
@@ -707,6 +635,7 @@ const App = () => {
               </Suspense>
             </ProtectedRoute>
           }
+          key="saved-cars"
         />
         <Route
           path="/my-chats"
@@ -987,6 +916,9 @@ const App = () => {
 
         {/* Support route redirect - handles /support?chatId=xxx */}
         <Route path="/support" element={<SupportRouteRedirect />} />
+
+        {/* 404 Catch-all route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {/* Show Footer except for auth pages & admin */}

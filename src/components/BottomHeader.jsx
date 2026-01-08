@@ -5,6 +5,7 @@ const BottomHeader = () => {
   const location = useLocation();
 
   if (location.pathname === "/cars") return null;
+  if (location.pathname === "/about") return null;
 
   return (
     <div

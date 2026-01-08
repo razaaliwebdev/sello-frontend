@@ -190,7 +190,7 @@ const ChatMonitoring = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-900">
-                                                                {user.name || 'Unknown User'}
+                                                                {user.name || chat.customerName || 'User'}
                                                             </p>
                                                             <p className="text-xs text-gray-500">
                                                                 {user.email || 'No email'}

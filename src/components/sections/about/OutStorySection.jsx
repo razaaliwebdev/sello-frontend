@@ -101,16 +101,12 @@ const OutStorySection = () => {
         </div>
 
         {/* Image */}
-        <div className="w-full md:w-[48%] relative group">
-          <div className="absolute -inset-2 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 rounded-3xl md:rounded-[40px] blur-xl opacity-40 group-hover:opacity-60 transition duration-500 animate-pulse"></div>
-          <div className="relative border-4 md:border-[6px] border-primary-500 rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl transform group-hover:scale-[1.02] transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
-            <img
-              src={ourStoryData.img}
-              className="h-full w-full object-cover"
-              alt="Our Story"
-            />
-          </div>
+        <div className="w-full md:w-[40%] border-2 border-primary-500 rounded-tr-[40px] rounded-bl-[40px] ">
+          <img
+            src={ourStoryData.img}
+            className="h-full w-full object-cover"
+            alt="Our Story"
+          />
         </div>
       </div>
 
@@ -164,16 +160,12 @@ const OutStorySection = () => {
         </div>
 
         {/* Image */}
-        <div className="w-full md:w-[48%] relative group">
-          <div className="absolute -inset-2 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 rounded-3xl md:rounded-[40px] blur-xl opacity-40 group-hover:opacity-60 transition duration-500 animate-pulse"></div>
-          <div className="relative border-4 md:border-[6px] border-primary-500 rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl transform group-hover:scale-[1.02] transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
-            <img
-              src={selloGroupData.img}
-              className="h-full w-full object-cover"
-              alt="Sello Group"
-            />
-          </div>
+        <div className="w-full md:w-[40%] border-2 border-primary-500 rounded-br-[40px] ">
+          <img
+            src={selloGroupData.img}
+            className="h-full w-full object-cover"
+            alt="Our Story"
+          />
         </div>
       </div>
     </div>

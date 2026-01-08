@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import { MdNotifications, MdNotificationsActive, MdCheck, MdCheckCircle } from "react-icons/md";
+import { useSocket } from "../../../contexts/SocketContext";
+import {
+  MdNotifications,
+  MdNotificationsActive,
+  MdCheck,
+  MdCheckCircle,
+} from "react-icons/md";
 import { FaBell, FaCheckDouble } from "react-icons/fa";
 import {
   useGetUserNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
 } from "../../../redux/services/api";
-import { SOCKET_BASE_URL } from "../../../redux/config";
 import toast from "react-hot-toast";
 
 const NotificationsSection = () => {
-  const [socket, setSocket] = useState(null);
   const [filter, setFilter] = useState("all"); // all, unread, read
   const navigate = useNavigate();
-
-  const token = localStorage.getItem("token");
+  const { socket: globalSocket } = useSocket();
 
   const { data: notificationsData, refetch } = useGetUserNotificationsQuery(
     { page: 1, limit: 50 },
@@ -30,57 +32,46 @@ const NotificationsSection = () => {
   const unreadCount = notificationsData?.unreadCount || 0;
 
   // Filter notifications
-  const filteredNotifications = allNotifications.filter(notif => {
+  const filteredNotifications = allNotifications.filter((notif) => {
     if (filter === "unread") return !notif.isRead;
     if (filter === "read") return notif.isRead;
     return true;
   });
 
-  // Initialize Socket.io for real-time notifications
+  // Store refetch function in ref to prevent infinite re-renders
+  const refetchRef = useRef(refetch);
+
   useEffect(() => {
-    if (!token) return;
+    refetchRef.current = refetch;
+  });
 
-    const newSocket = io(SOCKET_BASE_URL, {
-      auth: { token },
-      query: { token },
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
-    });
+  // Listen for new notifications using centralized socket
+  useEffect(() => {
+    if (!globalSocket) return;
 
-    newSocket.on('connect', () => {
-      newSocket.emit('join-notifications');
-    });
-
-    newSocket.on('disconnect', () => {
-    });
-
-    newSocket.on('new-notification', (data) => {
+    const handleNewNotification = (data) => {
       toast.success(data.message || data.title || "New notification", {
-        icon: '🔔',
+        icon: "🔔",
         duration: 7000,
-        position: 'bottom-right',
+        position: "bottom-right",
       });
-      refetch();
-    });
+      refetchRef.current();
+    };
 
-    setSocket(newSocket);
+    globalSocket.on("new-notification", handleNewNotification);
 
     return () => {
-      if (newSocket) {
-        newSocket.close();
-      }
+      globalSocket.off("new-notification", handleNewNotification);
     };
-  }, [token, refetch]);
+  }, [globalSocket]); // Removed refetch to prevent infinite loop
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
       try {
         await markAsRead(notification._id).unwrap();
-        refetch();
-      } catch (err) {
-        console.error('Failed to mark notification as read:', err);
+        refetchRef.current();
+      } catch {
+        console.error("Failed to mark notification as read");
       }
     }
 
@@ -96,38 +87,38 @@ const NotificationsSection = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead().unwrap();
-      refetch();
+      refetchRef.current();
       toast.success("All notifications marked as read");
-    } catch (err) {
+    } catch {
       toast.error("Failed to mark all as read");
     }
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'success':
-        return '✅';
-      case 'warning':
-        return '⚠️';
-      case 'error':
-        return '❌';
-      case 'info':
+      case "success":
+        return "✅";
+      case "warning":
+        return "⚠️";
+      case "error":
+        return "❌";
+      case "info":
       default:
-        return 'ℹ️';
+        return "ℹ️";
     }
   };
 
   const getNotificationColor = (type) => {
     switch (type) {
-      case 'success':
-        return 'bg-green-50 border-green-200 text-green-800';
-      case 'warning':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      case 'error':
-        return 'bg-red-50 border-red-200 text-red-800';
-      case 'info':
+      case "success":
+        return "bg-green-50 border-green-200 text-green-800";
+      case "warning":
+        return "bg-yellow-50 border-yellow-200 text-yellow-800";
+      case "error":
+        return "bg-red-50 border-red-200 text-red-800";
+      case "info":
       default:
-        return 'bg-primary-50 border-primary-200 text-primary-800';
+        return "bg-primary-50 border-primary-200 text-primary-800";
     }
   };
 
@@ -136,10 +127,12 @@ const NotificationsSection = () => {
     const notificationDate = new Date(date);
     const diffInSeconds = Math.floor((now - notificationDate) / 1000);
 
-    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 60) return "Just now";
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return notificationDate.toLocaleDateString();
   };
 
@@ -156,9 +149,15 @@ const NotificationsSection = () => {
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800">Notifications</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Notifications
+            </h2>
             <p className="text-sm text-gray-500">
-              {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+              {unreadCount > 0
+                ? `${unreadCount} unread notification${
+                    unreadCount > 1 ? "s" : ""
+                  }`
+                : "All caught up!"}
             </p>
           </div>
         </div>
@@ -213,7 +212,11 @@ const NotificationsSection = () => {
           <div className="text-center py-12">
             <MdNotifications className="text-5xl text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">
-              {filter === "unread" ? "No unread notifications" : filter === "read" ? "No read notifications" : "No notifications yet"}
+              {filter === "unread"
+                ? "No unread notifications"
+                : filter === "read"
+                ? "No read notifications"
+                : "No notifications yet"}
             </p>
           </div>
         ) : (
@@ -224,7 +227,7 @@ const NotificationsSection = () => {
               className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
                 !notification.isRead
                   ? `${getNotificationColor(notification.type)} border-l-4`
-                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -233,9 +236,11 @@ const NotificationsSection = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className={`font-semibold ${
-                      !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                    }`}>
+                    <h4
+                      className={`font-semibold ${
+                        !notification.isRead ? "text-gray-900" : "text-gray-700"
+                      }`}
+                    >
                       {notification.title}
                     </h4>
                     {!notification.isRead && (
@@ -269,4 +274,3 @@ const NotificationsSection = () => {
 };
 
 export default NotificationsSection;
-

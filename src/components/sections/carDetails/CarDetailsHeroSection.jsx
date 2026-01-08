@@ -10,6 +10,7 @@ const CarDetailsHeroSection = () => {
   const extractedCarId = extractCarIdFromSlug(routeParam);
   const { data: car, isLoading } = useGetSingleCarQuery(extractedCarId, {
     skip: !extractedCarId,
+    refetchOnMountOrArgChange: true,
   });
 
   if (isLoading || !car) {

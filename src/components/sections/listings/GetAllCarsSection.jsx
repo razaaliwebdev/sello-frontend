@@ -3,7 +3,7 @@ import { images } from "../../../assets/assets";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiZap } from "react-icons/fi";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { buildCarUrl } from "../../../utils/urlBuilders";
 import {
   useGetCarsQuery,
@@ -59,13 +59,12 @@ const GetAllCarsSection = () => {
 
   // Get user data and saved cars
   const token = localStorage.getItem("token");
-  const {
-    data: userData,
-    isLoading: isLoadingUser,
-    isError: isUserError,
-  } = useGetMeQuery(undefined, {
-    skip: !token, // Skip if no token
-  });
+  const { isLoading: isLoadingUser, isError: isUserError } = useGetMeQuery(
+    undefined,
+    {
+      skip: !token, // Skip if no token
+    }
+  );
   const { data: savedCarsData } = useGetSavedCarsQuery(undefined, {
     skip: !token || isLoadingUser || isUserError, // Only fetch if user is logged in
   });
@@ -78,6 +77,10 @@ const GetAllCarsSection = () => {
     return savedCarsData.map((car) => car._id || car.id).filter(Boolean);
   }, [savedCarsData]);
 
+  // Get URL parameters
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+
   // Memoize query params to prevent unnecessary refetches
   const queryParams = useMemo(
     () => ({
@@ -85,8 +88,10 @@ const GetAllCarsSection = () => {
       limit,
       // Only apply condition filter if not 'all cars'
       ...(activeTab !== "all" && { condition: activeTab }),
+      // Apply search term if present in URL
+      ...(urlSearch && { search: urlSearch }),
     }),
-    [page, activeTab, limit]
+    [page, activeTab, limit, urlSearch]
   );
 
   // Call backend with pagination and filtering
@@ -261,6 +266,11 @@ const GetAllCarsSection = () => {
     );
   }, [cars, activeTab]);
 
+  // Prevent rendering on search-results page to avoid conflicts
+  if (location.pathname === "/search-results") {
+    return null;
+  }
+
   // Show skeleton loaders while loading
   if (isLoading) {
     return (
@@ -383,9 +393,7 @@ const GetAllCarsSection = () => {
                         <LazyImage
                           src={carImage}
                           alt={`${carMake} ${carModel}`}
-                          className={`rounded-t-lg ${
-                            car?.isSold ? "opacity-60" : ""
-                          }`}
+                          className={`rounded-t-lg`}
                           width="100%"
                           height="100%"
                           onError={() => {
@@ -394,29 +402,21 @@ const GetAllCarsSection = () => {
                         />
                         {/* Boost Badge */}
                         {car?.isBoosted &&
-                          new Date(car?.boostExpiry) > new Date() &&
-                          !car?.isSold && (
+                          new Date(car?.boostExpiry) > new Date() && (
                             <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold z-10 flex items-center gap-1 shadow-lg">
                               <FiZap size={12} />
                               BOOSTED
                             </div>
                           )}
-                        {/* Sold Badge */}
-                        {car?.isSold && (
-                          <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
-                            SOLD
-                          </div>
-                        )}
                         {/* Featured Badge */}
-                        {car?.featured && !car?.isSold && (
+                        {car?.featured && (
                           <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
                             FEATURED
                           </div>
                         )}
                         {/* Verified Dealer Badge */}
                         {car?.postedBy?.role === "dealer" &&
-                          car?.postedBy?.dealerInfo?.verified &&
-                          !car?.isSold && (
+                          car?.postedBy?.dealerInfo?.verified && (
                             <div
                               className={`absolute ${
                                 car?.featured || car?.isBoosted
@@ -525,28 +525,14 @@ const GetAllCarsSection = () => {
 
                         <div className="flex items-center justify-between py-4">
                           <div className="flex items-center gap-2 md:text-xl font-medium text-lg">
-                            AED{" "}
-                            <h5
-                              className={`price ${
-                                car?.isSold ? "line-through text-gray-500" : ""
-                              }`}
-                            >
-                              {carPrice}
-                            </h5>
+                            AED <h5 className={`price`}>{carPrice}</h5>
                           </div>
                           <button
                             onClick={() => car && navigate(buildCarUrl(car))}
-                            className={`flex items-center gap-2 ${
-                              car?.isSold
-                                ? "text-gray-400 cursor-not-allowed"
-                                : "text-primary-500"
-                            }`}
-                            disabled={!car?._id || car?.isSold}
+                            className={`flex items-center gap-2 text-primary-500`}
                           >
-                            {car?.isSold ? "Sold Out" : "View Details"}
-                            {!car?.isSold && (
-                              <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
-                            )}
+                            View Details
+                            <IoIosArrowRoundUp className="text-2xl rotate-[43deg]" />
                           </button>
                         </div>
                       </div>

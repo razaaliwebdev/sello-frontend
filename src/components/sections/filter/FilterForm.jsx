@@ -50,7 +50,6 @@ const FilterForm = ({ onFilter }) => {
     minMileage: "",
     maxMileage: "",
     condition: "",
-    sellerType: "",
     bodyType: "",
     regionalSpec: "",
     fuelType: "",
@@ -519,7 +518,6 @@ const FilterForm = ({ onFilter }) => {
     if (filters.technicalFeatures)
       backendFilters.features = filters.technicalFeatures;
     if (filters.condition) backendFilters.condition = filters.condition;
-    if (filters.sellerType) backendFilters.sellerType = filters.sellerType;
     if (filters.country) backendFilters.country = filters.country;
     if (filters.city) backendFilters.city = filters.city;
     if (filters.radius) backendFilters.radius = filters.radius;
@@ -556,7 +554,6 @@ const FilterForm = ({ onFilter }) => {
       minMileage: "",
       maxMileage: "",
       condition: "",
-      sellerType: "",
       bodyType: "",
       regionalSpec: "",
       fuelType: "",
@@ -649,7 +646,7 @@ const FilterForm = ({ onFilter }) => {
         <div className="field space-y-2">
           <div className="flex flex-col sm:flex-row w-full mx-auto gap-4 items-center">
             <div className="w-full sm:w-1/2">
-              <label className="block mb-1">Price From</label>
+              <label className="block mb-1">Price From (PKR)</label>
               <Input
                 inputType="number"
                 value={filters.minPrice}
@@ -658,7 +655,7 @@ const FilterForm = ({ onFilter }) => {
               />
             </div>
             <div className="w-full sm:w-1/2">
-              <label className="block mb-1">To</label>
+              <label className="block mb-1">To (PKR)</label>
               <Input
                 inputType="number"
                 value={filters.maxPrice}
@@ -670,7 +667,7 @@ const FilterForm = ({ onFilter }) => {
           <RangeFilter
             type="price"
             min={0}
-            max={100000}
+            max={10000000}
             onChange={(values) => handleRangeChange("price", values)}
           />
         </div>
@@ -1006,22 +1003,6 @@ const FilterForm = ({ onFilter }) => {
             <option value="">All Conditions</option>
             <option value="New">New</option>
             <option value="Used">Used</option>
-          </select>
-        </div>
-
-        {/* Seller Type Filter - Full Width */}
-        <div className="field space-y-2">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
-            Seller Type
-          </label>
-          <select
-            value={filters.sellerType || ""}
-            onChange={(e) => handleChange("sellerType", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">All Sellers</option>
-            <option value="individual">Individual</option>
-            <option value="dealer">Dealer</option>
           </select>
         </div>
 

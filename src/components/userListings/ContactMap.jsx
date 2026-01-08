@@ -60,7 +60,8 @@ const ContactMap = () => {
       { day: "Friday", hours: "9:00 AM - 1:00 PM" },
       { day: "Saturday", hours: "Closed" },
     ],
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d27222.35469644249!2d74.3380!3d31.5204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391904f88cbd0f2f%3A0xede2ef749acd972b!2sGulberg%2C%20Lahore%2C%20Pakistan!5e0!3m2!1sen!2sPK!4v1700000000000",
+    mapUrl:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d27222.35469644249!2d74.3380!3d31.5204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391904f88cbd0f2f%3A0xede2ef749acd972b!2sGulberg%2C%20Lahore%2C%20Pakistan!5e0!3m2!1sen!2sPK!4v1700000000000",
   };
 
   return (

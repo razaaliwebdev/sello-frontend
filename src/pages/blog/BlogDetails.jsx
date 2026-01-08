@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   useGetBlogByIdQuery,
   useGetBlogsQuery,
@@ -13,7 +13,6 @@ import BlogCommentsSection from "../../components/sections/blogs/BlogCommentsSec
 
 const BlogDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { data: blog, isLoading, error, isError } = useGetBlogByIdQuery(id);
 
   // Get related blogs (same category, excluding current blog)
@@ -360,7 +359,7 @@ const BlogDetails = () => {
         {/* Navigation */}
         <div className="border-t border-gray-200 pt-8 mt-8">
           <Link
-            to="/blog/all"
+            to="/blog"
             className="text-primary-500 hover:underline inline-flex items-center gap-2"
           >
             ← Back to all blogs

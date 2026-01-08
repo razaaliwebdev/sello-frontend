@@ -24,6 +24,7 @@ export const adminApi = createApi({
       const baseResult = await fetchBaseQuery({
         baseUrl: API_BASE_URL,
         credentials: "include",
+        timeout: 300000, // 5 minutes global timeout for all admin requests
         prepareHeaders: (headers, { extra }) => {
           const token = getAccessToken();
           if (token) {
@@ -366,6 +367,7 @@ export const adminApi = createApi({
         url: "/blogs",
         method: "POST",
         body: formData,
+        timeout: 300000, // 5 minutes timeout for blog creation with images
       }),
       invalidatesTags: ["Blogs"], // Invalidate admin cache
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -811,11 +813,10 @@ export const adminApi = createApi({
       invalidatesTags: ["Comments", "Blog"],
     }),
 
-
-
     // Blog Analytics
     getBlogAnalytics: builder.query({
-      query: ({ blogId, days = 30 }) => `/blogs/${blogId}/analytics?days=${days}`,
+      query: ({ blogId, days = 30 }) =>
+        `/blogs/${blogId}/analytics?days=${days}`,
     }),
 
     // Testimonials

@@ -138,9 +138,6 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           to="/"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
           className="cursor-pointer flex-shrink-0"
         >
           <img

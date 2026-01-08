@@ -99,11 +99,11 @@ const BrandsSection = () => {
               </button>
             );
           })}
-
-          {/* Recently Viewed Cars - Takes 2 columns on desktop */}
-          <RecentlyViewedCars />
         </div>
       </div>
+
+      {/* Recently Viewed Cars - Full width section */}
+      <RecentlyViewedCars />
 
       {/* ad */}
       <div className="ad"></div>

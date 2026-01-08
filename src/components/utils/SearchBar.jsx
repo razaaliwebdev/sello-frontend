@@ -49,10 +49,15 @@ const SearchBar = () => {
   // Handle errors
   useEffect(() => {
     if (error) {
-      console.error("Search Error:", error);
       toast.error(error?.data?.message || "Failed to search cars");
     }
   }, [error]);
+
+  // Debug: Log when search is triggered
+  useEffect(() => {
+    if (triggerSearch) {
+    }
+  }, [triggerSearch]);
 
   return (
     <form

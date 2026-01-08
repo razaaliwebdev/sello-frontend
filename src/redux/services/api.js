@@ -26,8 +26,8 @@ let refreshPromise = null;
 export const api = createApi({
   reducerPath: "api",
   // Optimize caching configuration
-  keepUnusedDataFor: 60, // Keep unused data for 60 seconds
-  refetchOnMountOrArgChange: false, // Don't refetch on mount if data exists
+  keepUnusedDataFor: 5, // Reduced cache time for better navigation responsiveness
+  refetchOnMountOrArgChange: true, // Refetch on mount or arg change for proper navigation
   refetchOnFocus: false, // Don't refetch on window focus
   refetchOnReconnect: true, // Refetch on reconnect
   baseQuery: async (args, api, extraOptions) => {
@@ -128,8 +128,7 @@ export const api = createApi({
 
       return baseResult;
     } catch (error) {
-      // Catch any unexpected errors
-      console.error("API request error", error);
+      // API request error
       return {
         error: {
           status: "FETCH_ERROR",
@@ -233,9 +232,7 @@ export const api = createApi({
           };
         }
         // If response structure is unexpected, return as is
-        console.warn("Unexpected Google login response structure", {
-          response,
-        });
+        // Unexpected Google login response structure
         return response;
       },
       transformErrorResponse: (response, meta, arg) => {
@@ -394,9 +391,8 @@ export const api = createApi({
       },
     }),
 
-    // ✅ Car GET Endpoint with Pagination
     getCars: builder.query({
-      query: ({ page = 1, limit = 12, condition } = {}) => {
+      query: ({ page = 1, limit = 12, condition, search } = {}) => {
         const params = new URLSearchParams({
           page: String(page),
           limit: String(limit),
@@ -405,6 +401,11 @@ export const api = createApi({
         // Only add condition if it's explicitly 'new' or 'used' (not empty string or undefined)
         if (condition && (condition === "new" || condition === "used")) {
           params.append("condition", condition);
+        }
+
+        // Add search term if provided
+        if (search) {
+          params.append("search", search);
         }
 
         return {
@@ -421,6 +422,7 @@ export const api = createApi({
           pages: data?.pages || 1,
         };
       },
+      providesTags: ["Cars"],
     }),
 
     // ✅ Get Single Car Endpoint
@@ -429,6 +431,7 @@ export const api = createApi({
         url: `/cars/${carId}`,
         method: "GET",
       }),
+      providesTags: (result, error, carId) => [{ type: "Car", id: carId }],
       transformResponse: (response) => {
         const data = response?.data || response;
         return data;
@@ -485,7 +488,7 @@ export const api = createApi({
       invalidatesTags: ["Cars"],
       // Add error handling
       transformErrorResponse: (response) => {
-        console.error("Car creation failed", response);
+        // Car creation failed
         return response.data;
       },
     }),
@@ -495,10 +498,19 @@ export const api = createApi({
       query: (params) => {
         const searchParams = new URLSearchParams(params).toString();
         return {
-          url: `/cars/filter?${searchParams}`, // Changed from "fitler" to "filter"
+          url: `/cars/filter?${searchParams}`,
         };
       },
-      transformResponse: (response) => response,
+      transformResponse: (response) => {
+        const data = response?.data || response;
+        return {
+          cars: data?.cars || [],
+          total: data?.total || 0,
+          page: data?.page || 1,
+          pages: data?.pages || 1,
+        };
+      },
+      providesTags: ["Cars"],
     }),
     // Get My Cars or My listings (with optional status filter)
     getMyCars: builder.query({
@@ -726,11 +738,9 @@ export const api = createApi({
       refetchOnMountOrArgChange: true,
     }),
 
-
-
     // Blog Comments (Public/User)
     getBlogComments: builder.query({
-      query: ({ blogId, page = 1, limit = 10 }) => 
+      query: ({ blogId, page = 1, limit = 10 }) =>
         `/blogs/${blogId}/comments?page=${page}&limit=${limit}`,
       providesTags: ["Comment"],
     }),

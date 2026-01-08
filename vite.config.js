@@ -50,6 +50,54 @@ export default defineConfig({
     sourcemap: true,
     chunkSizeWarningLimit: 800,
 
+    // Manual chunk splitting for better performance
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          "react-vendor": ["react", "react-dom", "react-is"],
+          "react-router": ["react-router-dom"],
+          redux: ["@reduxjs/toolkit", "react-redux"],
+          "ui-libs": ["react-hot-toast", "react-icons"],
+
+          // Maps and location
+          maps: ["leaflet", "react-leaflet", "@react-google-maps/api"],
+
+          // Rich text and editors
+          editors: [
+            "@tiptap/react",
+            "@tiptap/starter-kit",
+            "@tiptap/extension-image",
+            "@tiptap/extension-link",
+            "@tiptap/extension-text-align",
+            "@tiptap/extension-underline",
+            "@tinymce/tinymce-react",
+          ],
+
+          // Charts and data visualization
+          charts: ["recharts"],
+
+          // PDF and document generation
+          documents: ["jspdf", "jspdf-autotable", "xlsx"],
+
+          // Utils and helpers
+          utils: [
+            "date-fns",
+            "query-string",
+            "js-cookie",
+            "isomorphic-dompurify",
+            "gsap",
+          ],
+
+          // Authentication
+          auth: ["@react-oauth/google"],
+
+          // Styling
+          styling: ["styled-components"],
+        },
+      },
+    },
+
     terserOptions: {
       compress: {
         drop_console: true,

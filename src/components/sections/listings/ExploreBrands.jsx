@@ -15,17 +15,17 @@ const ExploreBrands = () => {
             Explore Our Premium Brands
           </h1>
           <p className="text-base text-gray-700 leading-relaxed">
-            Discover a curated selection of top automotive brands known for
-            their quality, performance, and reliability. Whether you're
-            exploring luxury options, searching for efficiency, or comparing
-            models among <b>cars for sale</b> across Pakistan, our premium
-            brands give you the best driving experience.
+            Explore a curated collection of top automotive brands which present
+            you with reliable cars for sale in Pakistan. As you compare models,
+            check out premium features, or look for dependable used cars for
+            sale in Pakistan, our brand selection is here to help you make sure
+            footed decisions.
           </p>
           <p className="text-base text-gray-700 leading-relaxed">
-            No matter what you’re looking for, from family-friendly sedans to
-            powerful SUVs, these brands help you find the right{" "}
-            <b>car for sale in Karachi, Islamabad, Lahore</b>, or anywhere in
-            Pakistan.
+            From compact cars that are great for the whole family to large SUVs
+            and luxury models, we have what you are looking for in terms of cars
+            for sale in Karachi, Islamabad, Lahore and all over Pakistan and we
+            only feature trusted sellers.
           </p>
           <button
             onClick={() => navigate("/view-all-brands")}

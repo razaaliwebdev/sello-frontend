@@ -1,24 +1,23 @@
-import hero from './hero.png';
-import ourStoryImg from './ourStoryImg.png';
-import selloGroupImg from './selloGroupImg.png';
-import team from './team.png';
-
+import hero from "./hero.png";
+import ourStoryImg from "./ourStoryImg.png";
+import selloGroupImg from "./selloGroupImg.png";
+import team from "./team.png";
 
 export const aboutImages = {
-    hero,
-    team
-}
-
-
+  hero,
+  team,
+};
 
 export const ourStoryData = {
-    title: "The Smarter Way to Buy & Sell Cars in Pakistan",
-    img: ourStoryImg,
-    description: "Sello is designed to serve car buyers and sellers across Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, and all major cities of Pakistan. From sedans and hatchbacks to SUVs, luxury cars, and imported vehicles, we make car trading seamless and efficient. With advanced search filters, users can easily browse cars by make, model, price, city, mileage, and condition, ensuring they find the perfect vehicle that matches their needs and budget. We empower car dealers in Pakistan with tools to promote their inventory and reach serious buyers, while helping individuals sell their cars faster without unnecessary middlemen."
-}
+  title: "Your Trusted Car Marketplace in Pakistan",
+  img: ourStoryImg,
+  description:
+    "Sello is the go to site for buyers and sellers in Pakistan which we have made easy to use for those looking to buy or sell a car in Pakistan with confidence. We feature daily use cars to SUV’s, luxury and imported vehicles and we provide you with verified listings and smart filters to help you find your perfect match by price, city, and condition.We also enable dealers and individual sellers to connect with serious buyers faster which is without middlemen or hidden complications.",
+};
 
 export const selloGroupData = {
-    title: "Sello Group",
-    img: selloGroupImg,
-    description: "In 2024, we acquired Autovia and formed Carwow Group. Togetherwe’re driven by a passion for getting people into cars. But not justany car, the right car. That’s why our trailblazing portfolio of automotive brands is building the go-to destination for car-changing, capable of reachingdrivers everywhere Our group has one of the world's most popular motoring YouTube channels,with over 1.1 billion annual views. We also sell 1.2 millionprint copies of our magazines and have over 100 million websitevisits a year."
-}
+  title: "Sello Group",
+  img: selloGroupImg,
+  description:
+    "Sello Group is fueled by a passion to help people find the right car. In 2024 we grew by adding Autovia to the group and at the same time we formed the Carwow Group which in turn strengthened our position in the global auto space.Our company has a large portfolio of automotive brands which reach into millions of audiences that are in the market to buy a car or looking for cars for sale in Pakistan we also have the largest motoring YouTube channel which breaks the one billion mark in annual views and 1.2 million magazine that we put out each year along with over 100 million website visits a year.",
+};

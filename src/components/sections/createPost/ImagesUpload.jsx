@@ -37,13 +37,17 @@ const ImagesUpload = ({ onImagesChange }) => {
     // Validate file types and sizes
     const maxSize = 20 * 1024 * 1024; // 20MB
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const maxFiles = 20;
+    const maxFiles = 10;
 
     const validFiles = files.filter((file) => {
       if (!allowedTypes.includes(file.type)) {
+        alert(
+          `Invalid file type: ${file.type}. Only JPG, PNG, and WebP images are allowed.`
+        );
         return false;
       }
       if (file.size > maxSize) {
+        alert(`File too large: ${file.name}. Maximum size is 20MB per image.`);
         return false;
       }
       return true;
@@ -58,8 +62,16 @@ const ImagesUpload = ({ onImagesChange }) => {
     if (currentCount + validFiles.length > maxFiles) {
       const remainingSlots = maxFiles - currentCount;
       if (remainingSlots > 0) {
+        alert(
+          `Only ${remainingSlots} more image${
+            remainingSlots > 1 ? "s" : ""
+          } can be uploaded. Maximum 10 images per post.`
+        );
         validFiles.splice(remainingSlots);
       } else {
+        alert(
+          "Maximum 10 images allowed per post. Please remove some images first."
+        );
         return;
       }
     }
@@ -216,6 +228,9 @@ const ImagesUpload = ({ onImagesChange }) => {
 
         {/* Upload button */}
         <div className="mt-4 text-center">
+          <div className="text-sm text-gray-600 mb-2">
+            Maximum 10 images per post • JPG, PNG, WebP • Max 20MB each
+          </div>
           <input
             ref={fileInputRef}
             type="file"

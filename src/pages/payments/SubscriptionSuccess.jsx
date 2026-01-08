@@ -27,8 +27,8 @@ const SubscriptionSuccess = () => {
         await refetchSubscription();
         setStatus("success");
         toast.success("Subscription activated successfully!");
-      } catch (error) {
-        console.error("Verification error:", error);
+      } catch {
+        // Verification error
         setStatus("error");
         toast.error("Failed to verify payment. Please contact support.");
       }
@@ -65,7 +65,8 @@ const SubscriptionSuccess = () => {
               Payment Successful!
             </h2>
             <p className="text-gray-600 mb-6">
-              Your subscription has been activated successfully. You can now enjoy all the premium features.
+              Your subscription has been activated successfully. You can now
+              enjoy all the premium features.
             </p>
             <div className="space-y-3">
               <button
@@ -95,7 +96,8 @@ const SubscriptionSuccess = () => {
               Payment Verification Failed
             </h2>
             <p className="text-gray-600 mb-6">
-              We couldn't verify your payment. If you were charged, please contact support with your session ID.
+              We couldn't verify your payment. If you were charged, please
+              contact support with your session ID.
             </p>
             {sessionId && (
               <p className="text-sm text-gray-500 mb-6">
@@ -124,4 +126,3 @@ const SubscriptionSuccess = () => {
 };
 
 export default SubscriptionSuccess;
-

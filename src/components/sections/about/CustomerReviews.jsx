@@ -42,7 +42,7 @@ const CustomerReviews = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-24 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
             <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
-            <div className="w-24 h-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full"></div>
+            <div className="w-24 h-1.5 bg-primary-500 rounded-full"></div>
           </div>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Real experiences from our valued customers across Pakistan
@@ -69,7 +69,7 @@ const CustomerReviews = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary-500 flex items-center justify-center font-bold text-lg md:text-xl shadow-lg">
                         {review.name.charAt(0)}
                       </div>
                       <div>
@@ -95,7 +95,7 @@ const CustomerReviews = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-primary-400">
+                  <div className="flex items-center gap-1 text-primary-500">
                     {[...Array(review.rating)].map((_, i) => (
                       <FiStar
                         key={i}

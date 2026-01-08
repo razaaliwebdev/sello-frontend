@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { extractCarIdFromSlug } from "../../../utils/urlBuilders";
 import {
   useEditCarMutation,
   useGetSingleCarQuery,
   useGetMeQuery,
 } from "../../../redux/services/api";
+import toast from "react-hot-toast";
 
 import ImagesUpload from "../createPost/ImagesUpload";
 import Input from "../../utils/filter/Input";
@@ -67,7 +68,6 @@ const EditCarForm = () => {
     bodyType: "",
     city: "",
     location: "",
-    sellerType: "",
     carDoors: "",
     contactNumber: "",
     geoLocation: "",
@@ -84,8 +84,8 @@ const EditCarForm = () => {
     data: car,
     isLoading: isLoadingCar,
     error: carError,
-  } = useGetSingleCarQuery(id, {
-    skip: !id,
+  } = useGetSingleCarQuery(extractedCarId, {
+    skip: !extractedCarId,
   });
   const { data: currentUser } = useGetMeQuery();
 
@@ -144,7 +144,6 @@ const EditCarForm = () => {
         bodyType: car.bodyType || "",
         city: car.city || "",
         location: car.location || "",
-        sellerType: car.sellerType || "",
         carDoors: car.carDoors?.toString() || "",
         contactNumber: car.contactNumber || "",
         geoLocation: geoLoc,
@@ -192,6 +191,14 @@ const EditCarForm = () => {
     }
   }, [car, makes, getModelsByMake, years, currentUser, navigate]);
 
+  // Initialize available data when car data loads
+  useEffect(() => {
+    if (car && makes.length > 0) {
+      // Set available years - years are now independent
+      setAvailableYears(years);
+    }
+  }, [car, makes, years]);
+
   const handleChange = (field, value) => {
     // Handle features to ensure it's a flat array with no duplicates
     if (field === "features") {
@@ -236,28 +243,14 @@ const EditCarForm = () => {
           availableModels && availableModels.length > 0
             ? availableModels.find((m) => m && m.name === value)
             : null;
+        // Years are now independent - show all years when model changes
+        setAvailableYears(years);
+        // Reset year if it's not in the new years list
         if (
-          selectedModelObj &&
-          selectedModelObj._id &&
-          years &&
-          years.length > 0
+          formData.year &&
+          !years.find((y) => y && y.name === formData.year.toString())
         ) {
-          const modelYears = years.filter((y) => {
-            if (!y || !y.parentCategory) return false;
-            const parentId =
-              typeof y.parentCategory === "object"
-                ? y.parentCategory?._id || null
-                : y.parentCategory;
-            return parentId && parentId === selectedModelObj._id;
-          });
-          setAvailableYears(modelYears);
-          // Reset year if it's not available for the new model
-          if (
-            formData.year &&
-            !modelYears.find((y) => y && y.name === formData.year.toString())
-          ) {
-            setFormData((prev) => ({ ...prev, year: "" }));
-          }
+          setFormData((prev) => ({ ...prev, year: "" }));
         }
       }
     }
@@ -350,9 +343,9 @@ const EditCarForm = () => {
     });
 
     try {
-      await editCar({ carId: id, formData: data }).unwrap();
+      await editCar({ carId: extractedCarId, formData: data }).unwrap();
       toast.success("Car updated successfully!");
-      navigate(`/cars/${id}`);
+      navigate(`/cars/${extractedCarId}`);
     } catch (err) {
       console.error("Edit Car Error:", err);
       toast.error(err?.data?.message || "Failed to update car");
@@ -434,7 +427,7 @@ const EditCarForm = () => {
         </div>
 
         <div className="price mt-5 mb-2">
-          <label className="block mb-1">Price</label>
+          <label className="block mb-1">Price (PKR)</label>
           <Input
             inputType="number"
             value={formData.price}
@@ -625,20 +618,6 @@ const EditCarForm = () => {
         <div>
           <label className="block mb-1">Warranty</label>
           <WarrantyType onChange={(val) => handleChange("warranty", val)} />
-        </div>
-
-        <div>
-          <label className="block mb-1">Seller Type</label>
-          <select
-            value={formData.sellerType}
-            onChange={(e) => handleChange("sellerType", e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          >
-            <option value="">Select</option>
-            <option value="individual">Individual</option>
-            <option value="dealer">Dealer</option>
-          </select>
         </div>
 
         {isFieldVisible(formData.vehicleType, "horsepower") && (

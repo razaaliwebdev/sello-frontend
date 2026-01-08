@@ -12,6 +12,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
+import { mapsService } from "../../../utils/mapsService.js";
 
 // Fix leaflet icon issues (ESM friendly)
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -271,56 +272,8 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
 
   // Auto-get location on mount (optional)
   useEffect(() => {
-    // Don't auto-get, let user choose
+    // This useEffect is intentionally empty for now
   }, []);
-
-  // Update coordinates ref is handled in coordinatesChanged useMemo
-
-  // Update map center when user location is found
-  useEffect(() => {
-    const currentCoords = coordinatesRef.current;
-    if (
-      !currentCoords ||
-      !Array.isArray(currentCoords) ||
-      currentCoords.length !== 2
-    ) {
-      return;
-    }
-
-    if (
-      userLocation &&
-      Array.isArray(userLocation) &&
-      userLocation.length === 2
-    ) {
-      // Center between user and car location
-      const centerLat = (userLocation[0] + currentCoords[0]) / 2;
-      const centerLng = (userLocation[1] + currentCoords[1]) / 2;
-
-      // Only update if actually different
-      const [existingLat, existingLng] = mapCenter;
-      if (
-        Math.abs(centerLat - existingLat) > 0.0001 ||
-        Math.abs(centerLng - existingLng) > 0.0001
-      ) {
-        setMapCenter([centerLat, centerLng]);
-        setMapZoom(12);
-      }
-    } else {
-      // Only update if coordinates actually changed
-      const [currentLat, currentLng] = currentCoords;
-      const [existingLat, existingLng] = mapCenter;
-
-      // Check if coordinates are actually different (with small tolerance for floating point)
-      if (
-        Math.abs(currentLat - existingLat) > 0.0001 ||
-        Math.abs(currentLng - existingLng) > 0.0001
-      ) {
-        setMapCenter([currentLat, currentLng]);
-        setMapZoom(13);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userLocation, coordinatesChanged]);
 
   // Search for locations
   const searchLocation = async (query) => {
@@ -331,13 +284,14 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
 
     setIsSearching(true);
     try {
+      // Try OpenStreetMap first (free, no API key needed)
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           query
         )}&limit=5&addressdetails=1`,
         {
           headers: {
-            "User-Agent": "Sello.ae Location Picker",
+            "User-Agent": "Sello Location Picker",
           },
         }
       );
@@ -351,19 +305,11 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
         }));
         setSearchResults(results);
       } else {
-        const googleApiKey =
-          import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY ||
-          import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (googleApiKey) {
-          const googleResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-              query
-            )}&key=${googleApiKey}`
-          );
-          const googleData = await googleResponse.json();
-
-          if (googleData.status === "OK" && googleData.results.length > 0) {
-            const results = googleData.results.map((item) => ({
+        // Fallback to Google Maps API through our secure backend proxy
+        try {
+          const googleResult = await mapsService.geocode(query);
+          if (googleResult.success && googleResult.data.results.length > 0) {
+            const results = googleResult.data.results.map((item) => ({
               display_name: item.formatted_address,
               lat: item.geometry.location.lat,
               lon: item.geometry.location.lng,
@@ -373,9 +319,10 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
             setSearchResults([]);
             toast.error("No locations found");
           }
-        } else {
+        } catch (googleError) {
+          console.error("Google Maps fallback failed:", googleError);
           setSearchResults([]);
-          toast.error("No locations found");
+          toast.error("Location search failed");
         }
       }
     } catch (error) {
@@ -838,6 +785,7 @@ const MapView = ({ coordinates = [25.203, 55.2719], carLocation = null }) => {
             opacity: 0;
           }
         }
+        opacity: 0;
       `}</style>
     </div>
   );

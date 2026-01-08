@@ -3,9 +3,17 @@ import { GoArrowUpRight } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
 import { usersBrowseByCarType } from "../../assets/images/carDetails/types/bodyTypes";
 import { images } from "../../assets/assets";
+import toast from "react-hot-toast";
 
 const UserListingHero = () => {
   const navigate = useNavigate();
+
+  const handleBrowseClick = (searchTerm) => {
+    // Navigate to listings page with search term
+    navigate(`/listings?search=${encodeURIComponent(searchTerm)}`);
+    toast.success(`Searching for ${searchTerm}...`);
+  };
+
   return (
     <div className="md:h-[80vh] bg-primary flex flex-col md:flex-row items-center justify-between">
       {/* Left Section */}
@@ -41,16 +49,28 @@ const UserListingHero = () => {
 
           {/* Car Types */}
           <div className="flex flex-wrap gap-4 md:gap-8 mt-6 md:mt-10">
-            {usersBrowseByCarType.map((item) => (
+            {[
+              { name: "SUV", action: () => handleBrowseClick("suv") },
+              { name: "Sedan", action: () => handleBrowseClick("sedan") },
+              {
+                name: "Hatchback",
+                action: () => handleBrowseClick("hatchback"),
+              },
+              { name: "Coupe", action: () => handleBrowseClick("coupe") },
+              { name: "Hybrid", action: () => handleBrowseClick("hybrid") },
+            ].map((item) => (
               <div
-                key={item.id}
-                className="flex rounded-md px-3 cursor-pointer items-center gap-2 bg-white"
+                key={item.name}
+                className="flex rounded-md px-3 cursor-pointer items-center gap-2 bg-white hover:bg-primary-500 hover:text-white transition-all"
+                onClick={item.action}
               >
-                <h4 className="title text-sm md:text-base">
-                  {item.titleValue}
-                </h4>
+                <h4 className="title text-sm md:text-base">{item.name}</h4>
                 <img
-                  src={item.image}
+                  src={
+                    usersBrowseByCarType.find(
+                      (type) => type.titleValue === item.name
+                    )?.image
+                  }
                   alt="body type"
                   className="h-10 md:h-12"
                 />
